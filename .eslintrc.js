@@ -29,9 +29,11 @@ module.exports = {
 		"max-len": [
 			"error",
 			{
-				"code": 120
+				"code": 120,
+				"ignoreStrings": true,
 			}
 		],
+		"linebreak-style": 0,
 		"no-dupe-else-if": "error",
 		"no-promise-executor-return": "error",
 		"no-unreachable-loop": "error",

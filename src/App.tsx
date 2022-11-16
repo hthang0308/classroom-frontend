@@ -1,15 +1,11 @@
 import { MantineProvider } from '@mantine/core';
-import { BrowserRouter, Routes } from 'react-router-dom';
+import { RouterProvider } from 'react-router-dom';
 
-import { ROUTES, renderRoutes } from './routes';
+import router from './routes';
 
 const App = () => (
   <MantineProvider>
-    <BrowserRouter>
-      <Routes>
-        {renderRoutes(ROUTES)}
-      </Routes>
-    </BrowserRouter>
+    <RouterProvider router={router} />
   </MantineProvider>
 );
 
