@@ -26,6 +26,12 @@ module.exports = {
 	],
 	"rules": {
 		// "no-mixed-spaces-and-tabs": "off",
+		"max-len": [
+			"error",
+			{
+				"code": 120
+			}
+		],
 		"no-dupe-else-if": "error",
 		"no-promise-executor-return": "error",
 		"no-unreachable-loop": "error",
