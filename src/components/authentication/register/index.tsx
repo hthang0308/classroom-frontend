@@ -12,6 +12,8 @@ import { useForm } from '@mantine/form';
 import { showNotification } from '@mantine/notifications';
 import axios from 'axios';
 import config from 'config';
+import Cookies from 'js-cookie';
+import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { isAxiosError, ErrorReponse } from '@/utils/axiosErrorHandler';
@@ -33,6 +35,13 @@ interface SuccessReponse {
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (Cookies.get('token')) {
+      navigate('/');
+    }
+  }, [navigate]);
+
   const form = useForm({
     initialValues: {
       email: '',
