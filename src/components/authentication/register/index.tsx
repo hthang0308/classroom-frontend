@@ -10,9 +10,11 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { showNotification } from '@mantine/notifications';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import config from 'config';
 import { Link, useNavigate } from 'react-router-dom';
+
+import { isAxiosError, ErrorReponse } from '@/utils/axiosErrorHandler';
 
 interface FormProps {
   name: string
@@ -27,16 +29,6 @@ interface SuccessReponse {
     email: string
   }
   message: string
-}
-
-interface ErrorReponse {
-  statusCode: number
-  message: string
-  error: string
-}
-
-function isAxiosError<ResponseType>(error: unknown): error is AxiosError<ResponseType> {
-  return axios.isAxiosError(error);
 }
 
 const RegisterPage = () => {

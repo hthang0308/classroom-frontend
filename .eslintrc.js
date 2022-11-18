@@ -46,25 +46,26 @@ module.exports = {
 		"prefer-regex-literals": "error",
 		"capitalized-comments": "error",
 		"no-continue": "off",
-		"unicorn/prevent-abbreviations": [
-			"error",
-			{
-				"replacements": {
-					"props": {
-						"properties": false
-					},
-					"params": {
-						"parameters": false
-					},
-					"param": {
-						"parameter": false
-					},
-					"ref": {
-						"reference": false
-					}
-				}
-			}
-		],
+		// "unicorn/prevent-abbreviations": [
+		// 	"error",
+		// 	{
+		// 		"replacements": {
+		// 			"props": {
+		// 				"properties": false
+		// 			},
+		// 			"params": {
+		// 				"parameters": false
+		// 			},
+		// 			"param": {
+		// 				"parameter": false
+		// 			},
+		// 			"ref": {
+		// 				"reference": false
+		// 			}
+		// 		}
+		// 	}
+		// ],
+		"unicorn/prevent-abbreviations": 0,
 		"no-restricted-syntax": [
 			"error",
 			{
@@ -134,11 +135,11 @@ module.exports = {
 
 		"no-tabs": "off",
 		"@typescript-eslint/indent": ["error", 2, {
-      "SwitchCase": 1,
-      "VariableDeclarator": "first",
-      "MemberExpression": 1,
-      "flatTernaryExpressions": false
-    }],
+			"SwitchCase": 1,
+			"VariableDeclarator": "first",
+			"MemberExpression": 1,
+			"flatTernaryExpressions": false
+		}],
 		// import
 		"import/no-deprecated": "error",
 		"import/order": [
@@ -195,11 +196,11 @@ module.exports = {
 		"react/state-in-constructor": "off",
 		"react/static-property-placement": "off",
 		"react/jsx-tag-spacing": [
-      "error", {
-        "beforeSelfClosing": "always",
-        "beforeClosing": "never"
-      }
-    ],
+			"error", {
+				"beforeSelfClosing": "always",
+				"beforeClosing": "never"
+			}
+		],
 
 		"react/boolean-prop-naming": [
 			"error",
@@ -218,15 +219,15 @@ module.exports = {
 			}
 		],
 		"react/no-unstable-nested-components": "error",
-		"react/jsx-handler-names": [
-			"warn",
-			{
-				"eventHandlerPrefix": "on",
-				"eventHandlerPropPrefix": "on",
-				"checkLocalVariables": true,
-				"checkInlineFunction": true
-			}
-		],
+		// "react/jsx-handler-names": [
+		// 	"warn",
+		// 	{
+		// 		"eventHandlerPrefix": "on",
+		// 		"eventHandlerPropPrefix": "on",
+		// 		"checkLocalVariables": true,
+		// 		"checkInlineFunction": true
+		// 	}
+		// ],
 		"react/jsx-key": "error",
 		"react/jsx-no-bind": [
 			"error",
@@ -264,18 +265,30 @@ module.exports = {
 			}
 		],
 		"unicorn/no-nested-ternary": ["error"],
-		"absolute-imports-only/only-absolute-imports": ["error", {
-      "jsOnly": false,
-      "minLevel": 1,
-    }],
+		// "absolute-imports-only/only-absolute-imports": ["error", {
+		//   "jsOnly": false,
+		//   "minLevel": 1,
+		// }],
+		"unicorn/consistent-function-scoping": 0,
+		"import/extensions": [
+			"error",
+			"ignorePackages",
+			{
+				"": "never",
+				"js": "never",
+				"jsx": "never",
+				"ts": "never",
+				"tsx": "never"
+			}
+		],
 	},
 	"settings": {
 		"react": {
 			"version": "detect"
 		},
 		"absolute-imports-only": {
-      project: tsConfigPath,
-    },
+			project: tsConfigPath,
+		},
 	},
 	"overrides": [
 		{
