@@ -5,6 +5,17 @@ import {
 
 import GoogleIcon from './googleIcon';
 
-const GoogleButton = (props: ButtonProps) => <Button leftIcon={<GoogleIcon />} variant="default" color="gray" {...props} />;
+interface Props extends ButtonProps {
+  onClick: () => void
+}
+
+const GoogleButton = (props: Props) => (
+  <Button
+    leftIcon={<GoogleIcon />}
+    variant="default"
+    color="gray"
+    {...props}
+  />
+);
 
 export default GoogleButton;
