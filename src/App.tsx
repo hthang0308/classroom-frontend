@@ -1,15 +1,24 @@
-import { MantineProvider } from '@mantine/core';
+import { MantineProvider, ColorSchemeProvider } from '@mantine/core';
 import { NotificationsProvider } from '@mantine/notifications';
+import React from 'react';
 import { RouterProvider } from 'react-router-dom';
 
 import router from './routes';
 
-const App = () => (
-  <MantineProvider>
-    <NotificationsProvider position="top-right">
-      <RouterProvider router={router} />
-    </NotificationsProvider>
-  </MantineProvider>
-);
+import useColorScheme from '@/hooks/useColorScheme';
+
+const App = () => {
+  const { colorScheme, toggleColorScheme } = useColorScheme();
+
+  return (
+    <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
+      <MantineProvider theme={{ colorScheme }}>
+        <NotificationsProvider>
+          <RouterProvider router={router} />
+        </NotificationsProvider>
+      </MantineProvider>
+    </ColorSchemeProvider>
+  );
+};
 
 export default App;
