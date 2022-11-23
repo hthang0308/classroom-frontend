@@ -73,7 +73,7 @@ const RightButtons = () => {
       {
         userInfo
           ? (
-            <Link to="/profile">
+            <Link to="/user/profile">
               <UserAvatar userInfo={userInfo} />
             </Link>
           )

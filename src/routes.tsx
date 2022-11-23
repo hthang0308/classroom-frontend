@@ -8,10 +8,14 @@ import LoginPage from './components/authentication/login';
 import Logout from './components/authentication/logout';
 import RegisterPage from './components/authentication/register';
 import NotFoundPage from './components/errorPage/notFound';
+import ChangePasswordForm from './components/user/change-password';
+
+import ProfileEditor from './components/user/edit-profile';
 
 import { APP_LOGOUT_EVENT } from './utils/constants';
 
-import UserProfile from '@/components/authentication/user-profile';
+import UserProfile from '@/components/user/user-profile';
+
 import Layout from '@/layout/Layout';
 
 type Props = RouteObject & {
@@ -41,9 +45,19 @@ export const ROUTES: Props[] = [
     element: <Logout />,
   },
   {
-    path: '/profile',
+    path: '/user/profile',
     name: 'Profile',
     element: <UserProfile />,
+  },
+  {
+    path: '/user/change-password',
+    name: 'Profile',
+    element: <ChangePasswordForm />,
+  },
+  {
+    path: '/user/edit-profile',
+    name: 'Profile',
+    element: <ProfileEditor />,
   },
 ];
 

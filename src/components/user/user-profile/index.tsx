@@ -3,6 +3,7 @@ import {
 } from '@mantine/core';
 
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 import useUserInfo, { UserInfo } from '@/hooks/useUserInfo';
 import * as AxiosRequester from '@/utils/axiosRequester';
@@ -32,7 +33,7 @@ function TrueUserProfile(info: UserInfo) {
                 radius="md"
                 withBorder
                 p="lg"
-                sx={(theme) => ({ backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0] })}
+                sx={(theme) => ({ backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[0] })}
               >
 
                 <Avatar variant="filled" src={avatarUrl} size={100} mx={20} />
@@ -55,8 +56,15 @@ function TrueUserProfile(info: UserInfo) {
         </Paper>
 
         <Group position="center">
-          <Button>Edit</Button>
-          <Button variant="outline" color="gray">Logout</Button>
+          <Link to="/user/edit-profile">
+            <Button>Edit Profile</Button>
+          </Link>
+          <Link to="/user/change-password">
+            <Button color="red">Change password</Button>
+          </Link>
+          <Link to="/logout">
+            <Button variant="outline" color="gray">Logout</Button>
+          </Link>
         </Group>
       </Stack>
     </Container>
