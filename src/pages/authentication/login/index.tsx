@@ -91,7 +91,11 @@ const LoginPage = () => {
     <Container size={420} my={40}>
       <Title
         align="center"
-        sx={(theme) => ({ fontFamily: `Greycliff CF, ${theme.fontFamily}`, fontWeight: 900 })}
+        sx={(theme) => ({
+          fontFamily: `Greycliff CF, ${theme.fontFamily}`,
+          fontWeight: 900,
+          color: theme.colorScheme === 'dark' ? theme.colors.gray[1] : theme.colors.dark[4],
+        })}
       >
         Welcome back!
       </Title>
