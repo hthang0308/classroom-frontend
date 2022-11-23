@@ -18,8 +18,8 @@ import { Link } from 'react-router-dom';
 import BlackLogo from '@/assets/logo-low-res-black.png';
 import WhiteLogo from '@/assets/logo-low-res-white.png';
 
-import ThemeSwitcher from '@/components/buttons/ThemeSwitcher';
 import useUserInfo, { UserInfo } from '@/hooks/useUserInfo';
+import ThemeSwitcher from '@/pages/buttons/ThemeSwitcher';
 
 const useStyles = createStyles((theme) => ({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

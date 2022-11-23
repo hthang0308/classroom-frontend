@@ -4,19 +4,18 @@ import {
 } from 'react-router-dom';
 import type { RouteObject } from 'react-router-dom';
 
-import LoginPage from './components/authentication/login';
-import Logout from './components/authentication/logout';
-import RegisterPage from './components/authentication/register';
-import NotFoundPage from './components/errorPage/notFound';
-import ChangePasswordForm from './components/user/change-password';
+import LoginPage from './pages/authentication/login';
+import Logout from './pages/authentication/logout';
+import RegisterPage from './pages/authentication/register';
+import NotFoundPage from './pages/errorPage/notFound';
+import ChangePasswordForm from './pages/user/change-password';
 
-import ProfileEditor from './components/user/edit-profile';
+import ProfileEditor from './pages/user/edit-profile';
 
 import { APP_LOGOUT_EVENT } from './utils/constants';
 
-import UserProfile from '@/components/user/user-profile';
-
 import Layout from '@/layout/Layout';
+import UserProfile from '@/pages/user/user-profile';
 
 type Props = RouteObject & {
   name: string;
