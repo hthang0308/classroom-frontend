@@ -8,6 +8,7 @@ import LoginPage from './pages/authentication/login';
 import Logout from './pages/authentication/logout';
 import RegisterPage from './pages/authentication/register';
 import NotFoundPage from './pages/errorPage/notFound';
+import Home from './pages/home';
 import ChangePasswordForm from './pages/user/change-password';
 
 import ProfileEditor from './pages/user/edit-profile';
@@ -25,7 +26,7 @@ export const ROUTES: Props[] = [
   {
     index: true,
     name: 'Home',
-    element: <div>Home</div>,
+    element: <Home />,
     errorElement: <NotFoundPage />,
   },
   {
