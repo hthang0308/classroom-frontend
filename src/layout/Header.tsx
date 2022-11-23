@@ -1,5 +1,6 @@
 import {
   createStyles,
+  Avatar,
   Header,
   Group,
   Button,
@@ -18,7 +19,7 @@ import BlackLogo from '@/assets/logo-low-res-black.png';
 import WhiteLogo from '@/assets/logo-low-res-white.png';
 
 import ThemeSwitcher from '@/components/buttons/ThemeSwitcher';
-import useUserInfo from '@/hooks/useUserInfo';
+import useUserInfo, { UserInfo } from '@/hooks/useUserInfo';
 
 const useStyles = createStyles((theme) => ({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -48,6 +49,11 @@ const useStyles = createStyles((theme) => ({
   hiddenDesktop: { [theme.fn.largerThan('sm')]: { display: 'none' } },
 }));
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const UserAvatar = ({ userInfo }: { userInfo: UserInfo }) => (
+  <Avatar src={`https://avatars.dicebear.com/api/identicon/${userInfo.email}.svg`} size="sm" />
+);
+
 const NavLinks = () => {
   const { classes } = useStyles();
 
@@ -67,10 +73,8 @@ const RightButtons = () => {
       {
         userInfo
           ? (
-            <Link to="/user/me">
-              <Button variant="default">
-                {userInfo.name}
-              </Button>
+            <Link to="/profile">
+              <UserAvatar userInfo={userInfo} />
             </Link>
           )
           : (
