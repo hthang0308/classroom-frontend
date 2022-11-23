@@ -1,5 +1,5 @@
 import {
-  Avatar, Container, Text, Paper,
+  Avatar, Button, Blockquote, Container, Text, Paper, Group, Stack, Spoiler,
 } from '@mantine/core';
 
 import React, { useState, useEffect } from 'react';
@@ -19,23 +19,46 @@ function TrueUserProfile(info: UserInfo) {
 
   return (
     <Container size="xs" px="xs">
-      <Paper
-        radius="md"
-        withBorder
-        p="lg"
-        sx={(theme) => ({ backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.white })}
-      >
-        <Avatar variant="filled" src={avatarUrl} size={100} mx="auto" />
-        <Text align="center" size="lg" weight={500} mt="md">
-          {userInfo.name}
-        </Text>
-        <Text align="center" size="lg" weight={500} mt="md">
-          {userInfo.email}
-        </Text>
-        <Text align="center" size="lg" weight={500} mt="md">
-          {userInfo.description || ''}
-        </Text>
-      </Paper>
+      <Stack>
+        <Paper
+          radius="md"
+          withBorder
+          p="lg"
+          sx={(theme) => ({ backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.white })}
+        >
+          <Stack>
+            <Group position="left">
+              <Paper
+                radius="md"
+                withBorder
+                p="lg"
+                sx={(theme) => ({ backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0] })}
+              >
+
+                <Avatar variant="filled" src={avatarUrl} size={100} mx={20} />
+              </Paper>
+              <Stack>
+                <Text size="lg" weight={500} mt="md">
+                  {userInfo.name}
+                </Text>
+                <Text size="lg" weight={200} mt="md">
+                  {userInfo.email}
+                </Text>
+              </Stack>
+            </Group>
+            <Blockquote>
+              <Spoiler maxHeight={120} showLabel="Show more" hideLabel="Hide" transitionDuration={0}>
+                {userInfo.description || ''}
+              </Spoiler>
+            </Blockquote>
+          </Stack>
+        </Paper>
+
+        <Group position="center">
+          <Button>Edit</Button>
+          <Button variant="outline" color="gray">Logout</Button>
+        </Group>
+      </Stack>
     </Container>
 
   );
