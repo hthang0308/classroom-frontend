@@ -22,7 +22,8 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import GoogleButton from '../common/googleButton';
 
-import { isAxiosError, ErrorReponse } from '@/utils/axiosErrorHandler';
+import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
+import { AUTH_COOKIE } from '@/utils/constants';
 
 interface FormProps {
   email: string
@@ -43,7 +44,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (Cookies.get('token')) {
+    if (Cookies.get(AUTH_COOKIE)) {
       navigate('/');
     }
   }, [navigate]);
@@ -65,7 +66,7 @@ const LoginPage = () => {
     try {
       const { data: response } = await axios.post<SuccessResponse>(`${config.backendUrl}/auth/sign-in`, data);
 
-      Cookies.set('token', response.data.token);
+      Cookies.set(AUTH_COOKIE, response.data.token);
 
       showNotification({
         message: response.message,
@@ -73,7 +74,7 @@ const LoginPage = () => {
       });
       navigate('/');
     } catch (error) {
-      if (isAxiosError<ErrorReponse>(error)) {
+      if (isAxiosError<ErrorResponse>(error)) {
         showNotification({
           message: error.response?.data.message,
           color: 'red',

@@ -16,7 +16,9 @@ import Cookies from 'js-cookie';
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { isAxiosError, ErrorReponse } from '@/utils/axiosErrorHandler';
+import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
+
+import { AUTH_COOKIE } from '@/utils/constants';
 
 interface FormProps {
   name: string
@@ -37,7 +39,7 @@ const RegisterPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (Cookies.get('token')) {
+    if (Cookies.get(AUTH_COOKIE)) {
       navigate('/');
     }
   }, [navigate]);
@@ -75,7 +77,7 @@ const RegisterPage = () => {
         navigate('/login');
       }
     } catch (error: unknown) {
-      if (isAxiosError<ErrorReponse>(error)) {
+      if (isAxiosError<ErrorResponse>(error)) {
         showNotification({
           title: 'Register unsuccessfully',
           message: error.response?.data.message,
