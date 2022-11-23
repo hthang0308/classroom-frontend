@@ -8,8 +8,8 @@ import useUserInfo, { UserInfo } from '@/hooks/useUserInfo';
 import * as AxiosRequester from '@/utils/axiosRequester';
 
 function TrueUserProfile(info: UserInfo) {
-  const avatarUrl = 'https://gravatar.com/avatar/c013231eaf528ceff166587be3ebcefc?s=400&d=robohash&r=x';
   const [userInfo, setUserInfo] = useState<UserInfo>(info);
+  const avatarUrl = `https://avatars.dicebear.com/api/identicon/${userInfo.email}.svg`;
 
   useEffect(() => {
     AxiosRequester.get('/user/me', {})
@@ -25,7 +25,7 @@ function TrueUserProfile(info: UserInfo) {
         p="lg"
         sx={(theme) => ({ backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.white })}
       >
-        <Avatar variant="filled" src={avatarUrl} size={120} radius={120} mx="auto" />
+        <Avatar variant="filled" src={avatarUrl} size={100} mx="auto" />
         <Text align="center" size="lg" weight={500} mt="md">
           {userInfo.name}
         </Text>
