@@ -1,5 +1,5 @@
 import {
-  Avatar, Button, Blockquote, Container, Text, Paper, Group, Stack, Spoiler,
+  Avatar, Button, Blockquote, Container, Text, Paper, Group, Stack, Spoiler, Flex,
 } from '@mantine/core';
 
 import React, { useState, useEffect } from 'react';
@@ -55,17 +55,22 @@ function TrueUserProfile(info: UserInfo) {
           </Stack>
         </Paper>
 
-        <Group position="center">
-          <Link to="/user/edit-profile">
-            <Button>Edit Profile</Button>
-          </Link>
+        <Flex
+          justify="center"
+          align="center"
+          gap="sm"
+          sx={() => ({ '@media (max-width: 520px)': { flexDirection: 'column' } })}
+        >
           <Link to="/user/change-password">
-            <Button color="red">Change password</Button>
+            <Button color="red" w={160}>Change password</Button>
+          </Link>
+          <Link to="/user/edit-profile">
+            <Button w={160}>Edit Profile</Button>
           </Link>
           <Link to="/logout">
-            <Button variant="outline" color="gray">Logout</Button>
+            <Button w={160} variant="outline" color="gray">Logout</Button>
           </Link>
-        </Group>
+        </Flex>
       </Stack>
     </Container>
 
