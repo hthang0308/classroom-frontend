@@ -1,21 +1,32 @@
 import {
   Avatar, Button, Blockquote, Container, Text, Paper, Group, Stack, Spoiler, Flex,
 } from '@mantine/core';
-
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
+import userApi from '@/api/user';
 import useUserInfo, { UserInfo } from '@/hooks/useUserInfo';
-import * as AxiosRequester from '@/utils/axiosRequester';
+import * as notificationManager from '@/pages/common/notificationManager';
+import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 
 function TrueUserProfile(info: UserInfo) {
   const [userInfo, setUserInfo] = useState<UserInfo>(info);
   const avatarUrl = `https://avatars.dicebear.com/api/identicon/${userInfo.email}.svg`;
 
   useEffect(() => {
-    AxiosRequester.get('/user/me', {})
-      .then(({ data }) => { setUserInfo(data.data); })
-      .catch();
+    const fetchData = async () => {
+      try {
+        const { data: response } = await userApi.getMe();
+
+        setUserInfo(response.data);
+      } catch (error) {
+        if (isAxiosError<ErrorResponse>(error)) {
+          notificationManager.showFail('', error.response?.data.message);
+        }
+      }
+    };
+
+    fetchData();
   }, []);
 
   return (
