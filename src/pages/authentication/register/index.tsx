@@ -9,11 +9,11 @@ import {
   Button,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { showNotification } from '@mantine/notifications';
 import Cookies from 'js-cookie';
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
+import * as notificationManager from '@/pages/common/notificationManager';
 import axiosClient from '@/utils/axiosClient';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 
@@ -68,20 +68,12 @@ const RegisterPage = () => {
       const response = await axiosClient.post<SuccessReponse>('/auth/sign-up', data);
 
       if (response.status === 201) {
-        showNotification({
-          title: 'Register successfully',
-          message: response.data.message,
-          color: 'green',
-        });
+        notificationManager.showSuccess('Register successfully', response.data.message);
         navigate('/login');
       }
     } catch (error: unknown) {
       if (isAxiosError<ErrorResponse>(error)) {
-        showNotification({
-          title: 'Register unsuccessfully',
-          message: error.response?.data.message,
-          color: 'red',
-        });
+        notificationManager.showFail('Register unsuccessfully', error.response?.data.message);
       }
     }
   };

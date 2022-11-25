@@ -13,7 +13,6 @@ import {
   Stack,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { showNotification } from '@mantine/notifications';
 import config from 'config';
 import Cookies from 'js-cookie';
 import { useEffect } from 'react';
@@ -21,6 +20,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import GoogleButton from '../common/googleButton';
 
+import * as notificationManager from '@/pages/common/notificationManager';
 import axiosClient from '@/utils/axiosClient';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 import { AUTH_COOKIE } from '@/utils/constants';
@@ -68,17 +68,11 @@ const LoginPage = () => {
 
       Cookies.set(AUTH_COOKIE, response.data.token);
 
-      showNotification({
-        message: response.message,
-        color: 'green',
-      });
+      notificationManager.showSuccess('', response.message);
       navigate('/');
     } catch (error) {
       if (isAxiosError<ErrorResponse>(error)) {
-        showNotification({
-          message: error.response?.data.message,
-          color: 'red',
-        });
+        notificationManager.showFail('', error.response?.data.message);
       }
     }
   };
