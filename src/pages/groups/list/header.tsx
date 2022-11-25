@@ -4,6 +4,7 @@ import {
 import { useForm } from '@mantine/form';
 import { IconPlus } from '@tabler/icons';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import groupApi from '@/api/group';
 import * as notificationManager from '@/pages/common/notificationManager';
@@ -16,6 +17,7 @@ interface FormProps {
 
 export default function Header() {
   const [opened, setOpened] = useState(false);
+  const navigate = useNavigate();
   const form = useForm({
     initialValues: {
       name: '',
@@ -39,6 +41,7 @@ export default function Header() {
 
       notificationManager.showSuccess('', response.message);
       handleCloseModal();
+      navigate('/groups');
     } catch (error) {
       if (isAxiosError<ErrorResponse>(error)) {
         notificationManager.showFail('', error.response?.data.message);
