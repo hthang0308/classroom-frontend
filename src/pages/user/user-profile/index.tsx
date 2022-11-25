@@ -1,5 +1,5 @@
 import {
-  Avatar, Button, Blockquote, Container, Text, Paper, Group, Stack, Spoiler, Flex,
+  Avatar, Button, Blockquote, Container, Text, Paper, Group, Stack, Spoiler, Flex, Tooltip,
 } from '@mantine/core';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -72,14 +72,27 @@ function TrueUserProfile(info: UserInfo) {
           gap="sm"
           sx={() => ({ '@media (max-width: 520px)': { flexDirection: 'column' } })}
         >
-          <Link to="/user/change-password">
-            <Button color="red" w={160}>Change password</Button>
-          </Link>
+          {
+            userInfo.isLoggedInWithGoogle
+              ? (
+                <Tooltip withArrow label="User logged in with Google account cannot change their password">
+                  {/* wrap disabled button inside another div to make it show properly  */}
+                  <div>
+                    <Button color="red" disabled w={160}>Change password</Button>
+                  </div>
+                </Tooltip>
+              )
+              : (
+                <Link to="/user/change-password">
+                  <Button color="red" w={160}>Change password</Button>
+                </Link>
+              )
+          }
           <Link to="/user/edit-profile">
             <Button w={160}>Edit Profile</Button>
           </Link>
           <Link to="/logout">
-            <Button w={160} variant="outline" color="gray">Logout</Button>
+            <Button w={160} color="gray">Logout</Button>
           </Link>
         </Flex>
       </Stack>

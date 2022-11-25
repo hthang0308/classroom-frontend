@@ -8,6 +8,7 @@ export interface UserInfo {
   name: string;
   avatarUrl?: string;
   description?: string;
+  isLoggedInWithGoogle?: boolean;
 }
 
 export default function useUserInfo(): { userInfo: UserInfo | null } {
