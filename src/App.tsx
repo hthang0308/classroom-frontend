@@ -13,7 +13,7 @@ const App = () => {
   return (
     <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
       <MantineProvider theme={{ colorScheme }}>
-        <NotificationsProvider>
+        <NotificationsProvider position="top-right">
           <RouterProvider router={router} />
         </NotificationsProvider>
       </MantineProvider>

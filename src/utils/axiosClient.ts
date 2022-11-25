@@ -13,16 +13,17 @@ const axiosClient = axios.create({
 
 axiosClient.interceptors.request.use(
   (config: AxiosRequestConfig) => {
+    const cf = config;
     const { jwtToken, isExpired } = getJwtToken();
 
     if (!jwtToken || isExpired) {
       document.dispatchEvent(new CustomEvent(APP_LOGOUT_EVENT, {}));
-      return config;
+      return cf;
     }
 
-    config.headers.Authorization = `Bearer ${jwtToken}`;
+    cf.headers = { Authorization: `Bearer ${jwtToken}` };
 
-    return config;
+    return cf;
   },
   (error) => Promise.reject(error),
 );
