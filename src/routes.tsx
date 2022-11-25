@@ -8,6 +8,7 @@ import LoginPage from './pages/authentication/login';
 import Logout from './pages/authentication/logout';
 import RegisterPage from './pages/authentication/register';
 import NotFoundPage from './pages/errorPage/notFound';
+import GroupsPage from './pages/groups';
 import Home from './pages/home';
 import ChangePasswordForm from './pages/user/change-password';
 
@@ -30,6 +31,16 @@ export const ROUTES: Props[] = [
     errorElement: <NotFoundPage />,
   },
   {
+    path: '/register',
+    name: 'Register',
+    element: <RegisterPage />,
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    element: <LoginPage />,
+  },
+  {
     path: '/logout',
     name: 'Logout',
     element: <Logout />,
@@ -48,6 +59,11 @@ export const ROUTES: Props[] = [
     path: '/user/edit-profile',
     name: 'Profile',
     element: <ProfileEditor />,
+  },
+  {
+    path: '/groups',
+    name: 'Groups',
+    element: <GroupsPage />,
   },
 ];
 
@@ -73,14 +89,6 @@ const router = createBrowserRouter([
     element: <LayoutRoute />,
     errorElement: <NotFoundPage />,
     children: ROUTES,
-  },
-  {
-    path: '/register',
-    element: <RegisterPage />,
-  },
-  {
-    path: '/login',
-    element: <LoginPage />,
   },
 ]);
 
