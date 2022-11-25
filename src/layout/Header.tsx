@@ -3,7 +3,6 @@ import {
   Avatar,
   Header,
   Group,
-  Button,
   Divider,
   Box,
   Burger,
@@ -19,7 +18,7 @@ import BlackLogo from '@/assets/logo-low-res-black.png';
 import WhiteLogo from '@/assets/logo-low-res-white.png';
 
 import useUserInfo, { UserInfo } from '@/hooks/useUserInfo';
-import ThemeSwitcher from '@/pages/buttons/ThemeSwitcher';
+import ThemeSwitcher from '@/pages/common/buttons/ThemeSwitcher';
 
 const useStyles = createStyles((theme) => ({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -77,18 +76,7 @@ const RightButtons = () => {
               <UserAvatar userInfo={userInfo} />
             </Link>
           )
-          : (
-            <>
-              <Link to="/login">
-                <Button variant="default">
-                  Log in
-                </Button>
-              </Link>
-              <Link to="/register">
-                <Button>Sign up</Button>
-              </Link>
-            </>
-          )
+          : null
       }
     </>
   );

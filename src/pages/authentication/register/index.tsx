@@ -10,12 +10,11 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { showNotification } from '@mantine/notifications';
-import axios from 'axios';
-import config from 'config';
 import Cookies from 'js-cookie';
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
+import axiosClient from '@/utils/axiosClient';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 
 import { AUTH_COOKIE } from '@/utils/constants';
@@ -66,7 +65,7 @@ const RegisterPage = () => {
     };
 
     try {
-      const response = await axios.post<SuccessReponse>(`${config.backendUrl}/auth/sign-up`, data);
+      const response = await axiosClient.post<SuccessReponse>('/auth/sign-up', data);
 
       if (response.status === 201) {
         showNotification({

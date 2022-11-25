@@ -30,16 +30,6 @@ export const ROUTES: Props[] = [
     errorElement: <NotFoundPage />,
   },
   {
-    path: '/register',
-    name: 'Register',
-    element: <RegisterPage />,
-  },
-  {
-    path: '/login',
-    name: 'Login',
-    element: <LoginPage />,
-  },
-  {
     path: '/logout',
     name: 'Logout',
     element: <Logout />,
@@ -83,6 +73,14 @@ const router = createBrowserRouter([
     element: <LayoutRoute />,
     errorElement: <NotFoundPage />,
     children: ROUTES,
+  },
+  {
+    path: '/register',
+    element: <RegisterPage />,
+  },
+  {
+    path: '/login',
+    element: <LoginPage />,
   },
 ]);
 
