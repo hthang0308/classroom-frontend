@@ -9,12 +9,16 @@ import groupApi from '@/api/group';
 import * as notificationManager from '@/pages/common/notificationManager';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 
+interface Props {
+  fetchData: () => void
+}
+
 interface FormProps {
   name: string
   desc: string
 }
 
-export default function Header() {
+export default function Header({ fetchData }: Props) {
   const [opened, setOpened] = useState(false);
   const form = useForm({
     initialValues: {
@@ -39,6 +43,7 @@ export default function Header() {
 
       notificationManager.showSuccess('', response.message);
       handleCloseModal();
+      fetchData();
     } catch (error) {
       if (isAxiosError<ErrorResponse>(error)) {
         notificationManager.showFail('', error.response?.data.message);
