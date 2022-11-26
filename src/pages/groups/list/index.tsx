@@ -1,7 +1,9 @@
 import {
   Container, Grid, Group, Card, Image, Stack, Text, Pagination, createStyles,
 } from '@mantine/core';
-import { useState, useEffect } from 'react';
+import {
+  useState, useEffect, useCallback,
+} from 'react';
 import { Link } from 'react-router-dom';
 
 import Header from './header';
@@ -25,26 +27,26 @@ export default function GroupsPage() {
   const [activePage, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const { data: response } = await groupApi.getAll({ pageSize: 8, page: activePage });
+  const fetchData = useCallback(async () => {
+    try {
+      const { data: response } = await groupApi.getAll({ pageSize: 8, page: activePage });
 
-        setDataSource(response.data);
-        setTotalPages(response.meta.totalPages);
-      } catch (error) {
-        if (isAxiosError<ErrorResponse>(error)) {
-          notificationManager.showFail('', error.response?.data.message);
-        }
+      setDataSource(response.data);
+      setTotalPages(response.meta.totalPages);
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
       }
-    };
-
-    fetchData();
+    }
   }, [activePage]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   return (
     <Container size="lg">
-      <Header />
+      <Header fetchData={fetchData} />
       <Grid>
         {dataSource.map((group, index) => (
           <Grid.Col key={index} span={3}>
