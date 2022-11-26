@@ -43,6 +43,17 @@ interface GetAllResponseType {
   meta: Meta
 }
 
+interface GetLinkResponseType {
+  statusCode: string
+  data: string
+  message: string
+}
+
+interface InviteViaEmailResponseType {
+  statusCode: string
+  message: string
+}
+
 const groupApi = {
   createGroup: (name: string, description: string | undefined) => (
     axiosClient.post<SuccessResponseType>('/group', {
@@ -56,8 +67,14 @@ const groupApi = {
 
     return axiosClient.get<GetAllResponseType>(`/group?size=${pageSize}&page=${page}`);
   },
-  getGroupById: (id: string) => (
+  getGroupById: (id: string | undefined) => (
     axiosClient.get<SuccessResponseType>(`/group/${id}`)
+  ),
+  getInvitationLink: (id: string | undefined) => (
+    axiosClient.get<GetLinkResponseType>(`/group/${id}/get-invite-link`)
+  ),
+  inviteUserViaEmail: (id: string | undefined, email: string) => (
+    axiosClient.post<InviteViaEmailResponseType>(`/group/${id}/invite-user-by-email`, { email })
   ),
 };
 

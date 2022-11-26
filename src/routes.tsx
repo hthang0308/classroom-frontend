@@ -8,6 +8,7 @@ import LoginPage from './pages/authentication/login';
 import Logout from './pages/authentication/logout';
 import RegisterPage from './pages/authentication/register';
 import NotFoundPage from './pages/errorPage/notFound';
+import GroupDetail from './pages/groups/groupDetail';
 import GroupsPage from './pages/groups/list';
 import Home from './pages/home';
 import ChangePasswordForm from './pages/user/change-password';
@@ -55,11 +56,11 @@ export const ROUTES: Props[] = [
     name: 'Groups',
     element: <GroupsPage />,
   },
-  // {
-  //   path: '/group/:groupId',
-  //   name: 'Group',
-  //   element: ,
-  // }
+  {
+    path: '/group/:groupId',
+    name: 'Group',
+    element: <GroupDetail />,
+  },
 ];
 
 const LayoutRoute = () => {
