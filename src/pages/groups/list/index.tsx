@@ -1,8 +1,8 @@
 import {
-  Container, Grid, Group, Card, Image, Stack, Text, Pagination, createStyles,
+  Container, Grid, Group, Card, Image, Stack, Text, Pagination, createStyles, Tooltip,
 } from '@mantine/core';
 import {
-  useState, useEffect, useCallback,
+  useState, useEffect, useCallback, useMemo,
 } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -12,8 +12,16 @@ import groupApi, { Group as GroupType } from '@/api/group';
 import * as notificationManager from '@/pages/common/notificationManager';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 
+const GROUPS_PER_PAGE = 8;
+
 const useStyles = createStyles(() => ({
-  lineClamp: {
+  lineClamp1: {
+    display: '-webkit-box',
+    WebkitLineClamp: 1,
+    WebkitBoxOrient: 'vertical',
+    overflow: 'hidden',
+  },
+  lineClamp3: {
     display: '-webkit-box',
     WebkitLineClamp: 3,
     WebkitBoxOrient: 'vertical',
@@ -29,26 +37,33 @@ export default function GroupsPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const { data: response } = await groupApi.getAll({ pageSize: 8, page: activePage });
+      const { data: response } = await groupApi.getMyGroups();
 
       setDataSource(response.data);
-      setTotalPages(response.meta.totalPages);
+      setTotalPages(Math.ceil(response.data.length / GROUPS_PER_PAGE));
     } catch (error) {
       if (isAxiosError<ErrorResponse>(error)) {
         notificationManager.showFail('', error.response?.data.message);
       }
     }
-  }, [activePage]);
+  }, []);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
+  const currentDataSource: GroupType[] = useMemo(() => {
+    const startIndex = (activePage - 1) * GROUPS_PER_PAGE;
+    const groups = dataSource.slice(startIndex, startIndex + GROUPS_PER_PAGE);
+
+    return groups;
+  }, [activePage, dataSource]);
+
   return (
     <Container size="lg">
       <Header fetchData={fetchData} />
       <Grid>
-        {dataSource.map((group, index) => (
+        {currentDataSource.map((group, index) => (
           <Grid.Col key={index} span={3}>
             <Card
               component={Link}
@@ -69,11 +84,13 @@ export default function GroupsPage() {
               </Card.Section>
 
               <Stack mt="md" mb="xs" spacing="xs">
-                <Text weight={600}>{group.name}</Text>
-                <Text>{group.userCreated.name}</Text>
+                <Tooltip label={group.name} position="top-start">
+                  <Text weight={600} className={classes.lineClamp1}>{group.name}</Text>
+                </Tooltip>
+                <Text className={classes.lineClamp1}>{group.userCreated.name}</Text>
               </Stack>
 
-              <Text size="sm" color="dimmed" className={classes.lineClamp}>
+              <Text size="sm" color="dimmed" className={classes.lineClamp3}>
                 {group.description}
               </Text>
             </Card>

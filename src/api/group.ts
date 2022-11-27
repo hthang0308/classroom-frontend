@@ -43,6 +43,12 @@ interface GetAllResponseType {
   meta: Meta
 }
 
+interface GetMyGroupResponseType {
+  statusCode: string
+  data: Group[]
+  message: string
+}
+
 interface GetLinkResponseType {
   statusCode: string
   data: string
@@ -69,6 +75,9 @@ const groupApi = {
   },
   getGroupById: (id: string | undefined) => (
     axiosClient.get<SuccessResponseType>(`/group/${id}`)
+  ),
+  getMyGroups: () => (
+    axiosClient.get<GetMyGroupResponseType>('/group/my-group')
   ),
   getInvitationLink: (id: string | undefined) => (
     axiosClient.get<GetLinkResponseType>(`/group/${id}/get-invite-link`)
