@@ -1,8 +1,19 @@
 import axiosClient from '@/utils/axiosClient';
 
+export interface User {
+  _id: string;
+  email: string;
+  name: string;
+}
+
 export interface UsersAndRole {
   user: string
   role: string
+}
+
+export interface UsersInfoAndRole {
+  user: User;
+  role: string;
 }
 
 export interface UserCreated {
@@ -21,6 +32,18 @@ export interface Group {
   createdAt: Date
   updatedAt: Date
   __v: number
+}
+
+export interface Group2 {
+  _id: string;
+  name: string;
+  description: string;
+  usersAndRoles: UsersInfoAndRole[];
+  userCreated: UserCreated;
+  userUpdated: string;
+  createdAt: Date;
+  updatedAt: Date;
+  __v: number;
 }
 
 export interface Meta {
@@ -60,6 +83,12 @@ interface InviteViaEmailResponseType {
   message: string
 }
 
+interface GetAllMemberResponseType {
+  statusCode: string
+  data: Group2
+  message: string
+}
+
 const groupApi = {
   createGroup: (name: string, description: string | undefined) => (
     axiosClient.post<SuccessResponseType>('/group', {
@@ -84,6 +113,9 @@ const groupApi = {
   ),
   inviteUserViaEmail: (id: string | undefined, email: string) => (
     axiosClient.post<InviteViaEmailResponseType>(`/group/${id}/invite-user-by-email`, { email })
+  ),
+  getAllMembers: (id: string | undefined) => (
+    axiosClient.get<GetAllMemberResponseType>(`/group/${id}`)
   ),
 };
 
