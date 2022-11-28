@@ -1,8 +1,17 @@
-import { USER_ROLE } from './constants';
+import Cookies from 'js-cookie';
 
-import { UsersInfoAndRole } from '@/api/group';
-import userApi, { User as UserType } from '@/api/user';
-import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
+import {
+  USER_ROLE, GROUP_FILTER_TYPE, USER_COOKIE,
+} from './constants';
+
+import { UsersInfoAndRole, Group } from '@/api/group';
+
+export interface UserGetFromCookie {
+  id?: string
+  email?: string
+  name?: string
+  isLoggedInWithGoogle?: boolean
+}
 
 export function sortMemberListByRole(data: UsersInfoAndRole[]) {
   const sortingScheme = [
@@ -29,16 +38,26 @@ export function sortMemberListByRole(data: UsersInfoAndRole[]) {
   return data.sort(compare);
 }
 
-export async function getUserInfo(): Promise<UserType | undefined> {
-  try {
-    const { data: response } = await userApi.getMe();
+export function getUserId() {
+  const userString = Cookies.get(USER_COOKIE);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const user: UserGetFromCookie = JSON.parse(userString || '');
 
-    return response.data;
-  } catch (error) {
-    if (isAxiosError<ErrorResponse>(error)) {
-      console.log(error);
+  return user?.id;
+}
+
+export function filterGroupByType(groups: Group[], type: string | null, userId: string | undefined): Group[] {
+  switch (type) {
+    case GROUP_FILTER_TYPE.GROUP_YOU_CREATED: {
+      return groups.filter((group) => group.userCreated._id === userId);
+    }
+
+    case GROUP_FILTER_TYPE.GROUP_YOU_JOINED: {
+      return groups.filter((group) => group.userCreated._id !== userId);
+    }
+
+    default: {
+      return groups;
     }
   }
-
-  return undefined;
 }

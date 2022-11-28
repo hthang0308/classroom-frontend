@@ -8,7 +8,7 @@ import { useParams } from 'react-router-dom';
 import groupApi, { UsersInfoAndRole } from '@/api/group';
 import { ConfirmPopoverAssignRole, ConfirmPopoverKickOut } from '@/pages/common/confirmPopover';
 import * as notificationManager from '@/pages/common/notificationManager';
-import { sortMemberListByRole, getUserInfo } from '@/utils';
+import { sortMemberListByRole, getUserId } from '@/utils';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 import { USER_ROLE } from '@/utils/constants';
 
@@ -27,14 +27,14 @@ export default function MemberList({ role, setRole }: PropsType) {
       setFetching(true);
       const { data: response } = await groupApi.getAllMembers(groupId);
 
-      const userInfo = await getUserInfo();
+      const userId = getUserId();
 
       const convertedData = response.data.usersAndRoles.map((item) => ({
         ...item,
         role: USER_ROLE[item.role],
       }));
 
-      const user = convertedData.find((item) => item.user._id === userInfo?._id);
+      const user = convertedData.find((item) => item.user._id === userId);
 
       setRole(user?.role || '');
       setDataSource(sortMemberListByRole(convertedData));
