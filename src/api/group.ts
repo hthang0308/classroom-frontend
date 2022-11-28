@@ -94,6 +94,11 @@ interface AssignRoleResponseType {
   message: string
 }
 
+interface KickOutResponseType {
+  statusCode: string
+  message: string
+}
+
 const groupApi = {
   createGroup: (name: string, description: string | undefined) => (
     axiosClient.post<SuccessResponseType>('/group', {
@@ -127,6 +132,9 @@ const groupApi = {
       user: userId,
       role,
     })
+  ),
+  kickOutMember: (groupId: string | undefined, userId: string | undefined) => (
+    axiosClient.get<KickOutResponseType>(`/group/${groupId}/kick?userId=${userId}`)
   ),
 };
 

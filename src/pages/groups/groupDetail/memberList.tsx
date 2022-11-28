@@ -34,7 +34,6 @@ export default function MemberList({ role, setRole }: PropsType) {
         role: USER_ROLE[item.role],
       }));
 
-      // eslint-disable-next-line no-underscore-dangle
       const user = convertedData.find((item) => item.user._id === userInfo?._id);
 
       setRole(user?.role || '');
@@ -55,6 +54,19 @@ export default function MemberList({ role, setRole }: PropsType) {
   const handleAssignMemberRole = async (userId: string, roleAssign: string) => {
     try {
       const { data: response } = await groupApi.assignMemberRole(groupId, userId, roleAssign);
+
+      notificationManager.showSuccess('', response.message);
+      fetchData();
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
+  };
+
+  const handleKickOutMember = async (userId: string) => {
+    try {
+      const { data: response } = await groupApi.kickOutMember(groupId, userId);
 
       notificationManager.showSuccess('', response.message);
       fetchData();
@@ -88,19 +100,14 @@ export default function MemberList({ role, setRole }: PropsType) {
         const onAssignRoleConfirm = () => {
           const roleAssign = record.role === USER_ROLE.MEMBER ? 'CO_OWNER' : 'MEMBER';
 
-          // eslint-disable-next-line no-underscore-dangle
           handleAssignMemberRole(record.user._id, roleAssign);
-        };
-
-        const onKickOutConfirm = () => {
-
         };
 
         return record.role !== USER_ROLE.OWNER
           ? (
             <Group position="center">
               <ConfirmPopoverAssignRole role={record.role} onConfirm={onAssignRoleConfirm} />
-              <ConfirmPopoverKickOut onConfirm={onKickOutConfirm} />
+              <ConfirmPopoverKickOut onConfirm={() => handleKickOutMember(record.user._id)} />
             </Group>
           )
           : null;

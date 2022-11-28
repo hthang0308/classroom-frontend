@@ -94,7 +94,6 @@ export default function GroupsPage() {
                         <Grid.Col key={index} span={3}>
                           <Card
                             component={Link}
-                            // eslint-disable-next-line no-underscore-dangle
                             to={`/group/${group._id}`}
                             shadow="sm"
                             p="lg"
