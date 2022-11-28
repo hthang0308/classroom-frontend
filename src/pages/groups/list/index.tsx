@@ -1,6 +1,7 @@
 import {
-  Container, Grid, Group, Card, Image, Stack, Text, Pagination, createStyles, Tooltip, Loader, Center,
+  Container, Grid, Group, Card, Image, Stack, Text, Pagination, Tooltip, Loader, Center, Alert, createStyles,
 } from '@mantine/core';
+import { IconAlertCircle } from '@tabler/icons';
 import {
   useState, useEffect, useCallback, useMemo,
 } from 'react';
@@ -31,11 +32,11 @@ const useStyles = createStyles(() => ({
 
 function EmptyContent() {
   return (
-    <Container>
-      <Text align="center" color="blue" weight={600} size="xl" my="xl">
+    <Center>
+      <Alert icon={<IconAlertCircle size={16} />} radius="md" color="yellow" my="xl">
         Create or join a group to start
-      </Text>
-    </Container>
+      </Alert>
+    </Center>
   );
 }
 
@@ -85,7 +86,7 @@ export default function GroupsPage() {
             </Center>
           )
           : (
-            currentDataSource.length > 0
+            dataSource.length > 0
               ? (
                 <>
                   <Grid>

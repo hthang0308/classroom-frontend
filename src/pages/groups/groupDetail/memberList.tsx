@@ -13,7 +13,7 @@ import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 import { USER_ROLE } from '@/utils/constants';
 
 interface PropsType {
-  role: string,
+  role: string
   setRole: React.Dispatch<React.SetStateAction<string>>
 }
 
@@ -106,8 +106,20 @@ export default function MemberList({ role, setRole }: PropsType) {
         return record.role !== USER_ROLE.OWNER
           ? (
             <Group position="center">
-              <ConfirmPopoverAssignRole role={record.role} onConfirm={onAssignRoleConfirm} />
-              <ConfirmPopoverKickOut onConfirm={() => handleKickOutMember(record.user._id)} />
+              {
+                role === USER_ROLE.OWNER
+                  ? (
+                    <ConfirmPopoverAssignRole role={record.role} onConfirm={onAssignRoleConfirm} />
+                  )
+                  : null
+              }
+              {
+                (role === USER_ROLE.OWNER || record.role === USER_ROLE.MEMBER)
+                  ? (
+                    <ConfirmPopoverKickOut onConfirm={() => handleKickOutMember(record.user._id)} />
+                  )
+                  : null
+              }
             </Group>
           )
           : null;

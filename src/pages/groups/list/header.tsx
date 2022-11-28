@@ -77,7 +77,12 @@ export default function Header({ fetchData }: Props) {
         </form>
       </Modal>
       <Group my="lg" position="apart">
-        <Title order={3}>Groups</Title>
+        <Title
+          order={3}
+          sx={(theme) => ({ color: theme.colorScheme === 'dark' ? theme.colors.gray[1] : theme.colors.dark[4] })}
+        >
+          Groups
+        </Title>
         <Tooltip label="Create a group">
           <Button onClick={handleOpenModal}>
             <IconPlus />

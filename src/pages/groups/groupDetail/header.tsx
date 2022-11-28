@@ -3,10 +3,12 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import {
-  IconSettings, IconUserPlus, IconTrash, IconCategory,
+  IconSettings, IconUserPlus, IconTrash, IconCategory, IconLogout,
 } from '@tabler/icons';
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import {
+  useParams, useNavigate, Link,
+} from 'react-router-dom';
 
 import groupApi, { Group as GroupType } from '@/api/group';
 import * as notificationManager from '@/pages/common/notificationManager';
@@ -14,7 +16,7 @@ import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 import { USER_ROLE } from '@/utils/constants';
 
 interface PropsType {
-  role: string,
+  role: string
 }
 
 export default function Header({ role }: PropsType) {
@@ -25,6 +27,7 @@ export default function Header({ role }: PropsType) {
   const [invitationLink, setInvitationLink] = useState('');
   const [isLoading, setLoading] = useState(false);
   const { groupId } = useParams<string>();
+  const navigate = useNavigate();
 
   const form = useForm({
     initialValues: { email: '' },
@@ -110,6 +113,19 @@ export default function Header({ role }: PropsType) {
     setInviteViaEmailOpened(false);
   };
 
+  const handleMemberLeaveGroup = async () => {
+    try {
+      const { data: response } = await groupApi.leaveGroup(groupId);
+
+      notificationManager.showSuccess('', response.message);
+      navigate('/groups');
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
+  };
+
   return (
     <>
       {/* <Modal
@@ -162,7 +178,8 @@ export default function Header({ role }: PropsType) {
           ))}
         </Breadcrumbs>
         {
-          role !== USER_ROLE.MEMBER
+          // eslint-disable-next-line no-nested-ternary
+          role === USER_ROLE.OWNER || role === USER_ROLE.CO_OWNER
             ? (
               <Group>
                 <Menu position="bottom-end" shadow="md">
@@ -202,13 +219,35 @@ export default function Header({ role }: PropsType) {
                             <Menu.Item color="red" icon={<IconTrash size={14} />}>Delete group</Menu.Item>
                           </>
                         )
-                        : null
+                        : (
+                          <>
+                            <Menu.Divider />
+                            <Menu.Label>Danger zone</Menu.Label>
+                            <Menu.Item
+                              color="red"
+                              icon={<IconLogout size={14} />}
+                              onClick={handleMemberLeaveGroup}
+                            >
+                              Out group
+                            </Menu.Item>
+                          </>
+                        )
                     }
                   </Menu.Dropdown>
                 </Menu>
               </Group>
             )
-            : null
+            : (
+              role === USER_ROLE.MEMBER
+                ? (
+                  <Tooltip label="Leave group">
+                    <Button color="red" onClick={handleMemberLeaveGroup}>
+                      <IconLogout />
+                    </Button>
+                  </Tooltip>
+                )
+                : null
+            )
         }
       </Group>
     </>
