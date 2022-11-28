@@ -89,6 +89,11 @@ interface GetAllMemberResponseType {
   message: string
 }
 
+interface AssignRoleResponseType {
+  statusCode: string
+  message: string
+}
+
 const groupApi = {
   createGroup: (name: string, description: string | undefined) => (
     axiosClient.post<SuccessResponseType>('/group', {
@@ -116,6 +121,12 @@ const groupApi = {
   ),
   getAllMembers: (id: string | undefined) => (
     axiosClient.get<GetAllMemberResponseType>(`/group/${id}`)
+  ),
+  assignMemberRole: (groupId: string | undefined, userId: string | undefined, role: string) => (
+    axiosClient.post<AssignRoleResponseType>(`/group/${groupId}/assign-role`, {
+      user: userId,
+      role,
+    })
   ),
 };
 
