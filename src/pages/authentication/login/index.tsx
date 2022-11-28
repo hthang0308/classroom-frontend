@@ -20,8 +20,8 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import GoogleButton from '../common/googleButton';
 
+import authApi from '@/api/auth';
 import * as notificationManager from '@/pages/common/notificationManager';
-import axiosClient from '@/utils/axiosClient';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 import { AUTH_COOKIE } from '@/utils/constants';
 
@@ -29,15 +29,6 @@ interface FormProps {
   email: string
   password: string
   rememberMe: boolean
-}
-
-interface SuccessResponse {
-  data: {
-    id: string
-    email: string
-    token: string
-  }
-  message: string
 }
 
 const LoginPage = () => {
@@ -58,15 +49,8 @@ const LoginPage = () => {
   });
 
   const handleSubmitForm = async (values: FormProps) => {
-    const data = {
-      email: values.email,
-      password: values.password,
-    };
-
     try {
-      const { data: response } = await axiosClient.post<SuccessResponse>('/auth/sign-in', data);
-
-      Cookies.set(AUTH_COOKIE, response.data.token);
+      const { data: response } = await authApi.signIn(values.email, values.password);
 
       notificationManager.showSuccess('', response.message);
       navigate('/');

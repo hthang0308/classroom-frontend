@@ -13,8 +13,8 @@ import Cookies from 'js-cookie';
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
+import authApi from '@/api/auth';
 import * as notificationManager from '@/pages/common/notificationManager';
-import axiosClient from '@/utils/axiosClient';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 
 import { AUTH_COOKIE } from '@/utils/constants';
@@ -24,14 +24,6 @@ interface FormProps {
   email: string
   password: string
   confirm: string
-}
-
-interface SuccessReponse {
-  data: {
-    id: string
-    email: string
-  }
-  message: string
 }
 
 const RegisterPage = () => {
@@ -58,14 +50,8 @@ const RegisterPage = () => {
   });
 
   const handleSubmitForm = async (values: FormProps) => {
-    const data = {
-      email: values.email,
-      password: values.password,
-      name: values.name,
-    };
-
     try {
-      const response = await axiosClient.post<SuccessReponse>('/auth/sign-up', data);
+      const response = await authApi.signUp(values.email, values.password, values.name);
 
       if (response.status === 201) {
         notificationManager.showSuccess('Register successfully', response.data.message);
