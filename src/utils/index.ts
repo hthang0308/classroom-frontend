@@ -1,8 +1,10 @@
 import { USER_ROLE } from './constants';
 
 import { UsersInfoAndRole } from '@/api/group';
+import userApi, { User as UserType } from '@/api/user';
+import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 
-export default function sortMemberListByRole(data: UsersInfoAndRole[]) {
+export function sortMemberListByRole(data: UsersInfoAndRole[]) {
   const sortingScheme = [
     USER_ROLE.OWNER,
     USER_ROLE.CO_OWNER,
@@ -25,4 +27,18 @@ export default function sortMemberListByRole(data: UsersInfoAndRole[]) {
   };
 
   return data.sort(compare);
+}
+
+export async function getUserInfo(): Promise<UserType | undefined> {
+  try {
+    const { data: response } = await userApi.getMe();
+
+    return response.data;
+  } catch (error) {
+    if (isAxiosError<ErrorResponse>(error)) {
+      console.log(error);
+    }
+  }
+
+  return undefined;
 }
