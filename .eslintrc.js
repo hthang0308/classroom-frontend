@@ -283,6 +283,7 @@ module.exports = {
 		],
 		"react/no-array-index-key": 0,
 		"unicorn/numeric-separators-style": 0,
+		"no-underscore-dangle": 0,
 	},
 	"settings": {
 		"react": {

@@ -9,6 +9,7 @@ const axiosClient = axios.create({
   baseURL: appConfig.backendUrl,
   headers: { 'Content-Type': 'application/json' },
   timeout: 15000,
+  withCredentials: true,
 });
 
 axiosClient.interceptors.request.use(

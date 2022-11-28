@@ -2,22 +2,32 @@ import {
   Button, Group, Menu, Tooltip, Modal, TextInput, Breadcrumbs, Anchor,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconSettings, IconUserPlus } from '@tabler/icons';
+import {
+  IconSettings, IconUserPlus, IconTrash, IconCategory, IconLogout,
+} from '@tabler/icons';
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import {
+  useParams, useNavigate, Link,
+} from 'react-router-dom';
 
 import groupApi, { Group as GroupType } from '@/api/group';
 import * as notificationManager from '@/pages/common/notificationManager';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
+import { USER_ROLE } from '@/utils/constants';
 
-export default function Header() {
-  const [opened, setOpened] = useState(false);
+interface PropsType {
+  role: string
+}
+
+export default function Header({ role }: PropsType) {
+  // const [opened, setOpened] = useState(false);
   const [invitationModalOpened, setInvitationModalOpened] = useState(false);
   const [inviteViaEmailOpened, setInviteViaEmailOpened] = useState(false);
   const [groupData, setGroupData] = useState<GroupType>();
   const [invitationLink, setInvitationLink] = useState('');
   const [isLoading, setLoading] = useState(false);
   const { groupId } = useParams<string>();
+  const navigate = useNavigate();
 
   const form = useForm({
     initialValues: { email: '' },
@@ -45,13 +55,13 @@ export default function Header() {
     fetchData();
   }, [groupId]);
 
-  const handleOpenModal = () => {
-    setOpened(true);
-  };
+  // const handleOpenModal = () => {
+  //   setOpened(true);
+  // };
 
-  const handleCloseModal = () => {
-    setOpened(false);
-  };
+  // const handleCloseModal = () => {
+  //   setOpened(false);
+  // };
 
   const handleOpenInvitationModal = async () => {
     try {
@@ -103,15 +113,41 @@ export default function Header() {
     setInviteViaEmailOpened(false);
   };
 
+  const handleMemberLeaveGroup = async () => {
+    try {
+      const { data: response } = await groupApi.leaveGroup(groupId);
+
+      notificationManager.showSuccess('', response.message);
+      navigate('/groups');
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
+  };
+
+  const handleDeleteGroup = async () => {
+    try {
+      const { data: response } = await groupApi.deleteGroup(groupId);
+
+      notificationManager.showSuccess('', response.message);
+      navigate('/groups');
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
+  };
+
   return (
     <>
-      <Modal
+      {/* <Modal
         title="Settings"
         opened={opened}
         onClose={handleCloseModal}
       >
         Settings
-      </Modal>
+      </Modal> */}
       <Modal
         title="Invitation link"
         opened={invitationModalOpened}
@@ -154,30 +190,84 @@ export default function Header() {
             </Anchor>
           ))}
         </Breadcrumbs>
-        <Group>
-          <Menu position="bottom-end" shadow="md">
-            <Menu.Target>
-              <Tooltip label="Invite people">
-                <Button>
-                  <IconUserPlus />
-                </Button>
-              </Tooltip>
-            </Menu.Target>
-            <Menu.Dropdown>
-              <Menu.Item onClick={handleOpenInvitationModal}>
-                Get invitation link
-              </Menu.Item>
-              <Menu.Item onClick={handleOpenInviteViaEmailModal}>
-                Send invitation via email
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
-          <Tooltip label="Settings">
-            <Button onClick={handleOpenModal}>
-              <IconSettings />
-            </Button>
-          </Tooltip>
-        </Group>
+        {
+          // eslint-disable-next-line no-nested-ternary
+          role === USER_ROLE.OWNER || role === USER_ROLE.CO_OWNER
+            ? (
+              <Group>
+                <Menu position="bottom-end" shadow="md">
+                  <Menu.Target>
+                    <Tooltip label="Invite people">
+                      <Button>
+                        <IconUserPlus />
+                      </Button>
+                    </Tooltip>
+                  </Menu.Target>
+                  <Menu.Dropdown>
+                    <Menu.Item onClick={handleOpenInvitationModal}>
+                      Get invitation link
+                    </Menu.Item>
+                    <Menu.Item onClick={handleOpenInviteViaEmailModal}>
+                      Send invitation via email
+                    </Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
+                <Menu position="bottom-end" shadow="md">
+                  <Menu.Target>
+                    <Tooltip label="Menu">
+                      <Button>
+                        <IconCategory />
+                      </Button>
+                    </Tooltip>
+                  </Menu.Target>
+                  <Menu.Dropdown>
+                    <Menu.Label>Application</Menu.Label>
+                    <Menu.Item icon={<IconSettings size={14} />}>Settings</Menu.Item>
+                    {
+                      role === USER_ROLE.OWNER
+                        ? (
+                          <>
+                            <Menu.Divider />
+                            <Menu.Label>Danger zone</Menu.Label>
+                            <Menu.Item
+                              color="red"
+                              icon={<IconTrash size={14} />}
+                              onClick={handleDeleteGroup}
+                            >
+                              Delete group
+                            </Menu.Item>
+                          </>
+                        )
+                        : (
+                          <>
+                            <Menu.Divider />
+                            <Menu.Label>Danger zone</Menu.Label>
+                            <Menu.Item
+                              color="red"
+                              icon={<IconLogout size={14} />}
+                              onClick={handleMemberLeaveGroup}
+                            >
+                              Out group
+                            </Menu.Item>
+                          </>
+                        )
+                    }
+                  </Menu.Dropdown>
+                </Menu>
+              </Group>
+            )
+            : (
+              role === USER_ROLE.MEMBER
+                ? (
+                  <Tooltip label="Leave group">
+                    <Button color="red" onClick={handleMemberLeaveGroup}>
+                      <IconLogout />
+                    </Button>
+                  </Tooltip>
+                )
+                : null
+            )
+        }
       </Group>
     </>
   );

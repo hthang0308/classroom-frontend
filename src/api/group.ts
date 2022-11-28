@@ -89,6 +89,26 @@ interface GetAllMemberResponseType {
   message: string
 }
 
+interface AssignRoleResponseType {
+  statusCode: string
+  message: string
+}
+
+interface LeaveGroupResponseType {
+  statusCode: string
+  message: string
+}
+
+interface KickOutResponseType {
+  statusCode: string
+  message: string
+}
+
+interface DeleteGroupResponseType {
+  statusCode: string
+  message: string
+}
+
 const groupApi = {
   createGroup: (name: string, description: string | undefined) => (
     axiosClient.post<SuccessResponseType>('/group', {
@@ -116,6 +136,21 @@ const groupApi = {
   ),
   getAllMembers: (id: string | undefined) => (
     axiosClient.get<GetAllMemberResponseType>(`/group/${id}`)
+  ),
+  assignMemberRole: (groupId: string | undefined, userId: string | undefined, role: string) => (
+    axiosClient.post<AssignRoleResponseType>(`/group/${groupId}/assign-role`, {
+      user: userId,
+      role,
+    })
+  ),
+  leaveGroup: (groupId: string | undefined) => (
+    axiosClient.get<LeaveGroupResponseType>(`/group/${groupId}/leave`)
+  ),
+  kickOutMember: (groupId: string | undefined, userId: string | undefined) => (
+    axiosClient.get<KickOutResponseType>(`/group/${groupId}/kick?userId=${userId}`)
+  ),
+  deleteGroup: (groupId: string | undefined) => (
+    axiosClient.delete<DeleteGroupResponseType>(`/group/${groupId}`)
   ),
 };
 

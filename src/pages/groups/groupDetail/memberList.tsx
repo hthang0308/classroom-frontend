@@ -1,81 +1,136 @@
+import { Box, Group } from '@mantine/core';
+import { DataTable, DataTableColumn } from 'mantine-datatable';
 import {
-  Box, Group, ActionIcon, Tooltip,
-} from '@mantine/core';
-import { IconX, IconUser } from '@tabler/icons';
-import { DataTable } from 'mantine-datatable';
-import { useState, useEffect } from 'react';
+  useState, useEffect, useCallback,
+} from 'react';
 import { useParams } from 'react-router-dom';
 
 import groupApi, { UsersInfoAndRole } from '@/api/group';
+import { ConfirmPopoverAssignRole, ConfirmPopoverKickOut } from '@/pages/common/confirmPopover';
 import * as notificationManager from '@/pages/common/notificationManager';
-import sortMemberListByRole from '@/utils';
+import { sortMemberListByRole, getUserId } from '@/utils';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 import { USER_ROLE } from '@/utils/constants';
 
-export default function MemberList() {
+interface PropsType {
+  role: string
+  setRole: React.Dispatch<React.SetStateAction<string>>
+}
+
+export default function MemberList({ role, setRole }: PropsType) {
   const [dataSource, setDataSource] = useState<UsersInfoAndRole[]>([]);
   const [fetching, setFetching] = useState(false);
   const { groupId } = useParams<string>();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setFetching(true);
-        const { data: response } = await groupApi.getAllMembers(groupId);
+  const fetchData = useCallback(async () => {
+    try {
+      setFetching(true);
+      const { data: response } = await groupApi.getAllMembers(groupId);
 
-        const convertedData = response.data.usersAndRoles.map((item) => ({
-          ...item,
-          role: USER_ROLE[item.role],
-        }));
+      const userId = getUserId();
 
-        setDataSource(sortMemberListByRole(convertedData));
-      } catch (error) {
-        if (isAxiosError<ErrorResponse>(error)) {
-          notificationManager.showFail('', error.response?.data.message);
-        }
+      const convertedData = response.data.usersAndRoles.map((item) => ({
+        ...item,
+        role: USER_ROLE[item.role],
+      }));
+
+      const user = convertedData.find((item) => item.user._id === userId);
+
+      setRole(user?.role || '');
+      setDataSource(sortMemberListByRole(convertedData));
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
       }
+    }
 
-      setFetching(false);
-    };
+    setFetching(false);
+  }, [groupId, setRole]);
 
+  useEffect(() => {
     fetchData();
-  }, [groupId]);
+  }, [fetchData]);
+
+  const handleAssignMemberRole = async (userId: string, roleAssign: string) => {
+    try {
+      const { data: response } = await groupApi.assignMemberRole(groupId, userId, roleAssign);
+
+      notificationManager.showSuccess('', response.message);
+      fetchData();
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
+  };
+
+  const handleKickOutMember = async (userId: string) => {
+    try {
+      const { data: response } = await groupApi.kickOutMember(groupId, userId);
+
+      notificationManager.showSuccess('', response.message);
+      fetchData();
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
+  };
+
+  const COLUMNS: DataTableColumn<UsersInfoAndRole>[] = [
+    {
+      accessor: 'index',
+      title: '#',
+      textAlignment: 'center',
+      width: 40,
+      render: (_: UsersInfoAndRole, index: number) => index + 1,
+    },
+    { accessor: 'user.name', title: 'Name' },
+    { accessor: 'user.email', title: 'Email' },
+    { accessor: 'role', textAlignment: 'center' },
+  ];
+
+  const ACTION_COLUMNS: DataTableColumn<UsersInfoAndRole>[] = [
+    {
+      accessor: 'action',
+      title: 'Action',
+      textAlignment: 'center',
+      width: 100,
+      render: (record: UsersInfoAndRole) => {
+        const onAssignRoleConfirm = () => {
+          const roleAssign = record.role === USER_ROLE.MEMBER ? 'CO_OWNER' : 'MEMBER';
+
+          handleAssignMemberRole(record.user._id, roleAssign);
+        };
+
+        return record.role !== USER_ROLE.OWNER
+          ? (
+            <Group position="center">
+              {
+                role === USER_ROLE.OWNER
+                  ? (
+                    <ConfirmPopoverAssignRole role={record.role} onConfirm={onAssignRoleConfirm} />
+                  )
+                  : null
+              }
+              {
+                (role === USER_ROLE.OWNER || record.role === USER_ROLE.MEMBER)
+                  ? (
+                    <ConfirmPopoverKickOut onConfirm={() => handleKickOutMember(record.user._id)} />
+                  )
+                  : null
+              }
+            </Group>
+          )
+          : null;
+      },
+    },
+  ];
 
   return (
-    <Box>
+    <Box mt="xl">
       <DataTable
-        columns={[
-          {
-            accessor: 'index',
-            title: '#',
-            textAlignment: 'center',
-            width: 40,
-            render: (_, index) => index + 1,
-          },
-          { accessor: 'user.name', title: 'Name' },
-          { accessor: 'user.email', title: 'Email' },
-          { accessor: 'role', textAlignment: 'center' },
-          {
-            accessor: 'action',
-            title: 'Action',
-            textAlignment: 'center',
-            width: 100,
-            render: () => (
-              <Group position="center">
-                <Tooltip label="Assign role" key="assign">
-                  <ActionIcon variant="outline" color="blue">
-                    <IconUser />
-                  </ActionIcon>
-                </Tooltip>
-                <Tooltip label="Kick out">
-                  <ActionIcon variant="outline" color="red">
-                    <IconX />
-                  </ActionIcon>
-                </Tooltip>
-              </Group>
-            ),
-          },
-        ]}
+        columns={role !== USER_ROLE.MEMBER ? [...COLUMNS, ...ACTION_COLUMNS] : COLUMNS}
         records={dataSource}
         idAccessor="user._id"
         minHeight={dataSource.length > 0 ? 0 : 150}

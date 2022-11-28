@@ -1,5 +1,5 @@
 import {
-  Button, Group, Title, Tooltip, Modal, TextInput, Textarea,
+  Button, Group, Title, Tooltip, Modal, TextInput, Textarea, Select,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconPlus } from '@tabler/icons';
@@ -8,9 +8,12 @@ import { useState } from 'react';
 import groupApi from '@/api/group';
 import * as notificationManager from '@/pages/common/notificationManager';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
+import { GROUP_FILTER_TYPE } from '@/utils/constants';
 
 interface Props {
   fetchData: () => void
+  groupFilter: string | null
+  setGroupFilter: React.Dispatch<React.SetStateAction<string | null>>
 }
 
 interface FormProps {
@@ -18,8 +21,10 @@ interface FormProps {
   desc: string
 }
 
-export default function Header({ fetchData }: Props) {
+// eslint-disable-next-line object-curly-newline
+export default function Header({ fetchData, groupFilter, setGroupFilter }: Props) {
   const [opened, setOpened] = useState(false);
+
   const form = useForm({
     initialValues: {
       name: '',
@@ -77,12 +82,24 @@ export default function Header({ fetchData }: Props) {
         </form>
       </Modal>
       <Group my="lg" position="apart">
-        <Title order={3}>Groups</Title>
-        <Tooltip label="Create a group">
-          <Button onClick={handleOpenModal}>
-            <IconPlus />
-          </Button>
-        </Tooltip>
+        <Title
+          order={3}
+          sx={(theme) => ({ color: theme.colorScheme === 'dark' ? theme.colors.gray[1] : theme.colors.dark[4] })}
+        >
+          Groups
+        </Title>
+        <Group>
+          <Select
+            data={[GROUP_FILTER_TYPE.ALL, GROUP_FILTER_TYPE.GROUP_YOU_CREATED, GROUP_FILTER_TYPE.GROUP_YOU_JOINED]}
+            value={groupFilter}
+            onChange={setGroupFilter}
+          />
+          <Tooltip label="Create a group">
+            <Button onClick={handleOpenModal}>
+              <IconPlus />
+            </Button>
+          </Tooltip>
+        </Group>
       </Group>
     </>
   );
