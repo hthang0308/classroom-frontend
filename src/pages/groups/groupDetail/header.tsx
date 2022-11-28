@@ -126,6 +126,19 @@ export default function Header({ role }: PropsType) {
     }
   };
 
+  const handleDeleteGroup = async () => {
+    try {
+      const { data: response } = await groupApi.deleteGroup(groupId);
+
+      notificationManager.showSuccess('', response.message);
+      navigate('/groups');
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
+  };
+
   return (
     <>
       {/* <Modal
@@ -216,7 +229,13 @@ export default function Header({ role }: PropsType) {
                           <>
                             <Menu.Divider />
                             <Menu.Label>Danger zone</Menu.Label>
-                            <Menu.Item color="red" icon={<IconTrash size={14} />}>Delete group</Menu.Item>
+                            <Menu.Item
+                              color="red"
+                              icon={<IconTrash size={14} />}
+                              onClick={handleDeleteGroup}
+                            >
+                              Delete group
+                            </Menu.Item>
                           </>
                         )
                         : (

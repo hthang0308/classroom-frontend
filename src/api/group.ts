@@ -104,6 +104,11 @@ interface KickOutResponseType {
   message: string
 }
 
+interface DeleteGroupResponseType {
+  statusCode: string
+  message: string
+}
+
 const groupApi = {
   createGroup: (name: string, description: string | undefined) => (
     axiosClient.post<SuccessResponseType>('/group', {
@@ -143,6 +148,9 @@ const groupApi = {
   ),
   kickOutMember: (groupId: string | undefined, userId: string | undefined) => (
     axiosClient.get<KickOutResponseType>(`/group/${groupId}/kick?userId=${userId}`)
+  ),
+  deleteGroup: (groupId: string | undefined) => (
+    axiosClient.delete<DeleteGroupResponseType>(`/group/${groupId}`)
   ),
 };
 
