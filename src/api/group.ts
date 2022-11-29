@@ -46,6 +46,18 @@ export interface Group2 {
   __v: number;
 }
 
+export interface Group3 {
+  _id: string;
+  name: string;
+  description: string;
+  usersAndRoles: UsersInfoAndRole[];
+  userCreated: string;
+  userUpdated: string;
+  createdAt: Date;
+  updatedAt: Date;
+  __v: number;
+}
+
 export interface Meta {
   currentPage: number
   pageSize: number
@@ -80,6 +92,12 @@ interface GetLinkResponseType {
 
 interface InviteViaEmailResponseType {
   statusCode: string
+  message: string
+}
+
+interface JoinGroupResponseType {
+  statusCode: string
+  data: Group3
   message: string
 }
 
@@ -133,6 +151,9 @@ const groupApi = {
   ),
   inviteUserViaEmail: (id: string | undefined, email: string) => (
     axiosClient.post<InviteViaEmailResponseType>(`/group/${id}/invite-user-by-email`, { email })
+  ),
+  joinGroup: (token: string) => (
+    axiosClient.get<JoinGroupResponseType>(`/group/invite/${token}`)
   ),
   getAllMembers: (id: string | undefined) => (
     axiosClient.get<GetAllMemberResponseType>(`/group/${id}`)
