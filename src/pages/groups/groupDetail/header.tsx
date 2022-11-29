@@ -3,7 +3,7 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import {
-  IconSettings, IconUserPlus, IconTrash, IconCategory, IconLogout,
+  IconUserPlus, IconTrash, IconCategory, IconLogout,
 } from '@tabler/icons';
 import { useEffect, useState } from 'react';
 import {
@@ -221,14 +221,14 @@ export default function Header({ role }: PropsType) {
                     </Tooltip>
                   </Menu.Target>
                   <Menu.Dropdown>
-                    <Menu.Label>Application</Menu.Label>
+                    {/* <Menu.Label>Application</Menu.Label>
                     <Menu.Item icon={<IconSettings size={14} />}>Settings</Menu.Item>
+                    <Menu.Divider /> */}
                     {
                       role === USER_ROLE.OWNER
                         ? (
                           <>
-                            <Menu.Divider />
-                            <Menu.Label>Danger zone</Menu.Label>
+                            {/* <Menu.Label>Danger zone</Menu.Label> */}
                             <Menu.Item
                               color="red"
                               icon={<IconTrash size={14} />}
@@ -240,14 +240,13 @@ export default function Header({ role }: PropsType) {
                         )
                         : (
                           <>
-                            <Menu.Divider />
                             <Menu.Label>Danger zone</Menu.Label>
                             <Menu.Item
                               color="red"
                               icon={<IconLogout size={14} />}
                               onClick={handleMemberLeaveGroup}
                             >
-                              Out group
+                              Leave group
                             </Menu.Item>
                           </>
                         )

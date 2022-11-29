@@ -4,6 +4,7 @@ import {
 } from 'react-router-dom';
 import type { RouteObject } from 'react-router-dom';
 
+import UnauthorizedLayout from './layout/UnauthorizedLayout';
 import LoginPage from './pages/authentication/login';
 import Logout from './pages/authentication/logout';
 import RegisterPage from './pages/authentication/register';
@@ -25,7 +26,7 @@ type Props = RouteObject & {
   name: string;
 };
 
-export const ROUTES: Props[] = [
+export const AUTHORIZED_ROUTES: Props[] = [
   {
     index: true,
     name: 'Home',
@@ -80,25 +81,38 @@ const LayoutRoute = () => {
   );
 };
 
+const UNAUTHORIZED_ROUTES: Props[] = [
+  {
+    path: '/register',
+    name: 'Register',
+    element: <RegisterPage />,
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    element: <LoginPage />,
+  },
+  {
+    path: '/group/invite',
+    name: 'Invite',
+    element: <JoinGroup />,
+  },
+];
+
 const router = createBrowserRouter([
   {
     path: '/',
     element: <LayoutRoute />,
     errorElement: <NotFoundPage />,
-    children: ROUTES,
+    children: AUTHORIZED_ROUTES,
   },
-  {
-    path: '/register',
-    element: <RegisterPage />,
-  },
-  {
-    path: '/login',
-    element: <LoginPage />,
-  },
-  {
-    path: '/group/invite',
-    element: <JoinGroup />,
-  },
+  ...UNAUTHORIZED_ROUTES.map(({
+    path, name, element,
+  }) => ({
+    path,
+    name,
+    element: <UnauthorizedLayout>{element}</UnauthorizedLayout>,
+  })),
 ]);
 
 export default router;
