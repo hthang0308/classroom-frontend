@@ -109,10 +109,6 @@ module.exports = {
 			}
 		],
 		"unicorn/empty-brace-spaces": "off",
-		"unicorn/no-keyword-prefix": [
-			"error",
-			{ "disallowedPrefixes": ["new", "for"] }
-		],
 		"@typescript-eslint/explicit-module-boundary-types": "off",
 		"@typescript-eslint/init-declarations": "off",
 		"@typescript-eslint/no-confusing-void-expression": [

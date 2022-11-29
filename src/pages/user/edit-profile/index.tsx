@@ -4,7 +4,7 @@ import {
 import { useForm } from '@mantine/form';
 import { useEffect, useState } from 'react';
 
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import userApi from '@/api/user';
 import useUserInfo from '@/hooks/useUserInfo';
@@ -19,6 +19,7 @@ interface FormProps {
 export default function ProfileEditor() {
   const { userInfo: cookieUserInfo } = useUserInfo();
   const [email, setEmail] = useState(cookieUserInfo?.email || '');
+  const navigate = useNavigate();
   const avatarUrl = `https://avatars.dicebear.com/api/identicon/${email}.svg`;
 
   const form = useForm<FormProps>({
@@ -51,6 +52,8 @@ export default function ProfileEditor() {
       await userApi.updateMe(values.name, values.description);
 
       notificationManager.showSuccess('', 'Update user success');
+
+      navigate('/user/profile');
     } catch (error) {
       if (isAxiosError<ErrorResponse>(error)) {
         notificationManager.showFail('', error.response?.data.message);
