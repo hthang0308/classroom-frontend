@@ -16,7 +16,9 @@ import { useForm } from '@mantine/form';
 import config from 'config';
 import Cookies from 'js-cookie';
 import { useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import {
+  Link, useNavigate, useSearchParams,
+} from 'react-router-dom';
 
 import GoogleButton from '../common/googleButton';
 
@@ -33,6 +35,8 @@ interface FormProps {
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
 
   useEffect(() => {
     if (Cookies.get(AUTH_COOKIE)) {
@@ -53,7 +57,12 @@ const LoginPage = () => {
       const { data: response } = await authApi.signIn(values.email, values.password);
 
       notificationManager.showSuccess('', response.message);
-      navigate('/');
+
+      if (token) {
+        navigate(`/group/invite?token=${token}`);
+      } else {
+        navigate('/');
+      }
     } catch (error) {
       if (isAxiosError<ErrorResponse>(error)) {
         notificationManager.showFail('', error.response?.data.message);

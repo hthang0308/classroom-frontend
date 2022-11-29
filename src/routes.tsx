@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import {
   createBrowserRouter, Outlet, useNavigate,
 } from 'react-router-dom';
@@ -9,6 +9,7 @@ import Logout from './pages/authentication/logout';
 import RegisterPage from './pages/authentication/register';
 import NotFoundPage from './pages/errorPage/notFound';
 import GroupDetail from './pages/groups/groupDetail';
+import JoinGroup from './pages/groups/joinGroup';
 import GroupsPage from './pages/groups/list';
 import Home from './pages/home';
 import ChangePasswordForm from './pages/user/change-password';
@@ -93,6 +94,10 @@ const router = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />,
+  },
+  {
+    path: '/group/invite',
+    element: <JoinGroup />,
   },
 ]);
 
