@@ -40,6 +40,7 @@ export function sortMemberListByRole(data: UsersInfoAndRole[]) {
 
 export function getUserId() {
   const userString = Cookies.get(USER_COOKIE);
+
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const user: UserGetFromCookie = JSON.parse(userString || '');
 

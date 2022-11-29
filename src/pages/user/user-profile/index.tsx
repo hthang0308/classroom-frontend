@@ -92,7 +92,7 @@ function TrueUserProfile(info: UserInfo) {
             <Button w={160}>Edit Profile</Button>
           </Link>
           <Link to="/logout">
-            <Button w={160} color="gray">Logout</Button>
+            <Button w={160} color="grape">Logout</Button>
           </Link>
         </Flex>
       </Stack>

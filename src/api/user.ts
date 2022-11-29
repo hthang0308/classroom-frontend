@@ -22,6 +22,9 @@ const userApi = {
   getMe: () => (
     axiosClient.get<SuccessResponse>('/user/me')
   ),
+  updateMe: (name: string, description: string) => (
+    axiosClient.put<SuccessResponse>('/user/me', { name, description })
+  ),
 };
 
 export default userApi;
