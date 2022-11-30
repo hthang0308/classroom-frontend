@@ -38,8 +38,9 @@ export default function ChangePasswordForm() {
     const checkUser = async () => {
       const { data: resp } = await userApi.getMe();
 
-      if (resp.data.isEmailVerified) {
+      if (resp.data.isLoggedInWithGoogle) {
         navigate('/user/profile');
+        notificationManager.showFail('', 'User logged in with Google account cannot change their password');
       }
     };
 
