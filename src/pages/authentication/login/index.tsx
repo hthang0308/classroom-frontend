@@ -61,6 +61,9 @@ const LoginPage = () => {
       if (token) {
         navigate(`/group/invite?token=${token}`);
       } else {
+        Cookies.set('token', response.data.token);
+        Cookies.set('user', JSON.stringify(response.data.user));
+
         navigate('/');
       }
     } catch (error) {
