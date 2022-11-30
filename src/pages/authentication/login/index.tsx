@@ -37,6 +37,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
+  const initEmail = searchParams.get('email');
 
   useEffect(() => {
     if (Cookies.get(AUTH_COOKIE)) {
@@ -46,7 +47,7 @@ const LoginPage = () => {
 
   const form = useForm({
     initialValues: {
-      email: '',
+      email: initEmail || '',
       password: '',
       rememberMe: false,
     },
@@ -76,6 +77,12 @@ const LoginPage = () => {
   const handleGoogleLogin = async () => {
     window.open(`${config.backendUrl}/auth/google`, '_self');
   };
+
+  useEffect(() => {
+    if (initEmail) {
+      notificationManager.showSuccess('', 'Xác thực email thành công. Vui lòng đăng nhập để tiếp tục');
+    }
+  }, []);
 
   return (
     <Container size={420} my={40}>
