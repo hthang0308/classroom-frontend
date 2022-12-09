@@ -57,9 +57,14 @@ const NavLinks = () => {
   const { classes } = useStyles();
 
   return (
-    <Link to="/groups" className={classes.link}>
-      Groups
-    </Link>
+    <>
+      <Link to="/groups" className={classes.link}>
+        Groups
+      </Link>
+      <Link to="/presentations" className={classes.link}>
+        Presentations
+      </Link>
+    </>
   );
 };
 
