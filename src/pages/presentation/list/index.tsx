@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 
 import PresentationListHeader from './header';
 
-const FAKE_DATA = [
+export const FAKE_DATA = [
   {
     id: '1',
     name: 'Presentation 01',
@@ -49,7 +49,7 @@ const FAKE_DATA = [
   },
 ];
 
-interface PresentationType {
+export interface PresentationType {
   id: string
   name: string
   owner: string
@@ -75,7 +75,7 @@ export default function PresentationList() {
       sortable: true,
       width: 400,
       render: (record: PresentationType) => (
-        <Text component={Link} to={`/presentation/${record.id}`}>{record.name}</Text>
+        <Text component={Link} to={`/presentation/${record.id}/1/edit`}>{record.name}</Text>
       ),
     },
     {
@@ -97,14 +97,20 @@ export default function PresentationList() {
       accessor: 'action',
       title: '',
       width: 50,
-      render: (_: PresentationType) => (
+      render: (record: PresentationType) => (
         <Group position="center">
           <Menu shadow="sm" width={100}>
             <Menu.Target>
               <ActionIcon><IconDots /></ActionIcon>
             </Menu.Target>
             <Menu.Dropdown>
-              <Menu.Item icon={<IconEdit size={18} />}>Edit</Menu.Item>
+              <Menu.Item
+                component={Link}
+                to={`/presentation/${record.id}/1/edit`}
+                icon={<IconEdit size={18} />}
+              >
+                Edit
+              </Menu.Item>
               <Menu.Item icon={<IconPresentation size={18} />}>Present</Menu.Item>
               <Menu.Divider />
               <Menu.Item color="red" icon={<IconTrash size={18} />}>Delete</Menu.Item>
