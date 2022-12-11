@@ -23,7 +23,7 @@ import ProfileEditor from './pages/user/edit-profile';
 import { APP_LOGOUT_EVENT } from './utils/constants';
 
 import Layout from '@/layout/Layout';
-import ActivePresentation from '@/pages/presentation/active';
+// import ActivePresentation from '@/pages/presentation/active';
 import UserProfile from '@/pages/user/user-profile';
 
 type Props = RouteObject & {
@@ -77,11 +77,11 @@ export const AUTHORIZED_ROUTES: Props[] = [
     name: 'Presentation',
     element: <EditPresentation />,
   },
-  {
-    path: '/presentation/active/:presentationId',
-    name: 'Present',
-    element: <ActivePresentation />,
-  },
+  // {
+  //   path: '/presentation/active/:presentationId',
+  //   name: 'Present',
+  //   element: <ActivePresentation />,
+  // },
 ];
 
 const LayoutRoute = () => {
