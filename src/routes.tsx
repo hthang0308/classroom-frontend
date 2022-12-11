@@ -14,6 +14,8 @@ import GroupDetail from './pages/groups/groupDetail';
 import JoinGroup from './pages/groups/joinGroup';
 import GroupsPage from './pages/groups/list';
 import Home from './pages/home';
+import EditPresentation from './pages/presentation/editPresentation';
+import PresentationList from './pages/presentation/list';
 import ChangePasswordForm from './pages/user/change-password';
 
 import ProfileEditor from './pages/user/edit-profile';
@@ -64,6 +66,16 @@ export const AUTHORIZED_ROUTES: Props[] = [
     path: '/group/:groupId',
     name: 'Group',
     element: <GroupDetail />,
+  },
+  {
+    path: '/presentations',
+    name: 'Presentations',
+    element: <PresentationList />,
+  },
+  {
+    path: '/presentation/:presentationId/:slideId/edit',
+    name: 'Presentation',
+    element: <EditPresentation />,
   },
   {
     path: '/presentation/active/:presentationId',
