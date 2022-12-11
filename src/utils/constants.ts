@@ -18,9 +18,9 @@ export const GROUP_FILTER_TYPE: Record<string, string> = {
 };
 
 export const SLIDE_TYPE: Record<string, string> = {
-  MULTIPLE_CHOICE: 'Multiple Choice',
-  HEADING: 'Heading',
-  PARAGRAPH: 'paragraph',
+  MULTIPLE_CHOICE: 'MULTIPLE_CHOICE',
+  HEADING: 'HEADING',
+  PARAGRAPH: 'PARAGRAPH',
 };
 
 export const CHART_TYPE: Record<string, string> = {

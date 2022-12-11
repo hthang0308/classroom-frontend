@@ -8,12 +8,19 @@ export interface User {
 
 export interface Option {
   value: string;
+  quantity?: number
+}
+
+export interface MultipleChoiceDataType {
+  question: string
+  options: Option[]
 }
 
 export interface Slide {
   _id: string;
   title: string;
   slideType: string;
+  answer: string[];
   presentationId: string;
   userCreated: User;
   userUpdated: string;
@@ -21,14 +28,21 @@ export interface Slide {
   createdAt: Date;
   updatedAt: Date;
   __v: number;
-  answer: string;
+}
+
+export interface CompactSlide {
+  _id: string;
+  title: string;
+  slideType: string;
+  options: Option[];
+  answer: string[];
 }
 
 export interface Presentation {
   name: string;
   description: string;
   collaborators: User[];
-  slides: Slide[];
+  slides: CompactSlide[];
   userCreated: string;
   _id: string;
   createdAt: Date;
@@ -40,7 +54,7 @@ export interface PresentationWithUserCreated {
   name: string;
   description: string;
   collaborators: User[];
-  slides: Slide[];
+  slides: CompactSlide[];
   userCreated: User;
   _id: string;
   createdAt: Date;
@@ -60,6 +74,15 @@ const presentationApi = {
   ),
   getMyPresentations: () => (
     axiosClient.get<ResponseType<PresentationWithUserCreated[]>>('/presentation/my-presentation')
+  ),
+  getPresentationById: (id: string | undefined) => (
+    axiosClient.get<ResponseType<PresentationWithUserCreated>>(`/presentation/${id}`)
+  ),
+  updateMultipleChoiceSlide: (id: string | undefined, data: MultipleChoiceDataType) => (
+    axiosClient.put<ResponseType<Slide>>(`/slide/${id}`, {
+      title: data.question,
+      options: data.options,
+    })
   ),
 };
 

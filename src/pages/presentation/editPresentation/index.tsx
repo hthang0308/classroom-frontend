@@ -2,61 +2,40 @@ import {
   Container, Group, Box, Button, Breadcrumbs, Anchor, Grid, Tooltip, SegmentedControl,
   Select, TextInput, Divider, Center, Text, createStyles, ActionIcon, Stack,
 } from '@mantine/core';
-import { useForm } from '@mantine/form';
+import { useForm, UseFormReturnType } from '@mantine/form';
 import {
   IconPlus, IconGripVertical, IconX, IconDeviceFloppy, IconPresentationAnalytics,
   IconChartBar, IconChartDonut, IconChartPie, IconGrain,
 } from '@tabler/icons';
-import { useState, useEffect } from 'react';
+import {
+  useState, useEffect, useCallback,
+} from 'react';
 import { DragDropContext, Draggable } from 'react-beautiful-dnd';
 import { useParams, Link } from 'react-router-dom';
 
-import { FAKE_DATA, PresentationType } from '../list';
 import MultipleChoiceSlideTemplate from '../slideTemplate/multipleChoice';
 
+import presentationApi, {
+  PresentationWithUserCreated as PresentationType,
+  CompactSlide as SlideType,
+} from '@/api/presentation';
+import * as notificationManager from '@/pages/common/notificationManager';
 import StrictModeDroppable from '@/pages/common/strictModeDroppable';
-
+import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 import { SLIDE_TYPE, CHART_TYPE } from '@/utils/constants';
 
-// const FAKE_SLIDES_DATA = [
-//   {
-//     id: '1',
-//     type: 'mutilple choice',
-//     question: 'Question 01',
-//     options: [
-//       'Chocolate',
-//       'Cupcake',
-//       'Candy',
-//     ],
-//   },
-//   {
-//     id: '2',
-//     type: 'mutilple choice',
-//     question: 'Question 02',
-//     options: [
-//       'Chocolate',
-//       'Cupcake',
-//       'Candy',
-//     ],
-//   },
-//   {
-//     id: '3',
-//     type: 'mutilple choice',
-//     question: 'Question 03',
-//     options: [
-//       'Chocolate',
-//       'Cupcake',
-//       'Candy',
-//     ],
-//   },
-// ];
+interface FormProps {
+  question: string
+  options: {
+    value: string
+    quantity: number
+  }[]
+}
 
-// interface Slide {
-//   id: string
-//   type: string
-//   question: string
-//   options: string[]
-// }
+interface Props {
+  slideInfo: SlideType | undefined
+  form: UseFormReturnType<FormProps>
+}
 
 const useStyles = createStyles((theme) => ({
   inputLabel: {
@@ -67,19 +46,31 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-const SlideContentSetting = ({ slideType }: { slideType: string | null }) => {
+const MultipleChoiceSlideContentSetting = ({ slideInfo, form }: Props) => {
   const { classes } = useStyles();
   const [chartType, setChartType] = useState<string>(CHART_TYPE.BARS_CHART);
 
-  const form = useForm({
-    initialValues: {
-      question: '',
-      options: ['', '', ''],
-    },
-  });
+  useEffect(() => {
+    if (slideInfo?.title) {
+      form.setFieldValue('question', slideInfo?.title !== 'New Slide' ? slideInfo?.title : '');
+    }
+
+    if (slideInfo && slideInfo?.options.length !== 0) {
+      form.setFieldValue('options', slideInfo.options.map((i) => ({
+        ...i,
+        quantity: i.quantity || 0,
+      })));
+    } else {
+      form.setFieldValue('options', [{ value: '', quantity: 0 }]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slideInfo]);
 
   const handleAddOption = () => {
-    form.insertListItem('options', '');
+    form.insertListItem('options', {
+      value: '',
+      quantity: 0,
+    });
   };
 
   const handleRemoveOption = (index: number) => {
@@ -125,10 +116,8 @@ const SlideContentSetting = ({ slideType }: { slideType: string | null }) => {
     },
   ];
 
-  console.log(slideType);
-
   const fields = form.values.options.map((_, index) => (
-    <Draggable key={index.toString()} index={index} draggableId={index.toString()}>
+    <Draggable key={index} index={index} draggableId={index.toString()}>
       {(provided) => (
         <Group ref={provided.innerRef} mt="xs" {...provided.draggableProps} spacing="xs">
           <Center {...provided.dragHandleProps}>
@@ -137,7 +126,7 @@ const SlideContentSetting = ({ slideType }: { slideType: string | null }) => {
           <TextInput
             placeholder={`Option ${index + 1}`}
             styles={() => ({ root: { flexGrow: 2 } })}
-            {...form.getInputProps(`options.${index}`)}
+            {...form.getInputProps(`options.${index}.value`)}
           />
           <Tooltip label="Remove">
             <ActionIcon onClick={() => handleRemoveOption(index)}><IconX /></ActionIcon>
@@ -197,15 +186,42 @@ const SlideContentSetting = ({ slideType }: { slideType: string | null }) => {
 
 export default function EditPresentation() {
   const [presentationData, setPresentationData] = useState<PresentationType>();
-  const [slideType, setSlideType] = useState<string | null>(SLIDE_TYPE.MULTIPLE_CHOICE);
-  const { presentationId } = useParams();
+  const [slideData, setSlideData] = useState<SlideType>();
+  const [slideType, setSlideType] = useState<string | null>(null);
+  const { presentationId, slideId } = useParams();
   const { classes } = useStyles();
 
-  useEffect(() => {
-    const data = FAKE_DATA.find((i) => i.id === presentationId);
+  const form = useForm<FormProps>({
+    initialValues: {
+      question: '',
+      options: [
+        {
+          value: '',
+          quantity: 0,
+        },
+      ],
+    },
+  });
 
-    setPresentationData(data);
-  }, [presentationId]);
+  const fetchData = useCallback(async () => {
+    try {
+      const { data: response } = await presentationApi.getPresentationById(presentationId);
+
+      const currentSlideData = response.data.slides.find((i) => i._id === slideId);
+
+      setPresentationData(response.data);
+      setSlideData(currentSlideData);
+      setSlideType(currentSlideData?.slideType || null);
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
+  }, [presentationId, slideId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const breadcrumbsItems = [
     { title: 'My presentations', to: '/presentations' },
@@ -217,6 +233,22 @@ export default function EditPresentation() {
     // { value: SLIDE_TYPE.HEADING, label: 'Heading' },
     // { value: SLIDE_TYPE.PARAGRAPH, label: 'Paragraph' },
   ];
+
+  const handleSave = async () => {
+    try {
+      const { data: response } = await presentationApi.updateMultipleChoiceSlide(slideId, {
+        question: form.values.question,
+        options: form.values.options,
+      });
+
+      notificationManager.showSuccess('', response.message);
+      fetchData();
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
+  };
 
   return (
     <Container fluid>
@@ -232,7 +264,7 @@ export default function EditPresentation() {
           <Button leftIcon={<IconPlus />} variant="outline">
             <Text>New slide</Text>
           </Button>
-          <Button leftIcon={<IconDeviceFloppy />} variant="outline">
+          <Button leftIcon={<IconDeviceFloppy />} variant="outline" onClick={handleSave}>
             <Text>Save</Text>
           </Button>
           <Button leftIcon={<IconPresentationAnalytics />}>
@@ -256,7 +288,7 @@ export default function EditPresentation() {
             classNames={{ label: classes.inputLabel }}
           />
           <Divider my="md" />
-          <SlideContentSetting slideType={slideType} />
+          <MultipleChoiceSlideContentSetting slideInfo={slideData} form={form} />
         </Grid.Col>
       </Grid>
     </Container>
