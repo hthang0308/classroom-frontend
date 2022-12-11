@@ -9,11 +9,15 @@ import presentationApi from '@/api/presentation';
 import * as notificationManager from '@/pages/common/notificationManager';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 
+interface Props {
+  fetchData: () => void
+}
+
 interface FormProps {
   name: string
 }
 
-export default function PresentationListHeader() {
+export default function PresentationListHeader({ fetchData }: Props) {
   const [opened, setOpened] = useState(false);
 
   const form = useForm({ initialValues: { name: '' } });
@@ -33,6 +37,7 @@ export default function PresentationListHeader() {
 
       notificationManager.showSuccess('', response.message);
       handleCloseModal();
+      fetchData();
     } catch (error) {
       if (isAxiosError<ErrorResponse>(error)) {
         notificationManager.showFail('', error.response?.data.message);

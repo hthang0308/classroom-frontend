@@ -1,5 +1,5 @@
 import {
-  Container, Box, Text, ActionIcon, Group, Menu,
+  Container, Box, Text, ActionIcon, Group, Menu, Tooltip,
 } from '@mantine/core';
 import {
   IconDots, IconEdit, IconPresentation, IconTrash,
@@ -8,65 +8,45 @@ import sortBy from 'lodash.sortby';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import TimeAgo from 'react-timeago';
 
 import PresentationListHeader from './header';
 
-export const FAKE_DATA = [
-  {
-    id: '1',
-    name: 'Presentation 01',
-    owner: 'me',
-    modified: 'about 3 hours ago',
-    created: 'about 4 hours ago',
-  },
-  {
-    id: '2',
-    name: 'Presentation 02',
-    owner: 'me',
-    modified: 'about 4 hours ago',
-    created: 'about 5 hours ago',
-  },
-  {
-    id: '3',
-    name: 'Presentation 03',
-    owner: 'Nguyen Van A',
-    modified: 'about 1 hours ago',
-    created: 'about 2 hours ago',
-  },
-  {
-    id: '4',
-    name: 'Presentation 04',
-    owner: 'me',
-    modified: 'about 2 hours ago',
-    created: 'about 3 hours ago',
-  },
-  {
-    id: '5',
-    name: 'Presentation 05',
-    owner: 'me',
-    modified: 'about 5 hours ago',
-    created: 'about 6 hours ago',
-  },
-];
-
-export interface PresentationType {
-  id: string
-  name: string
-  owner: string
-  modified: string
-  created: string
-}
+import presentationApi, { PresentationWithUserCreated as PresentationType } from '@/api/presentation';
+import * as notificationManager from '@/pages/common/notificationManager';
+import { getUserId } from '@/utils';
+import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 
 export default function PresentationList() {
-  const [dataSource, setDataSource] = useState<PresentationType[]>(FAKE_DATA);
-  const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'modified', direction: 'asc' });
+  const [dataSource, setDataSource] = useState<PresentationType[]>([]);
+  const [sortedDataSource, setSortedDataSource] = useState<PresentationType[]>([]);
+  const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'updatedAt', direction: 'asc' });
+
+  const currentUserId = getUserId();
+
+  const fetchData = async () => {
+    try {
+      const { data: response } = await presentationApi.getMyPresentations();
+
+      setDataSource(response.data);
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
+  };
 
   useEffect(() => {
-    const data = sortBy(dataSource, sortStatus.columnAccessor) as PresentationType[];
+    fetchData();
+  }, []);
 
-    setDataSource(sortStatus.direction === 'desc' ? data.reverse() : data);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortStatus]);
+  useEffect(() => {
+    const data = sortStatus.columnAccessor === 'userCreated.name'
+      ? sortBy(dataSource, ['userCreated.name', 'name']) as PresentationType[]
+      : sortBy(dataSource, sortStatus.columnAccessor) as PresentationType[];
+
+    setSortedDataSource(sortStatus.direction === 'desc' ? data : data.reverse());
+  }, [sortStatus, dataSource]);
 
   const COLUMNS = [
     {
@@ -75,23 +55,40 @@ export default function PresentationList() {
       sortable: true,
       width: 400,
       render: (record: PresentationType) => (
-        <Text component={Link} to={`/presentation/${record.id}/1/edit`}>{record.name}</Text>
+        <Text component={Link} to={`/presentation/${record._id}/${record.slides[0]._id}/edit`}>{record.name}</Text>
       ),
     },
     {
-      accessor: 'owner',
+      accessor: 'userCreated.name',
       title: 'Owner',
       sortable: true,
+      render: (record: PresentationType) => (
+        currentUserId === record.userCreated._id ? <Text>me</Text> : <Text>{record.userCreated.name}</Text>
+      ),
     },
     {
-      accessor: 'modified',
+      accessor: 'updatedAt',
       title: 'Modified',
       sortable: true,
+      render: (record: PresentationType) => (
+        <Tooltip label={(new Date(record.updatedAt)).toLocaleString('en-US')}>
+          <Text>
+            <TimeAgo date={record.updatedAt} title="" />
+          </Text>
+        </Tooltip>
+      ),
     },
     {
-      accessor: 'created',
+      accessor: 'createdAt',
       title: 'Created',
       sortable: true,
+      render: (record: PresentationType) => (
+        <Tooltip label={(new Date(record.updatedAt)).toLocaleString('en-US')}>
+          <Text>
+            <TimeAgo date={record.createdAt} title="" />
+          </Text>
+        </Tooltip>
+      ),
     },
     {
       accessor: 'action',
@@ -106,7 +103,7 @@ export default function PresentationList() {
             <Menu.Dropdown>
               <Menu.Item
                 component={Link}
-                to={`/presentation/${record.id}/1/edit`}
+                to={`/presentation/${record._id}/${record.slides[0]._id}/edit`}
                 icon={<IconEdit size={18} />}
               >
                 Edit
@@ -123,11 +120,12 @@ export default function PresentationList() {
 
   return (
     <Container size="lg">
-      <PresentationListHeader />
+      <PresentationListHeader fetchData={fetchData} />
       <Box mt="xl">
         <DataTable
           columns={COLUMNS}
-          records={dataSource}
+          records={sortedDataSource}
+          idAccessor="_id"
           minHeight={dataSource.length > 0 ? 0 : 150}
           verticalSpacing="sm"
           noRecordsText="No presentations to show"

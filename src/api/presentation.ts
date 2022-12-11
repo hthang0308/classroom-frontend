@@ -36,15 +36,30 @@ export interface Presentation {
   __v: number;
 }
 
-export interface CreatePresentationResponseType {
-  statusCode: number;
-  data: Presentation;
-  message: string;
+export interface PresentationWithUserCreated {
+  name: string;
+  description: string;
+  collaborators: User[];
+  slides: Slide[];
+  userCreated: User;
+  _id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  __v: number;
+}
+
+export interface ResponseType<T> {
+  statusCode: number
+  data: T
+  message: string
 }
 
 const presentationApi = {
   createPresentation: (name: string) => (
-    axiosClient.post<CreatePresentationResponseType>('/presentation', { name })
+    axiosClient.post<ResponseType<Presentation>>('/presentation', { name })
+  ),
+  getMyPresentations: () => (
+    axiosClient.get<ResponseType<PresentationWithUserCreated[]>>('/presentation/my-presentation')
   ),
 };
 
