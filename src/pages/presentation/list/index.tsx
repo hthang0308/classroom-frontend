@@ -1,8 +1,8 @@
 import {
-  Container, Box, Text, ActionIcon, Group, Menu, Tooltip,
+  Container, Box, Text, ActionIcon, Group, Menu, Tooltip, Modal, Button,
 } from '@mantine/core';
 import {
-  IconDots, IconEdit, IconPresentation, IconTrash,
+  IconEdit, IconPresentation, IconTrash, IconDots,
 } from '@tabler/icons';
 import sortBy from 'lodash.sortby';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
@@ -21,6 +21,8 @@ export default function PresentationList() {
   const [dataSource, setDataSource] = useState<PresentationType[]>([]);
   const [sortedDataSource, setSortedDataSource] = useState<PresentationType[]>([]);
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'updatedAt', direction: 'asc' });
+  const [selectedPresentation, setSelectedPresentation] = useState({ name: '', id: '' });
+  const [opened, setOpened] = useState(false);
 
   const currentUserId = getUserId();
 
@@ -47,6 +49,29 @@ export default function PresentationList() {
 
     setSortedDataSource(sortStatus.direction === 'desc' ? data : data.reverse());
   }, [sortStatus, dataSource]);
+
+  const handleDeletePresentation = async (presentationId: string) => {
+    try {
+      const { data: response } = await presentationApi.deletePresentation(presentationId);
+
+      notificationManager.showSuccess('', response.message);
+      setOpened(false);
+      fetchData();
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
+  }
+
+  const handleOpenModal = (presentationName: string, presentationId: string) => {
+    setOpened(true);
+    setSelectedPresentation({ name: presentationName, id: presentationId });
+  }
+
+  const handleCloseModal = () => {
+    setOpened(false);
+  }
 
   const COLUMNS = [
     {
@@ -93,7 +118,7 @@ export default function PresentationList() {
     {
       accessor: 'action',
       title: '',
-      width: 50,
+      width: 100,
       render: (record: PresentationType) => (
         <Group position="center">
           <Menu shadow="sm" width={100}>
@@ -110,7 +135,13 @@ export default function PresentationList() {
               </Menu.Item>
               <Menu.Item icon={<IconPresentation size={18} />}>Present</Menu.Item>
               <Menu.Divider />
-              <Menu.Item color="red" icon={<IconTrash size={18} />}>Delete</Menu.Item>
+              <Menu.Item
+                color="red"
+                icon={<IconTrash size={18} />}
+                onClick={() => handleOpenModal(record.name, record._id)}
+              >
+                Delete
+              </Menu.Item>
             </Menu.Dropdown>
           </Menu>
         </Group>
@@ -120,17 +151,26 @@ export default function PresentationList() {
 
   return (
     <Container size="lg">
+      <Modal
+        title={`Delete "${selectedPresentation.name}"?`}
+        opened={opened}
+        onClose={handleCloseModal}
+      >
+        <Group position="right" mt={16}>
+          <Button color="dark" variant="subtle" onClick={handleCloseModal}>Cancel</Button>
+          <Button color="red" onClick={() => handleDeletePresentation(selectedPresentation.id)}>Delete</Button>
+        </Group>
+      </Modal>
       <PresentationListHeader fetchData={fetchData} />
       <Box mt="xl">
         <DataTable
           columns={COLUMNS}
           records={sortedDataSource}
           idAccessor="_id"
-          minHeight={dataSource.length > 0 ? 0 : 150}
+          minHeight={400}
           verticalSpacing="sm"
           noRecordsText="No presentations to show"
           highlightOnHover
-          shadow="sm"
           sortStatus={sortStatus}
           onSortStatusChange={setSortStatus}
         />

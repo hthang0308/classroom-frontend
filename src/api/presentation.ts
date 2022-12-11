@@ -78,6 +78,9 @@ const presentationApi = {
   getPresentationById: (id: string | undefined) => (
     axiosClient.get<ResponseType<PresentationWithUserCreated>>(`/presentation/${id}`)
   ),
+  deletePresentation: (id: string | undefined) => (
+    axiosClient.delete<ResponseType<null>>(`/presentation/${id}`)
+  ),
   updateMultipleChoiceSlide: (id: string | undefined, data: MultipleChoiceDataType) => (
     axiosClient.put<ResponseType<Slide>>(`/slide/${id}`, {
       title: data.question,
