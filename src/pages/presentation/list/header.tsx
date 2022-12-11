@@ -5,6 +5,10 @@ import { useForm } from '@mantine/form';
 import { IconPlus } from '@tabler/icons';
 import { useState } from 'react';
 
+import presentationApi from '@/api/presentation';
+import * as notificationManager from '@/pages/common/notificationManager';
+import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
+
 interface FormProps {
   name: string
 }
@@ -23,8 +27,17 @@ export default function PresentationListHeader() {
     setOpened(false);
   };
 
-  const handleSubmitForm = (values: FormProps) => {
-    console.log(values);
+  const handleSubmitForm = async (values: FormProps) => {
+    try {
+      const { data: response } = await presentationApi.createPresentation(values.name);
+
+      notificationManager.showSuccess('', response.message);
+      handleCloseModal();
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
   };
 
   return (
