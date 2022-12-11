@@ -1,6 +1,6 @@
 import { Box, Group } from '@mantine/core';
 import { DataTable, DataTableColumn } from 'mantine-datatable';
-import {
+import React, {
   useState, useEffect, useCallback,
 } from 'react';
 import { useParams } from 'react-router-dom';

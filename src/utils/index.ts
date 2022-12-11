@@ -62,3 +62,7 @@ export function filterGroupByType(groups: Group[], type: string | null, userId: 
     }
   }
 }
+
+export function isValidUrl(value: string) {
+  return value.match(/https?:\/\/(www\.)?[\w#%+.:=@~-]{1,256}\.[\d()A-Za-z]{1,6}\b([\w#%&()+./:=?@~-]*)/);
+}

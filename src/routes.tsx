@@ -21,6 +21,7 @@ import ProfileEditor from './pages/user/edit-profile';
 import { APP_LOGOUT_EVENT } from './utils/constants';
 
 import Layout from '@/layout/Layout';
+import ActivePresentation from '@/pages/presentation/active';
 import UserProfile from '@/pages/user/user-profile';
 
 type Props = RouteObject & {
@@ -63,6 +64,11 @@ export const AUTHORIZED_ROUTES: Props[] = [
     path: '/group/:groupId',
     name: 'Group',
     element: <GroupDetail />,
+  },
+  {
+    path: '/presentation/active/:presentationId',
+    name: 'Present',
+    element: <ActivePresentation />,
   },
 ];
 
