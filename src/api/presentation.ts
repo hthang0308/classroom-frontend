@@ -22,7 +22,7 @@ export interface Slide {
   slideType: string;
   answer: string[];
   presentationId: string;
-  userCreated: User;
+  userCreated: string;
   userUpdated: string;
   options: Option[];
   createdAt: Date;
@@ -86,6 +86,9 @@ const presentationApi = {
       title: data.question,
       options: data.options,
     })
+  ),
+  createSlide: (presentationId: string | undefined) => (
+    axiosClient.post<ResponseType<Slide>>('/slide', { presentationId })
   ),
 };
 

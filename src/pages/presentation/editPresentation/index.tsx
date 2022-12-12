@@ -249,11 +249,24 @@ export default function EditPresentation() {
     // { value: SLIDE_TYPE.PARAGRAPH, label: 'Paragraph' },
   ];
 
+  const handleCreateNewSlide = async () => {
+    try {
+      const { data: response } = await presentationApi.createSlide(presentationId);
+
+      notificationManager.showSuccess('', response.message);
+      fetchData();
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
+  };
+
   const handleSave = async () => {
     try {
       const { data: response } = await presentationApi.updateMultipleChoiceSlide(slideId, {
         question: form.values.question,
-        options: form.values.options,
+        options: form.values.options.filter((i) => i.value),
       });
 
       notificationManager.showSuccess('', response.message);
@@ -276,7 +289,7 @@ export default function EditPresentation() {
           ))}
         </Breadcrumbs>
         <Group spacing="xs">
-          <Button leftIcon={<IconPlus />} variant="outline">
+          <Button leftIcon={<IconPlus />} variant="outline" onClick={handleCreateNewSlide}>
             <Text>New slide</Text>
           </Button>
           <Button leftIcon={<IconDeviceFloppy />} variant="outline" onClick={handleSave}>
