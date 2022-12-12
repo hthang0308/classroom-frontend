@@ -1,6 +1,6 @@
 import {
   Container, Group, Box, Button, Breadcrumbs, Anchor, Grid, Tooltip, SegmentedControl,
-  Select, TextInput, Divider, Center, Text, createStyles, ActionIcon, Stack,
+  Select, TextInput, Divider, Center, Text, createStyles, ActionIcon, Stack, NavLink,
 } from '@mantine/core';
 import { useForm, UseFormReturnType } from '@mantine/form';
 import {
@@ -16,8 +16,8 @@ import { useParams, Link } from 'react-router-dom';
 import MultipleChoiceSlideTemplate from '../slideTemplate/multipleChoice';
 
 import presentationApi, {
-  PresentationWithUserCreated as PresentationType,
-  CompactSlide as SlideType,
+  PresentationWithUserCreated as Presentation,
+  CompactSlide as Slide,
 } from '@/api/presentation';
 import * as notificationManager from '@/pages/common/notificationManager';
 import StrictModeDroppable from '@/pages/common/strictModeDroppable';
@@ -33,8 +33,15 @@ interface FormProps {
 }
 
 interface Props {
-  slideInfo: SlideType | undefined
+  slideInfo: Slide | undefined
   form: UseFormReturnType<FormProps>
+}
+
+interface SlideInfo {
+  id: string
+  label: string
+  description: string
+  url: string
 }
 
 const useStyles = createStyles((theme) => ({
@@ -185,9 +192,10 @@ const MultipleChoiceSlideContentSetting = ({ slideInfo, form }: Props) => {
 };
 
 export default function EditPresentation() {
-  const [presentationData, setPresentationData] = useState<PresentationType>();
-  const [slideData, setSlideData] = useState<SlideType>();
+  const [presentationData, setPresentationData] = useState<Presentation>();
+  const [slideData, setSlideData] = useState<Slide>();
   const [slideType, setSlideType] = useState<string | null>(null);
+  const [slideList, setSlideList] = useState<SlideInfo[]>([]);
   const { presentationId, slideId } = useParams();
   const { classes } = useStyles();
 
@@ -208,10 +216,17 @@ export default function EditPresentation() {
       const { data: response } = await presentationApi.getPresentationById(presentationId);
 
       const currentSlideData = response.data.slides.find((i) => i._id === slideId);
+      const slideListData = response.data.slides.map((i, index) => ({
+        id: i._id,
+        label: `Slide ${index + 1}`,
+        description: i.title,
+        url: `/presentation/${presentationId}/${i._id}/edit`,
+      }));
 
       setPresentationData(response.data);
       setSlideData(currentSlideData);
       setSlideType(currentSlideData?.slideType || null);
+      setSlideList(slideListData);
     } catch (error) {
       if (isAxiosError<ErrorResponse>(error)) {
         notificationManager.showFail('', error.response?.data.message);
@@ -273,10 +288,20 @@ export default function EditPresentation() {
         </Group>
       </Group>
       <Grid my="md" gutter="md">
-        <Grid.Col span={1}>
-          Slides preview
+        <Grid.Col span={2}>
+          {slideList.map((i) => (
+            <NavLink
+              key={i.id}
+              label={i.label}
+              description={i.description}
+              active={i.id === slideId}
+              variant="filled"
+              component={Link}
+              to={i.id === slideId ? '#' : i.url}
+            />
+          ))}
         </Grid.Col>
-        <Grid.Col span={8}>
+        <Grid.Col span={7}>
           <MultipleChoiceSlideTemplate />
         </Grid.Col>
         <Grid.Col span={3} p={16}>
