@@ -23,11 +23,13 @@ export default function PresentationList() {
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'updatedAt', direction: 'asc' });
   const [selectedPresentation, setSelectedPresentation] = useState({ name: '', id: '' });
   const [opened, setOpened] = useState(false);
+  const [isLoading, setLoading] = useState(false);
 
   const currentUserId = getUserId();
 
   const fetchData = async () => {
     try {
+      setLoading(true);
       const { data: response } = await presentationApi.getMyPresentations();
 
       setDataSource(response.data);
@@ -36,6 +38,8 @@ export default function PresentationList() {
         notificationManager.showFail('', error.response?.data.message);
       }
     }
+
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -62,16 +66,16 @@ export default function PresentationList() {
         notificationManager.showFail('', error.response?.data.message);
       }
     }
-  }
+  };
 
   const handleOpenModal = (presentationName: string, presentationId: string) => {
     setOpened(true);
     setSelectedPresentation({ name: presentationName, id: presentationId });
-  }
+  };
 
   const handleCloseModal = () => {
     setOpened(false);
-  }
+  };
 
   const COLUMNS = [
     {
@@ -173,6 +177,7 @@ export default function PresentationList() {
           highlightOnHover
           sortStatus={sortStatus}
           onSortStatusChange={setSortStatus}
+          fetching={isLoading}
         />
       </Box>
     </Container>
