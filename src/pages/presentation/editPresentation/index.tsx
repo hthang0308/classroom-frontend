@@ -1,23 +1,25 @@
 import {
   Container, Group, Box, Button, Breadcrumbs, Anchor, Grid, Tooltip, SegmentedControl,
-  Select, TextInput, Divider, Center, Text, createStyles, ActionIcon, Stack,
+  Select, TextInput, Divider, Center, Text, createStyles, ActionIcon, Stack, NavLink,
 } from '@mantine/core';
 import { useForm, UseFormReturnType } from '@mantine/form';
 import {
   IconPlus, IconGripVertical, IconX, IconDeviceFloppy, IconPresentationAnalytics,
-  IconChartBar, IconChartDonut, IconChartPie, IconGrain,
+  IconChartBar, IconChartDonut, IconChartPie, IconGrain, IconTrash,
 } from '@tabler/icons';
 import {
   useState, useEffect, useCallback,
 } from 'react';
 import { DragDropContext, Draggable } from 'react-beautiful-dnd';
-import { useParams, Link } from 'react-router-dom';
+import {
+  useParams, Link, useNavigate,
+} from 'react-router-dom';
 
 import MultipleChoiceSlideTemplate from '../slideTemplate/multipleChoice';
 
 import presentationApi, {
-  PresentationWithUserCreated as PresentationType,
-  CompactSlide as SlideType,
+  PresentationWithUserCreated as Presentation,
+  CompactSlide as Slide,
 } from '@/api/presentation';
 import * as notificationManager from '@/pages/common/notificationManager';
 import StrictModeDroppable from '@/pages/common/strictModeDroppable';
@@ -33,8 +35,15 @@ interface FormProps {
 }
 
 interface Props {
-  slideInfo: SlideType | undefined
+  slideInfo: Slide | undefined
   form: UseFormReturnType<FormProps>
+}
+
+interface SlideInfo {
+  id: string
+  label: string
+  description: string
+  url: string
 }
 
 const useStyles = createStyles((theme) => ({
@@ -185,11 +194,13 @@ const MultipleChoiceSlideContentSetting = ({ slideInfo, form }: Props) => {
 };
 
 export default function EditPresentation() {
-  const [presentationData, setPresentationData] = useState<PresentationType>();
-  const [slideData, setSlideData] = useState<SlideType>();
+  const [presentationData, setPresentationData] = useState<Presentation>();
+  const [slideData, setSlideData] = useState<Slide>();
   const [slideType, setSlideType] = useState<string | null>(null);
+  const [slideList, setSlideList] = useState<SlideInfo[]>([]);
   const { presentationId, slideId } = useParams();
   const { classes } = useStyles();
+  const navigate = useNavigate();
 
   const form = useForm<FormProps>({
     initialValues: {
@@ -208,10 +219,17 @@ export default function EditPresentation() {
       const { data: response } = await presentationApi.getPresentationById(presentationId);
 
       const currentSlideData = response.data.slides.find((i) => i._id === slideId);
+      const slideListData = response.data.slides.map((i, index) => ({
+        id: i._id,
+        label: `Slide ${index + 1}`,
+        description: i.title,
+        url: `/presentation/${presentationId}/${i._id}/edit`,
+      }));
 
       setPresentationData(response.data);
       setSlideData(currentSlideData);
       setSlideType(currentSlideData?.slideType || null);
+      setSlideList(slideListData);
     } catch (error) {
       if (isAxiosError<ErrorResponse>(error)) {
         notificationManager.showFail('', error.response?.data.message);
@@ -234,14 +252,42 @@ export default function EditPresentation() {
     // { value: SLIDE_TYPE.PARAGRAPH, label: 'Paragraph' },
   ];
 
+  const handleCreateNewSlide = async () => {
+    try {
+      const { data: response } = await presentationApi.createSlide(presentationId);
+
+      notificationManager.showSuccess('', response.message);
+      fetchData();
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
+  };
+
   const handleSave = async () => {
     try {
       const { data: response } = await presentationApi.updateMultipleChoiceSlide(slideId, {
         question: form.values.question,
-        options: form.values.options,
+        options: form.values.options.filter((i) => i.value),
       });
 
       notificationManager.showSuccess('', response.message);
+      fetchData();
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
+  };
+
+  const handleDeleteSlide = async () => {
+    try {
+      const { data: response } = await presentationApi.deleteSlide(slideId);
+      const randomSlide = slideList.find((i) => i.id !== slideId);
+
+      notificationManager.showSuccess('', response.message);
+      navigate(`/presentation/${presentationId}/${randomSlide?.id}/edit`);
       fetchData();
     } catch (error) {
       if (isAxiosError<ErrorResponse>(error)) {
@@ -261,7 +307,7 @@ export default function EditPresentation() {
           ))}
         </Breadcrumbs>
         <Group spacing="xs">
-          <Button leftIcon={<IconPlus />} variant="outline">
+          <Button leftIcon={<IconPlus />} variant="outline" onClick={handleCreateNewSlide}>
             <Text>New slide</Text>
           </Button>
           <Button leftIcon={<IconDeviceFloppy />} variant="outline" onClick={handleSave}>
@@ -273,10 +319,20 @@ export default function EditPresentation() {
         </Group>
       </Group>
       <Grid my="md" gutter="md">
-        <Grid.Col span={1}>
-          Slides preview
+        <Grid.Col span={2}>
+          {slideList.map((i) => (
+            <NavLink
+              key={i.id}
+              label={i.label}
+              description={i.description}
+              active={i.id === slideId}
+              variant="filled"
+              component={Link}
+              to={i.id === slideId ? '#' : i.url}
+            />
+          ))}
         </Grid.Col>
-        <Grid.Col span={8}>
+        <Grid.Col span={7}>
           <MultipleChoiceSlideTemplate />
         </Grid.Col>
         <Grid.Col span={3} p={16}>
@@ -289,6 +345,16 @@ export default function EditPresentation() {
           />
           <Divider my="md" />
           <MultipleChoiceSlideContentSetting slideInfo={slideData} form={form} />
+          <Group position="center" mt="xl">
+            <Button
+              color="red"
+              leftIcon={<IconTrash />}
+              onClick={handleDeleteSlide}
+              disabled={slideList.length === 1}
+            >
+              Delete slide
+            </Button>
+          </Group>
         </Grid.Col>
       </Grid>
     </Container>
