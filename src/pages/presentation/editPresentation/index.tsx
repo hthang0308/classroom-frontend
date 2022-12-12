@@ -5,13 +5,15 @@ import {
 import { useForm, UseFormReturnType } from '@mantine/form';
 import {
   IconPlus, IconGripVertical, IconX, IconDeviceFloppy, IconPresentationAnalytics,
-  IconChartBar, IconChartDonut, IconChartPie, IconGrain,
+  IconChartBar, IconChartDonut, IconChartPie, IconGrain, IconTrash,
 } from '@tabler/icons';
 import {
   useState, useEffect, useCallback,
 } from 'react';
 import { DragDropContext, Draggable } from 'react-beautiful-dnd';
-import { useParams, Link } from 'react-router-dom';
+import {
+  useParams, Link, useNavigate,
+} from 'react-router-dom';
 
 import MultipleChoiceSlideTemplate from '../slideTemplate/multipleChoice';
 
@@ -198,6 +200,7 @@ export default function EditPresentation() {
   const [slideList, setSlideList] = useState<SlideInfo[]>([]);
   const { presentationId, slideId } = useParams();
   const { classes } = useStyles();
+  const navigate = useNavigate();
 
   const form = useForm<FormProps>({
     initialValues: {
@@ -278,6 +281,21 @@ export default function EditPresentation() {
     }
   };
 
+  const handleDeleteSlide = async () => {
+    try {
+      const { data: response } = await presentationApi.deleteSlide(slideId);
+      const randomSlide = slideList.find((i) => i.id !== slideId);
+
+      notificationManager.showSuccess('', response.message);
+      navigate(`/presentation/${presentationId}/${randomSlide?.id}/edit`);
+      fetchData();
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
+  };
+
   return (
     <Container fluid>
       <Group position="apart">
@@ -327,6 +345,16 @@ export default function EditPresentation() {
           />
           <Divider my="md" />
           <MultipleChoiceSlideContentSetting slideInfo={slideData} form={form} />
+          <Group position="center" mt="xl">
+            <Button
+              color="red"
+              leftIcon={<IconTrash />}
+              onClick={handleDeleteSlide}
+              disabled={slideList.length === 1}
+            >
+              Delete slide
+            </Button>
+          </Group>
         </Grid.Col>
       </Grid>
     </Container>

@@ -90,6 +90,9 @@ const presentationApi = {
   createSlide: (presentationId: string | undefined) => (
     axiosClient.post<ResponseType<Slide>>('/slide', { presentationId })
   ),
+  deleteSlide: (id: string | undefined) => (
+    axiosClient.delete<ResponseType<null>>(`/slide/${id}`)
+  ),
 };
 
 export default presentationApi;
