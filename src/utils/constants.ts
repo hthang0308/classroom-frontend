@@ -22,10 +22,3 @@ export enum SlideType {
   Heading = 'Heading',
   Paragraph = 'Paragraph',
 }
-
-export const CHART_TYPE: Record<string, string> = {
-  BARS_CHART: 'Bars chart',
-  DONUT_CHART: 'Donut chart',
-  PIE_CHART: 'Pie chart',
-  DOTS_CHART: 'Dots chart',
-};
