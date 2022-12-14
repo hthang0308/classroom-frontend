@@ -304,7 +304,10 @@ export default function EditPresentation() {
               : (
                 <Grid>
                   <Grid.Col span={8}>
-                    <MultipleChoiceSlideTemplate />
+                    <MultipleChoiceSlideTemplate
+                      question={slideData?.title}
+                      options={slideData?.options}
+                    />
                   </Grid.Col>
                   <Grid.Col span={4} p={16}>
                     <Select
