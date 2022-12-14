@@ -1,11 +1,10 @@
 import {
-  Container, Group, Box, Button, Breadcrumbs, Anchor, Grid, Tooltip, SegmentedControl, Loader,
-  Select, TextInput, Divider, Center, Text, createStyles, ActionIcon, Stack, NavLink,
+  Container, Group, Box, Button, Breadcrumbs, Anchor, Grid, Tooltip, Loader,
+  Select, TextInput, Divider, Center, Text, createStyles, ActionIcon, NavLink,
 } from '@mantine/core';
 import { useForm, UseFormReturnType } from '@mantine/form';
 import {
-  IconPlus, IconGripVertical, IconX, IconDeviceFloppy, IconPresentationAnalytics,
-  IconChartBar, IconChartDonut, IconChartPie, IconGrain, IconTrash,
+  IconPlus, IconGripVertical, IconX, IconDeviceFloppy, IconPresentationAnalytics, IconTrash,
 } from '@tabler/icons';
 import {
   useState, useEffect, useCallback,
@@ -24,7 +23,7 @@ import presentationApi, {
 import * as notificationManager from '@/pages/common/notificationManager';
 import StrictModeDroppable from '@/pages/common/strictModeDroppable';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
-import { CHART_TYPE, SlideType } from '@/utils/constants';
+import { SlideType } from '@/utils/constants';
 
 interface FormProps {
   question: string
@@ -57,7 +56,6 @@ const useStyles = createStyles((theme) => ({
 
 const MultipleChoiceSlideContentSetting = ({ slideInfo, form }: Props) => {
   const { classes } = useStyles();
-  const [chartType, setChartType] = useState<string>(CHART_TYPE.BARS_CHART);
 
   useEffect(() => {
     if (slideInfo?.title) {
@@ -85,45 +83,6 @@ const MultipleChoiceSlideContentSetting = ({ slideInfo, form }: Props) => {
   const handleRemoveOption = (index: number) => {
     form.removeListItem('options', index);
   };
-
-  const segmentedData = [
-    {
-      value: CHART_TYPE.BARS_CHART,
-      label: (
-        <Center>
-          <IconChartBar size={16} />
-          <Box ml={10}>Bars</Box>
-        </Center>
-      ),
-    },
-    {
-      value: CHART_TYPE.DONUT_CHART,
-      label: (
-        <Center>
-          <IconChartDonut size={16} />
-          <Box ml={10}>Donut</Box>
-        </Center>
-      ),
-    },
-    {
-      value: CHART_TYPE.PIE_CHART,
-      label: (
-        <Center>
-          <IconChartPie size={16} />
-          <Box ml={10}>Pie</Box>
-        </Center>
-      ),
-    },
-    {
-      value: CHART_TYPE.DOTS_CHART,
-      label: (
-        <Center>
-          <IconGrain size={16} />
-          <Box ml={10}>Dots</Box>
-        </Center>
-      ),
-    },
-  ];
 
   const fields = form.values.options.map((_, index) => (
     <Draggable key={index} index={index} draggableId={index.toString()}>
@@ -180,14 +139,6 @@ const MultipleChoiceSlideContentSetting = ({ slideInfo, form }: Props) => {
             Add option
           </Button>
         </Group>
-        <Stack mt="md" spacing="xs">
-          <Text className={classes.inputLabel}>Result Layout</Text>
-          <SegmentedControl
-            data={segmentedData}
-            value={chartType}
-            onChange={setChartType}
-          />
-        </Stack>
       </Box>
     </Box>
   );
@@ -353,7 +304,10 @@ export default function EditPresentation() {
               : (
                 <Grid>
                   <Grid.Col span={8}>
-                    <MultipleChoiceSlideTemplate />
+                    <MultipleChoiceSlideTemplate
+                      question={slideData?.title}
+                      options={slideData?.options}
+                    />
                   </Grid.Col>
                   <Grid.Col span={4} p={16}>
                     <Select
@@ -365,6 +319,7 @@ export default function EditPresentation() {
                     />
                     <Divider my="md" />
                     <MultipleChoiceSlideContentSetting slideInfo={slideData} form={form} />
+                    <Divider my="xl" />
                     <Group position="center" mt="xl">
                       <Button
                         color="red"

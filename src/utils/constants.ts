@@ -17,15 +17,21 @@ export const GROUP_FILTER_TYPE: Record<string, string> = {
   GROUP_YOU_CREATED: "Groups you've created",
 };
 
+export const COLORS = [
+  'rgba(255, 99, 132, 0.3)',
+  'rgba(255, 159, 64, 0.3)',
+  'rgba(255, 205, 86, 0.3)',
+  'rgba(75, 192, 192, 0.3)',
+  'rgba(54, 162, 235, 0.3)',
+  'rgba(153, 102, 255, 0.3)',
+  'rgba(201, 203, 207, 0.3)',
+  'rgba(255, 99, 132, 0.3)',
+  'rgba(255, 159, 64, 0.3)',
+  'rgba(255, 205, 86, 0.3)',
+];
+
 export enum SlideType {
-  MultipleChoice = 'MultipleChoice',
+  MultipleChoice = 'MULTIPLE_CHOICE',
   Heading = 'Heading',
   Paragraph = 'Paragraph',
 }
-
-export const CHART_TYPE: Record<string, string> = {
-  BARS_CHART: 'Bars chart',
-  DONUT_CHART: 'Donut chart',
-  PIE_CHART: 'Pie chart',
-  DOTS_CHART: 'Dots chart',
-};
