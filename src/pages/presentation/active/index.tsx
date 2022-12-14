@@ -22,6 +22,7 @@ import {
 } from '@/socket/types';
 import { ErrorResponse, isAxiosError } from '@/utils/axiosErrorHandler';
 import { SlideType } from '@/utils/constants';
+import getJwtToken from '@/utils/getJwtToken';
 
 const MOCK_SLIDES: Slide[] = [
   {
@@ -148,16 +149,15 @@ interface HostPresentationProps {
 
 function HostPresentation({ presentation, user }: HostPresentationProps) {
   const [roomId, setRoomId] = useState<string>();
-  const socket: Socket<ServerToClientEvents, ClientToServerEvents> = useMemo(() => socketIO(wsURL), []);
+  const { jwtToken } = getJwtToken();
+  // eslint-disable-next-line max-len
+  const socket: Socket<ServerToClientEvents, ClientToServerEvents> = useMemo(() => socketIO(wsURL, { extraHeaders: { Authorization: `Bearer ${jwtToken}` } }), [jwtToken]);
 
   useEffect(() => {
     socket.on('connect', () => {
-      console.log('send host create room');
-      socket.emit(ClientToServerEventType.hostCreateRoom, { presentationId: presentation._id });
-      socket.emit(ClientToServerEventType.joinRoom, { roomId: '223123' });
-
-      // @ts-ignore
-      socket.emit('host-create-room', { presentationId: '12312' });
+      socket.emit(ClientToServerEventType.hostCreateRoom, { presentationId: presentation._id.toString() });
+      // socket.emit(ClientToServerEventType.joinRoom, { roomId: '223123' });
+      // socket.emit('host-create-room', { presentationId: '12312' });
 
       socket.on(ServerToClientEventType.waitHostCreateRoom, (data) => {
         console.log(data);
