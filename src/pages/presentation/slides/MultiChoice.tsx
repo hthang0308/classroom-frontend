@@ -59,6 +59,12 @@ const TestChart = () => (
 
 export default function MultiChoiceDisplaySlide(_props: MultiChoiceSlide) {
   return (
-    <TestChart />
+    <>
+      <div>option</div>
+      <div>option</div>
+      <div>option</div>
+      <div>option</div>
+      <TestChart />
+    </>
   );
 }

@@ -1,3 +1,4 @@
+import { SlideType } from '@/utils/constants';
 
 export interface BasicSlide {
   title: string;
@@ -5,7 +6,7 @@ export interface BasicSlide {
 }
 
 export interface HeadingSlide extends BasicSlide {
-  type: 'heading';
+  type: SlideType.Heading;
   background?: string;
 }
 
@@ -15,9 +16,9 @@ export interface MultiChoiceValue {
 }
 
 export interface MultiChoiceSlide extends BasicSlide {
-  type: 'multi-choice';
+  type: SlideType.MultipleChoice;
   time: number;
-  options: MultiChoiceValue[]
+  options: MultiChoiceValue[];
 }
 
 export type Slide = HeadingSlide | MultiChoiceSlide;

@@ -17,11 +17,11 @@ export const GROUP_FILTER_TYPE: Record<string, string> = {
   GROUP_YOU_CREATED: "Groups you've created",
 };
 
-export const SLIDE_TYPE: Record<string, string> = {
-  MULTIPLE_CHOICE: 'MULTIPLE_CHOICE',
-  HEADING: 'HEADING',
-  PARAGRAPH: 'PARAGRAPH',
-};
+export enum SlideType {
+  MultipleChoice = 'MultipleChoice',
+  Heading = 'Heading',
+  Paragraph = 'Paragraph',
+}
 
 export const CHART_TYPE: Record<string, string> = {
   BARS_CHART: 'Bars chart',

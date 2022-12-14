@@ -24,7 +24,7 @@ import presentationApi, {
 import * as notificationManager from '@/pages/common/notificationManager';
 import StrictModeDroppable from '@/pages/common/strictModeDroppable';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
-import { SLIDE_TYPE, CHART_TYPE } from '@/utils/constants';
+import { CHART_TYPE, SlideType } from '@/utils/constants';
 
 interface FormProps {
   question: string
@@ -256,7 +256,7 @@ export default function EditPresentation() {
   ];
 
   const slideTypeOptions = [
-    { value: SLIDE_TYPE.MULTIPLE_CHOICE, label: 'Multiple Choice' },
+    { value: SlideType.MultipleChoice, label: 'Multiple Choice' },
     // { value: SLIDE_TYPE.HEADING, label: 'Heading' },
     // { value: SLIDE_TYPE.PARAGRAPH, label: 'Paragraph' },
   ];

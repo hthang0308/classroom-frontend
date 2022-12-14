@@ -244,7 +244,7 @@ module.exports = {
 		"unicorn/no-array-reduce": "off",
 		"unicorn/no-useless-undefined": "warn",
 		"@typescript-eslint/no-unused-vars": [
-			"error",
+			"warn",
 			{
 				"argsIgnorePattern": "^_",
 				"varsIgnorePattern": "^_"
