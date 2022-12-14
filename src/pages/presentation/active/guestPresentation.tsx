@@ -7,6 +7,8 @@ import React, {
 
 import { io as socketIO, Socket } from 'socket.io-client';
 
+import config from '../../../../config';
+
 import { PresentationWithUserCreated } from '@/api/presentation';
 
 import {
@@ -21,8 +23,6 @@ import getJwtToken from '@/utils/getJwtToken';
 export interface ShowPageProps {
   roomId: string;
 }
-
-const wsURL = 'http://localhost:3000';
 
 function InputCodePage({ setRoomId }: { setRoomId: (_: string) => void }) {
   const [input, setInput] = useState('');
@@ -43,7 +43,7 @@ function ShowPage({ roomId }: ShowPageProps) {
   const options = multiChoiceSlide?.options || [];
 
   const socket: Socket<ServerToClientEvents, ClientToServerEvents> = useMemo(
-    () => socketIO(wsURL, { extraHeaders: { Authorization: `Bearer ${jwtToken}` } }),
+    () => socketIO(config.backendUrl, { extraHeaders: { Authorization: `Bearer ${jwtToken}` } }),
     [jwtToken],
   );
 

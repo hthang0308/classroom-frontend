@@ -22,8 +22,6 @@ import {
 import { SlideType } from '@/utils/constants';
 import getJwtToken from '@/utils/getJwtToken';
 
-const wsURL = 'http://localhost:3000';
-
 interface HostPresentationProps {
   presentation: PresentationWithUserCreated;
 }
@@ -46,7 +44,7 @@ export default function HostPresentation({ presentation }: HostPresentationProps
   const isLoading = multiChoiceSlide === undefined || !!roomId;
 
   const socket: Socket<ServerToClientEvents, ClientToServerEvents> = useMemo(
-    () => socketIO(wsURL, { extraHeaders: { Authorization: `Bearer ${jwtToken}` } }),
+    () => socketIO(config.backendUrl, { extraHeaders: { Authorization: `Bearer ${jwtToken}` } }),
     [jwtToken],
   );
 
