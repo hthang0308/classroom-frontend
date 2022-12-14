@@ -39,7 +39,7 @@ export default function HostPresentation({ presentation }: HostPresentationProps
     options,
     time: 30,
   }, [multiChoiceSlide, options]);
-  const invitationLink = `${config.backendUrl}/${roomId}`;
+  const invitationLink = `${config.backendUrl}/presentation/join`;
 
   const isLoading = multiChoiceSlide === undefined || !!roomId;
 
