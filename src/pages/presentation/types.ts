@@ -1,3 +1,4 @@
+import { Option } from '@/api/presentation';
 import { SlideType } from '@/utils/constants';
 
 export interface BasicSlide {
@@ -10,15 +11,10 @@ export interface HeadingSlide extends BasicSlide {
   background?: string;
 }
 
-export interface MultiChoiceValue {
-  value: string;
-  color?: string;
-}
-
 export interface MultiChoiceSlide extends BasicSlide {
   type: SlideType.MultipleChoice;
   time: number;
-  options: MultiChoiceValue[];
+  options: Option[];
 }
 
 export type Slide = HeadingSlide | MultiChoiceSlide;

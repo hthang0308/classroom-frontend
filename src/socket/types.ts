@@ -1,43 +1,88 @@
+import {
+  CompactSlide, Option, PresentationWithUserCreated,
+} from '@/api/presentation';
+
 export enum ClientToServerEventType {
   hostCreateRoom = 'host-create-room',
   joinRoom = 'join-room',
-  // hostStartSlide = 'host-start-slide',
-  // hostStopPresentation = 'host-stop-presentation',
-  // leaveRoom = 'leave-room',
-  // memberVote = 'member-vote',
-  //
-  // privateMessage = 'private-message',
-  //
+  leaveRoom = 'leave-room',
+  hostStartSlide = 'host-start-slide',
+  hostStopPresentation = 'host-stop-presentation',
+  memberVote = 'member-vote',
 }
 
 export enum ServerToClientEventType {
   waitHostCreateRoom = 'wait-host-create-room',
-  joinRoom = 'join-room',
+  waitJoinRoom = 'wait-join-room',
   waitInRoom = 'wait-in-room',
 
-  // privateMessage = 'private-message',
+  privateMessage = 'private-message',
 }
 
-export interface HostCreateRoomData {
+export interface HostStartStopRoomData {
   presentationId: string;
 }
 
-export interface BasicServerData {
+export interface HostStartSlideData {
+  slideId: string;
+}
+
+export interface JoinLeaveRoomData {
+  roomId: string;
+}
+
+export interface MemberVoteData {
+  slideId: string;
+  optionIndex: number;
+}
+
+export interface WaitHostCreateRoomData {
   roomId: string;
   message: string;
 }
 
-export interface JoinRoomData {
-  roomId: string;
+export interface WaitJoinRoomData {
+  message: string;
+  data: PresentationWithUserCreated;
 }
 
+export enum WaitInRoomType {
+  info = 'info',
+  newSlide = 'new-slide',
+  newVote = 'new-vote',
+}
+
+export interface WaitInRoomNewVoteData {
+  type: WaitInRoomType.newVote;
+  message: string;
+  data: Required<Option>[]
+}
+
+export interface WaitInRoomInfoData {
+  type: WaitInRoomType.info;
+  message: string;
+}
+
+export interface WaitInRoomNewSlideData {
+  type: WaitInRoomType.newSlide;
+  message: string;
+  data: CompactSlide;
+}
+
+export type WaitInRoomData = WaitInRoomInfoData | WaitInRoomNewVoteData | WaitInRoomNewSlideData;
+
 export interface ClientToServerEvents {
-  [ClientToServerEventType.hostCreateRoom]: (data: HostCreateRoomData) => void;
-  [ClientToServerEventType.joinRoom]: (data: JoinRoomData) => void;
+  [ClientToServerEventType.hostCreateRoom]: (data: HostStartStopRoomData) => void;
+  [ClientToServerEventType.hostStopPresentation]: (data: HostStartStopRoomData) => void;
+  [ClientToServerEventType.joinRoom]: (data: JoinLeaveRoomData) => void;
+  [ClientToServerEventType.leaveRoom]: (data: JoinLeaveRoomData) => void;
+  [ClientToServerEventType.hostStartSlide]: (data: HostStartSlideData) => void;
+  [ClientToServerEventType.memberVote]: (data: MemberVoteData) => void;
 }
 
 export interface ServerToClientEvents {
-  [ServerToClientEventType.waitHostCreateRoom]: (data: BasicServerData) => void;
-  [ServerToClientEventType.waitInRoom]: (data: BasicServerData) => void;
+  [ServerToClientEventType.waitHostCreateRoom]: (data: WaitHostCreateRoomData) => void;
+  [ServerToClientEventType.waitJoinRoom]: (data: WaitJoinRoomData) => void;
+  [ServerToClientEventType.waitInRoom]: (data: WaitInRoomData) => void;
 }
 

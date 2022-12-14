@@ -273,9 +273,11 @@ export default function EditPresentation() {
           <Button leftIcon={<IconDeviceFloppy />} variant="outline" onClick={handleSave}>
             <Text>Save</Text>
           </Button>
-          <Button leftIcon={<IconPresentationAnalytics />}>
-            <Text>Present</Text>
-          </Button>
+          <Link to={`/presentation/active/${presentationId}`}>
+            <Button leftIcon={<IconPresentationAnalytics />}>
+              <Text>Present</Text>
+            </Button>
+          </Link>
         </Group>
       </Group>
 

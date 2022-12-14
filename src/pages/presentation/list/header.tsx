@@ -2,8 +2,10 @@ import {
   Group, Title, Button, Tooltip, Modal, TextInput,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconPlus } from '@tabler/icons';
+import { IconPlus, IconArrowsJoin } from '@tabler/icons';
 import { useState } from 'react';
+
+import { Link } from 'react-router-dom';
 
 import presentationApi from '@/api/presentation';
 import * as notificationManager from '@/pages/common/notificationManager';
@@ -72,11 +74,20 @@ export default function PresentationListHeader({ fetchData }: Props) {
         >
           My presentations
         </Title>
-        <Tooltip label="Create a presentation">
-          <Button onClick={handleOpenModal}>
-            <IconPlus />
-          </Button>
-        </Tooltip>
+        <Group>
+          <Tooltip label="Create a presentation">
+            <Button onClick={handleOpenModal}>
+              <IconPlus />
+            </Button>
+          </Tooltip>
+          <Tooltip label="Join a presentation">
+            <Link to="/presentation/join">
+              <Button>
+                <IconArrowsJoin />
+              </Button>
+            </Link>
+          </Tooltip>
+        </Group>
       </Group>
     </>
   );

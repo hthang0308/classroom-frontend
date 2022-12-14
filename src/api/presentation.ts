@@ -9,6 +9,8 @@ export interface User {
 export interface Option {
   value: string;
   quantity?: number
+  index?: number
+  color?: string;
 }
 
 export interface MultipleChoiceDataType {

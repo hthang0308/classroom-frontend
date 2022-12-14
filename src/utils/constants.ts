@@ -32,6 +32,6 @@ export const COLORS = [
 
 export enum SlideType {
   MultipleChoice = 'MULTIPLE_CHOICE',
-  Heading = 'Heading',
-  Paragraph = 'Paragraph',
+  Heading = 'HEADING',
+  Paragraph = 'PARAGRAPH',
 }

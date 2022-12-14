@@ -137,7 +137,9 @@ export default function PresentationList() {
               >
                 Edit
               </Menu.Item>
-              <Menu.Item icon={<IconPresentation size={18} />}>Present</Menu.Item>
+              <Link to={`/presentation/active/${record._id}`}>
+                <Menu.Item icon={<IconPresentation size={18} />}>Present</Menu.Item>
+              </Link>
               <Menu.Divider />
               <Menu.Item
                 color="red"

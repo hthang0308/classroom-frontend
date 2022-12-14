@@ -14,7 +14,7 @@ import GroupDetail from './pages/groups/groupDetail';
 import JoinGroup from './pages/groups/joinGroup';
 import GroupsPage from './pages/groups/list';
 import Home from './pages/home';
-import EditPresentation from './pages/presentation/editPresentation';
+import EditPresentation from './pages/presentation/edit';
 import PresentationList from './pages/presentation/list';
 import ChangePasswordForm from './pages/user/change-password';
 
@@ -24,6 +24,7 @@ import { APP_LOGOUT_EVENT } from './utils/constants';
 
 import Layout from '@/layout/Layout';
 import ActivePresentation from '@/pages/presentation/active';
+import GuestPresentation from '@/pages/presentation/active/guestPresentation';
 import UserProfile from '@/pages/user/user-profile';
 
 type Props = RouteObject & {
@@ -81,6 +82,11 @@ export const AUTHORIZED_ROUTES: Props[] = [
     path: '/presentation/active/:presentationId',
     name: 'Present',
     element: <ActivePresentation />,
+  },
+  {
+    path: '/presentation/join/',
+    name: 'Join Present',
+    element: <GuestPresentation />,
   },
 ];
 
