@@ -191,6 +191,9 @@ module.exports = {
 		"react/sort-comp": "off",
 		"react/state-in-constructor": "off",
 		"react/static-property-placement": "off",
+		"react/require-default-props": ['warn', {
+			"functions": "defaultArguments"
+		}],
 		"react/jsx-tag-spacing": [
 			"error", {
 				"beforeSelfClosing": "always",

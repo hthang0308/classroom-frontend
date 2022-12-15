@@ -16,16 +16,16 @@ import GroupsPage from './pages/groups/list';
 import Home from './pages/home';
 import EditPresentation from './pages/presentation/edit';
 import PresentationList from './pages/presentation/list';
-import ChangePasswordForm from './pages/user/change-password';
+import ChangePasswordForm from './pages/user/changePassword';
 
-import ProfileEditor from './pages/user/edit-profile';
+import ProfileEditor from './pages/user/editProfile';
 
 import { APP_LOGOUT_EVENT } from './utils/constants';
 
 import Layout from '@/layout/Layout';
-import ActivePresentation from '@/pages/presentation/active';
 import GuestPresentation from '@/pages/presentation/active/guestPresentation';
-import UserProfile from '@/pages/user/user-profile';
+import HostPresentation from '@/pages/presentation/active/hostPresentation';
+import UserProfile from '@/pages/user/userProfile';
 
 type Props = RouteObject & {
   name: string;
@@ -81,7 +81,7 @@ export const AUTHORIZED_ROUTES: Props[] = [
   {
     path: '/presentation/active/:presentationId',
     name: 'Present',
-    element: <ActivePresentation />,
+    element: <HostPresentation />,
   },
   {
     path: '/presentation/join/',

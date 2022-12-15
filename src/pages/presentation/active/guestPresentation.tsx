@@ -1,13 +1,12 @@
 import {
   Button, Group, SimpleGrid, TextInput, Title, Text,
 } from '@mantine/core';
+import config from 'config';
 import React, {
   useEffect, useMemo, useState,
 } from 'react';
 
 import { io as socketIO, Socket } from 'socket.io-client';
-
-import config from '../../../../config';
 
 import { PresentationWithUserCreated, Option } from '@/api/presentation';
 
