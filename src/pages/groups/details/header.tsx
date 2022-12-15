@@ -13,7 +13,7 @@ import {
 import groupApi, { Group as GroupType } from '@/api/group';
 import * as notificationManager from '@/pages/common/notificationManager';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
-import { USER_ROLE } from '@/utils/constants';
+import { UserRole } from '@/utils/constants';
 
 interface PropsType {
   role: string
@@ -192,7 +192,7 @@ export default function Header({ role }: PropsType) {
         </Breadcrumbs>
         {
           // eslint-disable-next-line no-nested-ternary
-          role === USER_ROLE.OWNER || role === USER_ROLE.CO_OWNER
+          role === UserRole.Owner || role === UserRole.CoOwner
             ? (
               <Group>
                 <Menu position="bottom-end" shadow="md">
@@ -225,7 +225,7 @@ export default function Header({ role }: PropsType) {
                     <Menu.Item icon={<IconSettings size={14} />}>Settings</Menu.Item>
                     <Menu.Divider /> */}
                     {
-                      role === USER_ROLE.OWNER
+                      role === UserRole.Owner
                         ? (
                           <>
                             {/* <Menu.Label>Danger zone</Menu.Label> */}
@@ -256,15 +256,14 @@ export default function Header({ role }: PropsType) {
               </Group>
             )
             : (
-              role === USER_ROLE.MEMBER
-                ? (
+              role === UserRole.Member
+                && (
                   <Tooltip label="Leave group">
                     <Button color="red" onClick={handleMemberLeaveGroup}>
                       <IconLogout />
                     </Button>
                   </Tooltip>
                 )
-                : null
             )
         }
       </Group>

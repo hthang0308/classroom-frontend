@@ -2,22 +2,27 @@ import {
   CompactMultiChoiceSlide, MultiChoiceOption, PresentationWithUserInfo,
 } from '@/api/presentation';
 
-export enum ClientToServerEventType {
-  hostCreateRoom = 'host-create-room',
-  joinRoom = 'join-room',
-  leaveRoom = 'leave-room',
-  hostStartSlide = 'host-start-slide',
-  hostStopPresentation = 'host-stop-presentation',
-  memberVote = 'member-vote',
-}
+export const ClientToServerEventType = {
+  hostCreateRoom: 'host-create-room',
+  joinRoom: 'join-room',
+  leaveRoom: 'leave-room',
+  hostStartSlide: 'host-start-slide',
+  hostStopPresentation: 'host-stop-presentation',
+  memberVote: 'member-vote',
+} as const;
 
-export enum ServerToClientEventType {
-  waitHostCreateRoom = 'wait-host-create-room',
-  waitJoinRoom = 'wait-join-room',
-  waitInRoom = 'wait-in-room',
+export const ServerToClientEventType = {
+  waitHostCreateRoom: 'wait-host-create-room',
+  waitJoinRoom: 'wait-join-room',
+  waitInRoom: 'wait-in-room',
+  privateMessage: 'private-message',
+} as const;
 
-  privateMessage = 'private-message',
-}
+export const WaitInRoomType = {
+  info: 'info',
+  newSlide: 'new-slide',
+  newVote: 'new-vote',
+} as const;
 
 export interface HostStartStopRoomData {
   presentationId: string;
@@ -46,25 +51,19 @@ export interface WaitJoinRoomData {
   data: PresentationWithUserInfo;
 }
 
-export enum WaitInRoomType {
-  info = 'info',
-  newSlide = 'new-slide',
-  newVote = 'new-vote',
-}
-
 export interface WaitInRoomNewVoteData {
-  type: WaitInRoomType.newVote;
+  type: typeof WaitInRoomType.newVote;
   message: string;
   data: Required<MultiChoiceOption>[]
 }
 
 export interface WaitInRoomInfoData {
-  type: WaitInRoomType.info;
+  type: typeof WaitInRoomType.info;
   message: string;
 }
 
 export interface WaitInRoomNewSlideData {
-  type: WaitInRoomType.newSlide;
+  type: typeof WaitInRoomType.newSlide;
   message: string;
   data: CompactMultiChoiceSlide;
 }

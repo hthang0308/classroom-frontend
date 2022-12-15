@@ -7,12 +7,12 @@ export interface BasicSlide {
 }
 
 export interface HeadingSlide extends BasicSlide {
-  type: SlideType.Heading;
+  type: typeof SlideType.heading;
   background?: string;
 }
 
 export interface MultiChoiceSlide extends BasicSlide {
-  type: SlideType.MultipleChoice;
+  type: typeof SlideType.multipleChoice;
   time: number;
   options: MultiChoiceOption[];
 }

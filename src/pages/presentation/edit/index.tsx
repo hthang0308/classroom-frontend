@@ -206,7 +206,7 @@ export default function EditPresentation() {
   ];
 
   const slideTypeOptions = [
-    { value: SlideType.MultipleChoice, label: 'Multiple Choice' },
+    { value: SlideType.multipleChoice, label: 'Multiple Choice' },
     // { value: SLIDE_TYPE.HEADING, label: 'Heading' },
     // { value: SLIDE_TYPE.PARAGRAPH, label: 'Paragraph' },
   ];

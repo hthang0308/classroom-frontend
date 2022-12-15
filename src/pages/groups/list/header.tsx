@@ -3,7 +3,7 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconPlus } from '@tabler/icons';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 import groupApi from '@/api/group';
 import * as notificationManager from '@/pages/common/notificationManager';

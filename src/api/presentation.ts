@@ -19,7 +19,7 @@ export interface MultipleChoiceDataType {
 export interface CompactMultiChoiceSlide {
   _id: string;
   title: string;
-  slideType: SlideType.MultipleChoice;
+  slideType: typeof SlideType.multipleChoice;
   options: MultiChoiceOption[];
   answer: string[];
 }

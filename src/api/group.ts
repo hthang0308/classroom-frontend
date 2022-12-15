@@ -2,15 +2,16 @@ import {
   BasicObject, BasicResponse, CompactUser, PagingData, BaseResponse,
 } from '@/api/types';
 import axiosClient from '@/utils/axiosClient';
+import { UserRoleType } from '@/utils/constants';
 
 export interface UsersAndRole {
   user: string
-  role: string
+  role: UserRoleType
 }
 
 export interface UsersInfoAndRole {
   user: CompactUser;
-  role: string;
+  role: UserRoleType;
 }
 
 interface BasicGroup extends BasicObject {
@@ -51,13 +52,13 @@ const groupApi = {
 
     return axiosClient.get<GetAllResponseType>(`/group?size=${pageSize}&page=${page}`);
   },
-  getGroupById: (id: string | undefined) => (
+  getGroupById: (id?: string) => (
     axiosClient.get<BaseResponse<Group>>(`/group/${id}`)
   ),
   getMyGroups: () => (
     axiosClient.get<BaseResponse<Group[]>>('/group/my-group')
   ),
-  getInvitationLink: (id: string | undefined) => (
+  getInvitationLink: (id?: string) => (
     axiosClient.get<BaseResponse<string>>(`/group/${id}/get-invite-link`)
   ),
   inviteUserViaEmail: (id: string | undefined, email: string) => (
@@ -69,19 +70,19 @@ const groupApi = {
   getAllMembers: (id: string | undefined) => (
     axiosClient.get<BaseResponse<Group2>>(`/group/${id}`)
   ),
-  assignMemberRole: (groupId: string | undefined, userId: string | undefined, role: string) => (
+  assignMemberRole: (groupId: string | undefined, userId: string | undefined, role: UserRoleType) => (
     axiosClient.post<BasicResponse>(`/group/${groupId}/assign-role`, {
       user: userId,
       role,
     })
   ),
-  leaveGroup: (groupId: string | undefined) => (
+  leaveGroup: (groupId?: string) => (
     axiosClient.get<BasicResponse>(`/group/${groupId}/leave`)
   ),
-  kickOutMember: (groupId: string | undefined, userId: string | undefined) => (
+  kickOutMember: (groupId?: string, userId?: string) => (
     axiosClient.get<BasicResponse>(`/group/${groupId}/kick?userId=${userId}`)
   ),
-  deleteGroup: (groupId: string | undefined) => (
+  deleteGroup: (groupId?: string) => (
     axiosClient.delete<BasicResponse>(`/group/${groupId}`)
   ),
 };

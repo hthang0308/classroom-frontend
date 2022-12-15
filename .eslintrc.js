@@ -79,6 +79,10 @@ module.exports = {
 			{
 				"selector": "WithStatement",
 				"message": "`with` is disallowed in strict mode because it makes code impossible to predict and optimize."
+			},
+			{
+				"selector": "TSEnumDeclaration",
+				"message": "Typescript enums does not follow structural type pattern and does not play well with JavaScript"
 			}
 		],
 		"no-void": "off",

@@ -6,7 +6,7 @@ import {
 } from '@tabler/icons';
 import { useState } from 'react';
 
-import { USER_ROLE } from '@/utils/constants';
+import { UserRole } from '@/utils/constants';
 
 export function ConfirmPopoverAssignRole({ role, onConfirm }: { role: string, onConfirm: () => void }) {
   const [opened, setOpened] = useState(false);
@@ -27,7 +27,7 @@ export function ConfirmPopoverAssignRole({ role, onConfirm }: { role: string, on
           </ActionIcon>
           <Text size="sm">
             Assign to role
-            {role === USER_ROLE.MEMBER ? ' Co-owner' : ' Member'}
+            {role === UserRole.Member ? ' Co-owner' : ' Member'}
             ?
           </Text>
         </Group>

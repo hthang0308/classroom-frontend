@@ -68,7 +68,7 @@ function ShowPage({ presentation }: HostPresentationProps) {
   const [roomId, setRoomId] = useState<string>('');
   const { jwtToken } = getJwtToken();
 
-  const multiChoiceSlide = presentation.slides.find((s) => s.slideType === SlideType.MultipleChoice);
+  const multiChoiceSlide = presentation.slides.find((s) => s.slideType === SlideType.multipleChoice);
   const [options, setOptions] = useState<MultiChoiceOption[]>(multiChoiceSlide?.options || []);
 
   const displaySlideData = useMemo(() => multiChoiceSlide, [multiChoiceSlide]);
@@ -121,7 +121,7 @@ function ShowPage({ presentation }: HostPresentationProps) {
             <div>No Slide</div>
           ) : (
             <div style={{ padding: 20 }}>
-              <MultiChoiceDisplaySlide title={multiChoiceSlide?.title} options={options} randomData />
+              <MultiChoiceDisplaySlide title={multiChoiceSlide?.title} options={options} />
             </div>
           )
         }

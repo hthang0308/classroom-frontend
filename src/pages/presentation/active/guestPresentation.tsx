@@ -41,7 +41,7 @@ function ShowPage({ roomId }: ShowPageProps) {
   const [presentation, setPresentation] = useState<PresentationWithUserInfo>();
   const [voteValue, setVoteValue] = useState<MultiChoiceOption>();
 
-  const multiChoiceSlide = (presentation?.slides || []).find((s) => s.slideType === SlideType.MultipleChoice);
+  const multiChoiceSlide = (presentation?.slides || []).find((s) => s.slideType === SlideType.multipleChoice);
   const options = multiChoiceSlide?.options || [];
 
   const socket: Socket<ServerToClientEvents, ClientToServerEvents> = useMemo(
