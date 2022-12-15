@@ -9,11 +9,10 @@ import React, {
 import { useParams } from 'react-router-dom';
 import { io as socketIO, Socket } from 'socket.io-client';
 
-import { Option, PresentationWithUserCreated } from '@/api/presentation';
+import { MultiChoiceOption, PresentationWithUserInfo } from '@/api/presentation';
 import CopyButton from '@/pages/common/buttons/copyButton';
 import { usePresentation, useUser } from '@/pages/presentation/hooks';
 import MultiChoiceDisplaySlide from '@/pages/presentation/slides/multiChoice';
-import { MultiChoiceSlide } from '@/pages/presentation/types';
 import {
   ClientToServerEvents,
   ClientToServerEventType,
@@ -26,7 +25,7 @@ import { SlideType } from '@/utils/constants';
 import getJwtToken from '@/utils/getJwtToken';
 
 interface HostPresentationProps {
-  presentation: PresentationWithUserCreated;
+  presentation: PresentationWithUserInfo;
 }
 
 function ShowPage({ presentation }: HostPresentationProps) {
@@ -34,14 +33,9 @@ function ShowPage({ presentation }: HostPresentationProps) {
   const { jwtToken } = getJwtToken();
 
   const multiChoiceSlide = presentation.slides.find((s) => s.slideType === SlideType.MultipleChoice);
-  const [options, setOptions] = useState<Option[]>(multiChoiceSlide?.options || []);
+  const [options, setOptions] = useState<MultiChoiceOption[]>(multiChoiceSlide?.options || []);
 
-  const displaySlideData = useMemo<MultiChoiceSlide | undefined>(() => multiChoiceSlide && {
-    type: SlideType.MultipleChoice,
-    title: multiChoiceSlide.title,
-    options,
-    time: 30,
-  }, [multiChoiceSlide, options]);
+  const displaySlideData = useMemo(() => multiChoiceSlide, [multiChoiceSlide]);
   const invitationLink = `${window.location.host}/presentation/join`;
 
   const isLoading = multiChoiceSlide === undefined || !!roomId;
@@ -97,9 +91,9 @@ function ShowPage({ presentation }: HostPresentationProps) {
         </Group>
         {
           displaySlideData === undefined ? (
-            <div>NoSide</div>
+            <div>No Slide</div>
           ) : (
-            <MultiChoiceDisplaySlide {...displaySlideData} />
+            <MultiChoiceDisplaySlide {...displaySlideData} options={options} />
           )
         }
       </Stack>
@@ -118,7 +112,7 @@ export default function HostPresentation() {
       <Skeleton visible={user === undefined}>
         {
           isHost ? (
-            <ShowPage presentation={presentation as PresentationWithUserCreated} />
+            <ShowPage presentation={presentation as PresentationWithUserInfo} />
           ) : (
             <Title order={3} sx={{ textAlign: 'center' }}>You cannot start a presentation that is not yours</Title>
           )

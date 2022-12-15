@@ -12,7 +12,7 @@ import TimeAgo from 'react-timeago';
 
 import PresentationListHeader from './header';
 
-import presentationApi, { PresentationWithUserCreated as PresentationType } from '@/api/presentation';
+import presentationApi, { PresentationWithUserInfo as PresentationType } from '@/api/presentation';
 import * as notificationManager from '@/pages/common/notificationManager';
 import { getUserId } from '@/utils';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';

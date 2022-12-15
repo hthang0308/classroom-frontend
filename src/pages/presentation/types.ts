@@ -1,4 +1,4 @@
-import { Option } from '@/api/presentation';
+import { MultiChoiceOption } from '@/api/presentation';
 import { SlideType } from '@/utils/constants';
 
 export interface BasicSlide {
@@ -14,7 +14,7 @@ export interface HeadingSlide extends BasicSlide {
 export interface MultiChoiceSlide extends BasicSlide {
   type: SlideType.MultipleChoice;
   time: number;
-  options: Option[];
+  options: MultiChoiceOption[];
 }
 
 export type Slide = HeadingSlide | MultiChoiceSlide;

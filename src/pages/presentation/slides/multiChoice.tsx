@@ -1,10 +1,10 @@
 import randomColor from 'randomcolor';
 import React from 'react';
 
+import { CompactMultiChoiceSlide } from '@/api/presentation';
 import Chart from '@/pages/common/chart';
-import { MultiChoiceSlide } from '@/pages/presentation/types';
 
-export default function MultiChoiceDisplaySlide({ title, options }: MultiChoiceSlide) {
+export default function MultiChoiceDisplaySlide({ title, options }: CompactMultiChoiceSlide) {
   const backgroundColor = options.map(({ color }) => color || randomColor());
 
   return (

@@ -1,5 +1,5 @@
 import {
-  CompactSlide, Option, PresentationWithUserCreated,
+  CompactMultiChoiceSlide, MultiChoiceOption, PresentationWithUserInfo,
 } from '@/api/presentation';
 
 export enum ClientToServerEventType {
@@ -43,7 +43,7 @@ export interface WaitHostCreateRoomData {
 
 export interface WaitJoinRoomData {
   message: string;
-  data: PresentationWithUserCreated;
+  data: PresentationWithUserInfo;
 }
 
 export enum WaitInRoomType {
@@ -55,7 +55,7 @@ export enum WaitInRoomType {
 export interface WaitInRoomNewVoteData {
   type: WaitInRoomType.newVote;
   message: string;
-  data: Required<Option>[]
+  data: Required<MultiChoiceOption>[]
 }
 
 export interface WaitInRoomInfoData {
@@ -66,7 +66,7 @@ export interface WaitInRoomInfoData {
 export interface WaitInRoomNewSlideData {
   type: WaitInRoomType.newSlide;
   message: string;
-  data: CompactSlide;
+  data: CompactMultiChoiceSlide;
 }
 
 export type WaitInRoomData = WaitInRoomInfoData | WaitInRoomNewVoteData | WaitInRoomNewSlideData;

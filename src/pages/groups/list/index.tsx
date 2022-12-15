@@ -1,9 +1,21 @@
 import {
-  Container, Grid, Group, Card, Image, Stack, Text, Pagination, Tooltip, Loader, Center, Alert, createStyles,
+  Alert,
+  Card,
+  Center,
+  Container,
+  createStyles,
+  Grid,
+  Group,
+  Image,
+  Loader,
+  Pagination,
+  Stack,
+  Text,
+  Tooltip,
 } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons';
 import {
-  useState, useEffect, useCallback, useMemo,
+  useCallback, useEffect, useMemo, useState,
 } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -12,7 +24,7 @@ import Header from './header';
 import groupApi, { Group as GroupType } from '@/api/group';
 import * as notificationManager from '@/pages/common/notificationManager';
 import { filterGroupByType, getUserId } from '@/utils';
-import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
+import { ErrorResponse, isAxiosError } from '@/utils/axiosErrorHandler';
 import { GROUP_FILTER_TYPE } from '@/utils/constants';
 
 const GROUPS_PER_PAGE = 8;
@@ -80,9 +92,8 @@ export default function GroupsPage() {
 
   const currentDataSource: GroupType[] = useMemo(() => {
     const startIndex = (activePage - 1) * GROUPS_PER_PAGE;
-    const groups = filteredDataSource.slice(startIndex, startIndex + GROUPS_PER_PAGE);
 
-    return groups;
+    return filteredDataSource.slice(startIndex, startIndex + GROUPS_PER_PAGE);
   }, [activePage, filteredDataSource]);
 
   return (

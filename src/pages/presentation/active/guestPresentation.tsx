@@ -8,7 +8,7 @@ import React, {
 
 import { io as socketIO, Socket } from 'socket.io-client';
 
-import { PresentationWithUserCreated, Option } from '@/api/presentation';
+import { PresentationWithUserInfo, MultiChoiceOption } from '@/api/presentation';
 
 import {
   ClientToServerEvents,
@@ -38,8 +38,8 @@ function InputCodePage({ setRoomId }: { setRoomId: (_: string) => void }) {
 function ShowPage({ roomId }: ShowPageProps) {
   const { jwtToken } = getJwtToken();
 
-  const [presentation, setPresentation] = useState<PresentationWithUserCreated>();
-  const [voteValue, setVoteValue] = useState<Option>();
+  const [presentation, setPresentation] = useState<PresentationWithUserInfo>();
+  const [voteValue, setVoteValue] = useState<MultiChoiceOption>();
 
   const multiChoiceSlide = (presentation?.slides || []).find((s) => s.slideType === SlideType.MultipleChoice);
   const options = multiChoiceSlide?.options || [];
@@ -49,7 +49,7 @@ function ShowPage({ roomId }: ShowPageProps) {
     [jwtToken],
   );
 
-  const sendVote = (option: Option) => {
+  const sendVote = (option: MultiChoiceOption) => {
     setVoteValue(option);
     socket.emit(ClientToServerEventType.memberVote, {
       slideId: multiChoiceSlide?._id || '',

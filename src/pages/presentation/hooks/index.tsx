@@ -2,7 +2,7 @@ import {
   useCallback, useEffect, useState,
 } from 'react';
 
-import presentationApi, { PresentationWithUserCreated } from '@/api/presentation';
+import presentationApi, { PresentationWithUserInfo } from '@/api/presentation';
 import userApi, { User } from '@/api/user';
 import * as notificationManager from '@/pages/common/notificationManager';
 import { ErrorResponse, isAxiosError } from '@/utils/axiosErrorHandler';
@@ -29,7 +29,7 @@ export const useUser = () => {
 };
 
 export const usePresentation = (presentationId?: string) => {
-  const [presentation, setPresentation] = useState<PresentationWithUserCreated>();
+  const [presentation, setPresentation] = useState<PresentationWithUserInfo>();
   const fetchData = useCallback(async () => {
     if (!presentationId) {
       return;

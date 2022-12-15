@@ -1,12 +1,10 @@
+import {
+  BasicObject, CompactUser, BaseResponse,
+} from '@/api/types';
 import axiosClient from '@/utils/axiosClient';
+import { SlideType } from '@/utils/constants';
 
-export interface User {
-  _id: string;
-  email: string;
-  name: string;
-}
-
-export interface Option {
+export interface MultiChoiceOption {
   value: string;
   quantity?: number
   index?: number
@@ -15,85 +13,60 @@ export interface Option {
 
 export interface MultipleChoiceDataType {
   question: string
-  options: Option[]
+  options: MultiChoiceOption[]
 }
 
-export interface Slide {
+export interface CompactMultiChoiceSlide {
   _id: string;
   title: string;
-  slideType: string;
+  slideType: SlideType.MultipleChoice;
+  options: MultiChoiceOption[];
   answer: string[];
+}
+
+export interface MultiChoiceSlide extends CompactMultiChoiceSlide, BasicObject {
   presentationId: string;
   userCreated: string;
   userUpdated: string;
-  options: Option[];
-  createdAt: Date;
-  updatedAt: Date;
-  __v: number;
 }
 
-export interface CompactSlide {
-  _id: string;
-  title: string;
-  slideType: string;
-  options: Option[];
-  answer: string[];
-}
+interface BasePresentation<UserType> extends BasicObject {
 
-export interface Presentation {
   name: string;
   description: string;
-  collaborators: User[];
-  slides: CompactSlide[];
-  userCreated: string;
-  _id: string;
-  createdAt: Date;
-  updatedAt: Date;
-  __v: number;
+  collaborators: CompactUser[];
+  slides: CompactMultiChoiceSlide[];
+  userCreated: UserType;
 }
 
-export interface PresentationWithUserCreated {
-  name: string;
-  description: string;
-  collaborators: User[];
-  slides: CompactSlide[];
-  userCreated: User;
-  _id: string;
-  createdAt: Date;
-  updatedAt: Date;
-  __v: number;
-}
+export type Presentation = BasePresentation<string>;
 
-export interface ResponseType<T> {
-  statusCode: number
-  data: T
-  message: string
-}
+export type PresentationWithUserInfo = BasePresentation<CompactUser>;
 
 const presentationApi = {
   createPresentation: (name: string) => (
-    axiosClient.post<ResponseType<Presentation>>('/presentation', { name })
+    axiosClient.post<BaseResponse<Presentation>>('/presentation', { name })
   ),
   getMyPresentations: () => (
-    axiosClient.get<ResponseType<PresentationWithUserCreated[]>>('/presentation/my-presentation')
+    axiosClient.get<BaseResponse<PresentationWithUserInfo[]>>('/presentation/my-presentation')
   ),
-  getPresentationById: (id: string | undefined) => (
-    axiosClient.get<ResponseType<PresentationWithUserCreated>>(`/presentation/${id}`)
+  getPresentationById: (id?: string) => (
+    axiosClient.get<BaseResponse<PresentationWithUserInfo>>(`/presentation/${id}`)
   ),
-  deletePresentation: (id: string | undefined) => (
-    axiosClient.delete<ResponseType<null>>(`/presentation/${id}`)
+  deletePresentation: (id?: string) => (
+    axiosClient.delete<BaseResponse<null>>(`/presentation/${id}`)
   ),
   updateMultipleChoiceSlide: (id: string | undefined, data: MultipleChoiceDataType) => (
-    axiosClient.put<ResponseType<Slide>>(`/slide/${id}`, {
+    axiosClient.put<BaseResponse<MultiChoiceSlide>>(`/slide/${id}`, {
       title: data.question,
       options: data.options,
     })
   ),
-  createSlide: (presentationId: string | undefined) => (
-    axiosClient.post<ResponseType<Slide>>('/slide', { presentationId })
+  createSlide: (presentationId?: string) => (
+    axiosClient.post<BaseResponse<MultiChoiceSlide>>('/slide', { presentationId })
   ),
-  deleteSlide: (id: string | undefined) => (
-    axiosClient.delete<ResponseType<null>>(`/slide/${id}`)
+  deleteSlide: (id?: string) => (
+    axiosClient.delete<BaseResponse<null>>(`/slide/${id}`)
   ),
 };
 

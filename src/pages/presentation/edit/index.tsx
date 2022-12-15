@@ -17,8 +17,8 @@ import {
 import MultipleChoiceSlideTemplate from '../slideTemplate/multipleChoice';
 
 import presentationApi, {
-  PresentationWithUserCreated as Presentation,
-  CompactSlide as Slide,
+  PresentationWithUserInfo as Presentation,
+  CompactMultiChoiceSlide as Slide,
 } from '@/api/presentation';
 import * as notificationManager from '@/pages/common/notificationManager';
 import StrictModeDroppable from '@/pages/common/strictModeDroppable';
