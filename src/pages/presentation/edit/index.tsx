@@ -14,14 +14,13 @@ import {
   useParams, Link, useNavigate,
 } from 'react-router-dom';
 
-import MultipleChoiceSlideTemplate from '../slideTemplate/multipleChoice';
-
 import presentationApi, {
   PresentationWithUserInfo as Presentation,
-  CompactMultiChoiceSlide as Slide,
+  CompactMultiChoiceSlide,
 } from '@/api/presentation';
 import * as notificationManager from '@/pages/common/notificationManager';
 import StrictModeDroppable from '@/pages/common/strictModeDroppable';
+import MultiChoiceDisplaySlide from '@/pages/presentation/slides/multiChoice';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 import { SlideType } from '@/utils/constants';
 
@@ -34,8 +33,8 @@ interface FormProps {
 }
 
 interface Props {
-  slideInfo: Slide | undefined
-  form: UseFormReturnType<FormProps>
+  slideInfo?: CompactMultiChoiceSlide;
+  form: UseFormReturnType<FormProps>;
 }
 
 interface SlideInfo {
@@ -146,7 +145,7 @@ const MultipleChoiceSlideContentSetting = ({ slideInfo, form }: Props) => {
 
 export default function EditPresentation() {
   const [presentationData, setPresentationData] = useState<Presentation>();
-  const [slideData, setSlideData] = useState<Slide>();
+  const [slideData, setSlideData] = useState<CompactMultiChoiceSlide>();
   const [slideType, setSlideType] = useState<string | null>(null);
   const [slideList, setSlideList] = useState<SlideInfo[]>([]);
   const [isLoading, setLoading] = useState(false);
@@ -306,9 +305,10 @@ export default function EditPresentation() {
               : (
                 <Grid>
                   <Grid.Col span={8}>
-                    <MultipleChoiceSlideTemplate
-                      question={slideData?.title}
+                    <MultiChoiceDisplaySlide
+                      title={slideData?.title}
                       options={slideData?.options}
+                      randomData
                     />
                   </Grid.Col>
                   <Grid.Col span={4} p={16}>

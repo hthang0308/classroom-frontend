@@ -1,6 +1,8 @@
 import {
+  Button,
   Container, Group, Skeleton, Stack, Text, Title,
 } from '@mantine/core';
+import { IconArrowLeft, IconArrowRight } from '@tabler/icons';
 import config from 'config';
 import React, {
   useEffect, useMemo, useState,
@@ -11,6 +13,7 @@ import { io as socketIO, Socket } from 'socket.io-client';
 
 import { MultiChoiceOption, PresentationWithUserInfo } from '@/api/presentation';
 import CopyButton from '@/pages/common/buttons/copyButton';
+import FullScreenButton from '@/pages/common/buttons/fullScreenButton';
 import { usePresentation, useUser } from '@/pages/presentation/hooks';
 import MultiChoiceDisplaySlide from '@/pages/presentation/slides/multiChoice';
 import {
@@ -23,6 +26,39 @@ import {
 } from '@/socket/types';
 import { SlideType } from '@/utils/constants';
 import getJwtToken from '@/utils/getJwtToken';
+
+interface NavigationHeaderProps {
+  roomId: string;
+  invitationLink: string;
+}
+
+function NavigationHeader({ roomId, invitationLink }: NavigationHeaderProps) {
+  return (
+    <Stack>
+      <Group position="center">
+        <Text>
+          Copy the code
+        </Text>
+        <CopyButton value={roomId} />
+        <Text>
+          or the link
+        </Text>
+        <CopyButton value={invitationLink} />
+      </Group>
+      <Group position="apart">
+        <Group>
+          <Button>
+            <IconArrowLeft />
+          </Button>
+          <Button>
+            <IconArrowRight />
+          </Button>
+        </Group>
+        <FullScreenButton />
+      </Group>
+    </Stack>
+  );
+}
 
 interface HostPresentationProps {
   presentation: PresentationWithUserInfo;
@@ -79,21 +115,14 @@ function ShowPage({ presentation }: HostPresentationProps) {
   return (
     <Skeleton visible={!isLoading}>
       <Stack>
-        <Group position="center">
-          <Text>
-            Copy the code
-          </Text>
-          <CopyButton value={roomId} />
-          <Text>
-            or the link
-          </Text>
-          <CopyButton value={invitationLink} />
-        </Group>
+        <NavigationHeader roomId={roomId} invitationLink={invitationLink} />
         {
           displaySlideData === undefined ? (
             <div>No Slide</div>
           ) : (
-            <MultiChoiceDisplaySlide {...displaySlideData} options={options} />
+            <div style={{ padding: 20 }}>
+              <MultiChoiceDisplaySlide title={multiChoiceSlide?.title} options={options} randomData />
+            </div>
           )
         }
       </Stack>
