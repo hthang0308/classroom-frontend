@@ -18,7 +18,7 @@ import BlackLogo from '@/assets/logo-low-res-black.png';
 import WhiteLogo from '@/assets/logo-low-res-white.png';
 
 import useUserInfo, { UserInfo } from '@/hooks/useUserInfo';
-import ThemeSwitcher from '@/pages/common/buttons/ThemeSwitcher';
+import ThemeSwitcher from '@/pages/common/buttons/themeSwitcher';
 
 const useStyles = createStyles((theme) => ({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

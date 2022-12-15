@@ -5,8 +5,9 @@ import React, {
 } from 'react';
 import { useParams } from 'react-router-dom';
 
+import { ConfirmPopoverAssignRole, ConfirmPopoverKickOut } from './confirmPopovers';
+
 import groupApi, { UsersInfoAndRole } from '@/api/group';
-import { ConfirmPopoverAssignRole, ConfirmPopoverKickOut } from '@/pages/common/confirmPopover';
 import * as notificationManager from '@/pages/common/notificationManager';
 import { sortMemberListByRole, getUserId } from '@/utils';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
