@@ -36,23 +36,15 @@ function NavigationHeader({ roomId, invitationLink }: NavigationHeaderProps) {
   return (
     <Stack>
       <Group position="center">
-        <Text>
-          Copy the code
-        </Text>
+        <Text>Copy the code</Text>
         <CopyButton value={roomId} />
-        <Text>
-          or the link
-        </Text>
+        <Text>or the link</Text>
         <CopyButton value={invitationLink} />
       </Group>
       <Group position="apart">
         <Group>
-          <Button>
-            <IconArrowLeft />
-          </Button>
-          <Button>
-            <IconArrowRight />
-          </Button>
+          <Button><IconArrowLeft /></Button>
+          <Button><IconArrowRight /></Button>
         </Group>
         <FullScreenButton />
       </Group>
@@ -76,12 +68,20 @@ function ShowPage({ presentation }: HostPresentationProps) {
 
   const isLoading = multiChoiceSlide === undefined || !!roomId;
 
-  const socket: Socket<ServerToClientEvents, ClientToServerEvents> = useMemo(
-    () => socketIO(config.backendUrl, { extraHeaders: { Authorization: `Bearer ${jwtToken}` } }),
-    [jwtToken],
-  );
+  const [socket, setSocket] = useState<Socket<ServerToClientEvents, ClientToServerEvents>>();
 
   useEffect(() => {
+    if (!socket) {
+      setSocket((prevState) => {
+        if (prevState) {
+          return prevState;
+        }
+
+        return socketIO(config.backendUrl, { extraHeaders: { Authorization: `Bearer ${jwtToken}` } });
+      });
+      return () => {};
+    }
+
     socket.on('connect', () => {
       socket.on(ServerToClientEventType.waitHostCreateRoom, (data) => {
         setRoomId(data.roomId);
@@ -110,7 +110,7 @@ function ShowPage({ presentation }: HostPresentationProps) {
       socket.emit(ClientToServerEventType.hostStopPresentation, { presentationId: presentation._id });
       socket.disconnect();
     };
-  }, [displaySlideData, presentation._id, socket]);
+  }, [displaySlideData, jwtToken, presentation._id, socket]);
 
   return (
     <Skeleton visible={!isLoading}>

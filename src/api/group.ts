@@ -40,7 +40,7 @@ interface GetAllResponseType extends BaseResponse<Group[]> {
 }
 
 const groupApi = {
-  createGroup: (name: string, description: string | undefined) => (
+  createGroup: (name: string, description?: string) => (
     axiosClient.post<BaseResponse<Group>>('/group', {
       name,
       description,

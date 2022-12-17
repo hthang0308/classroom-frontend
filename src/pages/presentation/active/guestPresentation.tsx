@@ -2,9 +2,7 @@ import {
   Button, Group, SimpleGrid, TextInput, Title, Text,
 } from '@mantine/core';
 import config from 'config';
-import React, {
-  useEffect, useMemo, useState,
-} from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { io as socketIO, Socket } from 'socket.io-client';
 
@@ -44,12 +42,13 @@ function ShowPage({ roomId }: ShowPageProps) {
   const multiChoiceSlide = (presentation?.slides || []).find((s) => s.slideType === SlideType.multipleChoice);
   const options = multiChoiceSlide?.options || [];
 
-  const socket: Socket<ServerToClientEvents, ClientToServerEvents> = useMemo(
-    () => socketIO(config.backendUrl, { extraHeaders: { Authorization: `Bearer ${jwtToken}` } }),
-    [jwtToken],
-  );
+  const [socket, setSocket] = useState<Socket<ServerToClientEvents, ClientToServerEvents>>();
 
   const sendVote = (option: MultiChoiceOption) => {
+    if (!socket) {
+      return;
+    }
+
     setVoteValue(option);
     socket.emit(ClientToServerEventType.memberVote, {
       slideId: multiChoiceSlide?._id || '',
@@ -58,6 +57,17 @@ function ShowPage({ roomId }: ShowPageProps) {
   };
 
   useEffect(() => {
+    if (!socket) {
+      setSocket((prevState) => {
+        if (prevState) {
+          return prevState;
+        }
+
+        return socketIO(config.backendUrl, { extraHeaders: { Authorization: `Bearer ${jwtToken}` } });
+      });
+      return () => {};
+    }
+
     socket.on('connect', () => {
       socket.on(ServerToClientEventType.waitJoinRoom, (data) => {
         setPresentation(data.data);
@@ -70,7 +80,7 @@ function ShowPage({ roomId }: ShowPageProps) {
       socket.emit(ClientToServerEventType.leaveRoom, { roomId });
       socket.disconnect();
     };
-  }, [roomId, socket]);
+  }, [jwtToken, roomId, socket]);
 
   return (
     <div>
