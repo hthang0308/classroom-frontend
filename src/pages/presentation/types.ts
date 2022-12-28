@@ -1,5 +1,5 @@
 import { MultiChoiceOption } from '@/api/presentation';
-import { SlideType } from '@/utils/constants';
+import { SlideTypes } from '@/utils/constants';
 
 export interface BasicSlide {
   title: string;
@@ -7,12 +7,12 @@ export interface BasicSlide {
 }
 
 export interface HeadingSlide extends BasicSlide {
-  type: typeof SlideType.heading;
+  type: typeof SlideTypes.heading;
   background?: string;
 }
 
 export interface MultiChoiceSlide extends BasicSlide {
-  type: typeof SlideType.multipleChoice;
+  type: typeof SlideTypes.multipleChoice;
   time: number;
   options: MultiChoiceOption[];
 }

@@ -2,7 +2,7 @@ import {
   BasicObject, CompactUser, BaseResponse,
 } from '@/api/types';
 import axiosClient from '@/utils/axiosClient';
-import { SlideType } from '@/utils/constants';
+import { SlideTypesType } from '@/utils/constants';
 
 export interface MultiChoiceOption {
   value: string;
@@ -19,7 +19,7 @@ export interface MultipleChoiceDataType {
 export interface CompactMultiChoiceSlide {
   _id: string;
   title: string;
-  slideType: typeof SlideType.multipleChoice;
+  slideType: SlideTypesType;
   options: MultiChoiceOption[];
   answer: string[];
 }

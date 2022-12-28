@@ -25,8 +25,10 @@ export const GROUP_FILTER_TYPE: Record<string, string> = {
   GROUP_YOU_CREATED: "Groups you've created",
 };
 
-export const SlideType = {
+export const SlideTypes = {
   multipleChoice: 'MULTIPLE_CHOICE',
   heading: 'HEADING',
   paragraph: 'PARAGRAPH',
 } as const;
+
+export type SlideTypesType = typeof SlideTypes[keyof typeof SlideTypes];

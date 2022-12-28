@@ -14,7 +14,7 @@ import {
   ServerToClientEvents,
   ServerToClientEventType,
 } from '@/socket/types';
-import { SlideType } from '@/utils/constants';
+import { SlideTypes } from '@/utils/constants';
 
 import getJwtToken from '@/utils/getJwtToken';
 
@@ -39,7 +39,7 @@ function ShowPage({ roomId }: ShowPageProps) {
   const [presentation, setPresentation] = useState<PresentationWithUserInfo>();
   const [voteValue, setVoteValue] = useState<MultiChoiceOption>();
 
-  const multiChoiceSlide = (presentation?.slides || []).find((s) => s.slideType === SlideType.multipleChoice);
+  const multiChoiceSlide = (presentation?.slides || []).find((s) => s.slideType === SlideTypes.multipleChoice);
   const options = multiChoiceSlide?.options || [];
 
   const [socket, setSocket] = useState<Socket<ServerToClientEvents, ClientToServerEvents>>();
@@ -65,7 +65,7 @@ function ShowPage({ roomId }: ShowPageProps) {
 
         return socketIO(config.backendUrl, { extraHeaders: { Authorization: `Bearer ${jwtToken}` } });
       });
-      return () => {};
+      return () => { };
     }
 
     socket.on('connect', () => {

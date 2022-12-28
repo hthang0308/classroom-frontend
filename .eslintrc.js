@@ -87,15 +87,6 @@ module.exports = {
 		],
 		"no-void": "off",
 		"function-paren-newline": ["error", "consistent"],
-		"object-curly-newline": [
-			"error",
-			{
-				"ObjectExpression": { "multiline": true, "minProperties": 3 },
-				"ObjectPattern": { "multiline": true, "minProperties": 3 },
-				"ImportDeclaration": { "multiline": true, "minProperties": 3 },
-				"ExportDeclaration": "always"
-			}
-		],
 		"unicorn/no-abusive-eslint-disable": "off",
 		"@typescript-eslint/no-unsafe-assignment": "warn",
 		"@typescript-eslint/no-type-alias": "off",
@@ -287,6 +278,7 @@ module.exports = {
 		"react/no-array-index-key": 0,
 		"unicorn/numeric-separators-style": 0,
 		"no-underscore-dangle": 0,
+		"object-curly-newline": 0,
 	},
 	"settings": {
 		"react": {

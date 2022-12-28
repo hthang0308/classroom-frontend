@@ -24,7 +24,7 @@ import {
   WaitInRoomNewVoteData,
   WaitInRoomType,
 } from '@/socket/types';
-import { SlideType } from '@/utils/constants';
+import { SlideTypes } from '@/utils/constants';
 import getJwtToken from '@/utils/getJwtToken';
 
 interface NavigationHeaderProps {
@@ -60,7 +60,7 @@ function ShowPage({ presentation }: HostPresentationProps) {
   const [roomId, setRoomId] = useState<string>('');
   const { jwtToken } = getJwtToken();
 
-  const multiChoiceSlide = presentation.slides.find((s) => s.slideType === SlideType.multipleChoice);
+  const multiChoiceSlide = presentation.slides.find((s) => s.slideType === SlideTypes.multipleChoice);
   const [options, setOptions] = useState<MultiChoiceOption[]>(multiChoiceSlide?.options || []);
 
   const displaySlideData = useMemo(() => multiChoiceSlide, [multiChoiceSlide]);
