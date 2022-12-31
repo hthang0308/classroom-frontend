@@ -1,8 +1,12 @@
-import randomColor from 'randomcolor';
-import React, { memo } from 'react';
+import { AspectRatio, Center, Title, Stack } from '@mantine/core';
+import { memo, useRef, useEffect, useState } from 'react';
+import { ResponsiveContainer, BarChart, Tooltip, Bar, XAxis, YAxis, CartesianGrid, Cell } from 'recharts';
+
+import useWindowDimensions from '../hooks';
 
 import { MultiChoiceOption } from '@/api/presentation';
-import Chart from '@/pages/common/chart';
+
+import { Colors } from '@/utils/constants';
 
 interface MultiChoiceDisplaySlideProps {
   title?: string;
@@ -17,48 +21,69 @@ function randInt(min: number, max: number) {
 function MultiChoiceDisplaySlide({
   title = '', options = [], randomData = false,
 }: MultiChoiceDisplaySlideProps) {
-  const backgroundColor = options.map(({ color }) => color || randomColor());
-  const data = options.map(({ quantity }) => (randomData ? randInt(0, 5) : quantity || 0));
+  const [data, setData] = useState<MultiChoiceOption[]>([]);
+  const [slideDisplayHeight, setSlideDisplayHeight] = useState<number>(0);
+  const { height } = useWindowDimensions();
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (randomData) {
+      setData(options.map((i) => ({
+        ...i,
+        quantity: randInt(0, 10),
+      })));
+    } else {
+      setData(options);
+    }
+  }, [randomData, options]);
+
+  useEffect(() => {
+    setSlideDisplayHeight(height - (ref.current?.offsetTop || 0) - 48);
+  }, [height]);
 
   return (
-    <Chart
-      type="bar"
-      options={{
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              stepSize: 1,
-              font: { size: 15 },
-              color: '#4F4F4F',
-            },
-          },
-          x: {
-            ticks: {
-              font: { size: 15 },
-              color: '#4F4F4F',
-            },
-          },
-        },
-        plugins: {
-          datalabels: {
-            color: 'white',
-            borderColor: 'black',
-            font: { size: 40 },
-          },
-          title: {
-            display: true,
-            text: title,
-            font: { size: 30 },
-          },
-          legend: { display: false },
-        },
-      }}
-      data={{
-        labels: options.map(({ value }) => value),
-        datasets: [{ data, backgroundColor }],
-      }}
-    />
+    <AspectRatio
+      ratio={16 / 9}
+      h={slideDisplayHeight}
+      sx={(theme) => ({
+        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.gray[5] : 'white',
+      })}
+      ref={ref}
+    >
+      <Stack>
+        <Center py="md">
+          <Title order={1} align="center">{title}</Title>
+        </Center>
+        {
+          data.length > 0
+            ? (
+              <ResponsiveContainer>
+                <BarChart
+                  data={data}
+                  margin={{
+                    top: 35,
+                    bottom: 30,
+                  }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="value" style={{ fontSize: '32px' }} />
+                  <YAxis style={{ fontSize: '24px' }} />
+                  <Tooltip />
+                  <Bar dataKey="quantity" label={{ fontSize: 40, position: 'top' }}>
+                    {data.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={Colors[index % Colors.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )
+            : (
+              null
+            )
+        }
+      </Stack>
+
+    </AspectRatio>
   );
 }
 

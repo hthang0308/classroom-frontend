@@ -79,7 +79,7 @@ function ShowPage({ presentation }: HostPresentationProps) {
 
         return socketIO(config.backendUrl, { extraHeaders: { Authorization: `Bearer ${jwtToken}` } });
       });
-      return () => {};
+      return () => { };
     }
 
     socket.on('connect', () => {
@@ -132,13 +132,13 @@ function ShowPage({ presentation }: HostPresentationProps) {
 
 export default function HostPresentation() {
   const { presentationId = '' } = useParams<string>();
-  const { user } = useUser();
+  const { user, isLoading } = useUser();
   const { presentation } = usePresentation(presentationId);
   const isHost = (user?._id || 'unknown') === presentation?.userCreated._id;
 
   return (
-    <Container fluid sx={{ height: '100%' }}>
-      <Skeleton visible={user === undefined}>
+    <Container fluid>
+      <Skeleton visible={isLoading}>
         {
           isHost ? (
             <ShowPage presentation={presentation as PresentationWithUserInfo} />
