@@ -2,13 +2,13 @@ import {
   Button,
   Container, Group, Skeleton, Stack, Text, Title,
 } from '@mantine/core';
-import { IconArrowLeft, IconArrowRight } from '@tabler/icons';
+import { IconArrowLeft, IconArrowRight, IconPresentationOff } from '@tabler/icons';
 import config from 'config';
-import React, {
+import {
   useEffect, useMemo, useState,
 } from 'react';
 
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { io as socketIO, Socket } from 'socket.io-client';
 
 import { MultiChoiceOption, PresentationWithUserInfo } from '@/api/presentation';
@@ -30,9 +30,12 @@ import getJwtToken from '@/utils/getJwtToken';
 interface NavigationHeaderProps {
   roomId: string;
   invitationLink: string;
+  presentationData: PresentationWithUserInfo | undefined
 }
 
-function NavigationHeader({ roomId, invitationLink }: NavigationHeaderProps) {
+function NavigationHeader({ roomId, invitationLink, presentationData }: NavigationHeaderProps) {
+  const navigate = useNavigate();
+
   return (
     <Stack>
       <Group position="center">
@@ -46,7 +49,16 @@ function NavigationHeader({ roomId, invitationLink }: NavigationHeaderProps) {
           <Button><IconArrowLeft /></Button>
           <Button><IconArrowRight /></Button>
         </Group>
-        <FullScreenButton />
+        <Group>
+          <FullScreenButton />
+          <Button
+            color="red"
+            onClick={() => navigate(`/presentation/${presentationData?._id}/${presentationData?.slides[0]._id}/edit`)}
+            leftIcon={<IconPresentationOff />}
+          >
+            <Text>Stop present</Text>
+          </Button>
+        </Group>
       </Group>
     </Stack>
   );
@@ -115,7 +127,7 @@ function ShowPage({ presentation }: HostPresentationProps) {
   return (
     <Skeleton visible={!isLoading}>
       <Stack>
-        <NavigationHeader roomId={roomId} invitationLink={invitationLink} />
+        <NavigationHeader roomId={roomId} invitationLink={invitationLink} presentationData={presentation} />
         {
           displaySlideData === undefined ? (
             <div>No Slide</div>

@@ -57,7 +57,7 @@ function MultiChoiceDisplaySlide({
         {
           data.length > 0
             ? (
-              <ResponsiveContainer>
+              <ResponsiveContainer width="100%" height="80%">
                 <BarChart
                   data={data}
                   margin={{
