@@ -4,19 +4,19 @@ import {
 import { UseFormReturnType } from '@mantine/form';
 import { IconPlus, IconGripVertical, IconX } from '@tabler/icons';
 import { useEffect } from 'react';
-
 import { DragDropContext, Draggable } from 'react-beautiful-dnd';
 
 import { FormProps } from './types';
 
-import { CompactMultiChoiceSlide } from '@/api/presentation';
+import { CompactSlide } from '@/api/presentation';
 import StrictModeDroppable from '@/pages/common/strictModeDroppable';
 
 import { SlideTypes } from '@/utils/constants';
 
 interface Props {
-  slideInfo: CompactMultiChoiceSlide | undefined
+  slideInfo: CompactSlide | undefined
   form: UseFormReturnType<FormProps>
+  slideType: string | null
 }
 
 export const useStyles = createStyles((theme) => ({
@@ -32,8 +32,10 @@ const MultipleChoiceSlideContentSetting = ({ slideInfo, form }: Props) => {
   const { classes } = useStyles();
 
   useEffect(() => {
+    form.reset();
+
     if (slideInfo?.title) {
-      form.setFieldValue('question', slideInfo?.title !== 'New Slide' ? slideInfo?.title : '');
+      form.setFieldValue('question', slideInfo.title);
     }
 
     if (slideInfo && slideInfo?.options.length !== 0) {
@@ -121,6 +123,19 @@ const MultipleChoiceSlideContentSetting = ({ slideInfo, form }: Props) => {
 const HeadingSlideContentSetting = ({ slideInfo, form }: Props) => {
   const { classes } = useStyles();
 
+  useEffect(() => {
+    form.reset();
+
+    if (slideInfo?.title) {
+      form.setFieldValue('heading', slideInfo.title);
+    }
+
+    if (slideInfo?.content) {
+      form.setFieldValue('subheading', slideInfo.content);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slideInfo]);
+
   return (
     <Box>
       <TextInput
@@ -145,6 +160,19 @@ const HeadingSlideContentSetting = ({ slideInfo, form }: Props) => {
 const ParagraphSlideContentSetting = ({ slideInfo, form }: Props) => {
   const { classes } = useStyles();
 
+  useEffect(() => {
+    form.reset();
+
+    if (slideInfo?.title) {
+      form.setFieldValue('heading', slideInfo.title);
+    }
+
+    if (slideInfo?.content) {
+      form.setFieldValue('paragraph', slideInfo.content);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slideInfo]);
+
   return (
     <Box>
       <TextInput
@@ -166,8 +194,8 @@ const ParagraphSlideContentSetting = ({ slideInfo, form }: Props) => {
   );
 };
 
-export default function SlideContentSetting({ slideType, ...props }: Props & { slideType: string | null }) {
-  const { slideInfo } = props;
+export default function SlideContentSetting({ ...props }: Props) {
+  const { slideInfo, slideType } = props;
 
   if (!slideInfo) {
     return null;

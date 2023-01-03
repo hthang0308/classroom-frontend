@@ -4,7 +4,6 @@ export interface SlideInfo {
   id: string
   label: string
   title: string
-  subtitle?: string
   url: string
   type: SlideTypesType
 }

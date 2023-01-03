@@ -49,6 +49,7 @@ export default function SlideListNavigation({ slideList, currentSlideId = '' }: 
               icon={<Icon />}
               component={Link}
               to={i.id === currentSlideId ? '#' : i.url}
+              mih={57}
             />
           );
         })

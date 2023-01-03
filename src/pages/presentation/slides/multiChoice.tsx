@@ -1,8 +1,8 @@
-import { AspectRatio, Center, Title, Stack } from '@mantine/core';
-import { memo, useRef, useEffect, useState } from 'react';
+import { Center, Title, Stack } from '@mantine/core';
+import { memo, useEffect, useState } from 'react';
 import { ResponsiveContainer, BarChart, Tooltip, Bar, XAxis, YAxis, CartesianGrid, Cell } from 'recharts';
 
-import useWindowDimensions from '../hooks';
+import BaseSlide from './baseSlide';
 
 import { MultiChoiceOption } from '@/api/presentation';
 
@@ -22,34 +22,19 @@ function MultiChoiceDisplaySlide({
   title = '', options = [], randomData = false,
 }: MultiChoiceDisplaySlideProps) {
   const [data, setData] = useState<MultiChoiceOption[]>([]);
-  const [slideDisplayHeight, setSlideDisplayHeight] = useState<number>(0);
-  const { height } = useWindowDimensions();
-  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (randomData) {
       setData(options.map((i) => ({
         ...i,
-        quantity: randInt(0, 10),
+        quantity: randInt(2, 10),
       })));
     } else {
       setData(options);
     }
   }, [randomData, options]);
-
-  useEffect(() => {
-    setSlideDisplayHeight(height - (ref.current?.offsetTop || 0) - 48);
-  }, [height]);
-
   return (
-    <AspectRatio
-      ratio={16 / 9}
-      h={slideDisplayHeight}
-      sx={(theme) => ({
-        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.gray[5] : 'white',
-      })}
-      ref={ref}
-    >
+    <BaseSlide>
       <Stack>
         <Center py="md">
           <Title order={1} align="center">{title}</Title>
@@ -82,8 +67,7 @@ function MultiChoiceDisplaySlide({
             )
         }
       </Stack>
-
-    </AspectRatio>
+    </BaseSlide>
   );
 }
 

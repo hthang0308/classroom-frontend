@@ -10,20 +10,22 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 
 import SlideContentSetting, { useStyles } from './slideContentSetting';
 import SlideListNavigation from './slideListNavigation';
+import SlidePreview from './slidePreview';
 import { SlideInfo, FormProps } from './types';
 
 import presentationApi, {
   PresentationWithUserInfo as Presentation,
-  CompactMultiChoiceSlide,
+  CompactSlide,
+  Slide,
 } from '@/api/presentation';
+import { BaseResponse } from '@/api/types';
 import * as notificationManager from '@/pages/common/notificationManager';
-import MultiChoiceDisplaySlide from '@/pages/presentation/slides/multiChoice';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 import { SlideTypes } from '@/utils/constants';
 
 export default function EditPresentation() {
   const [presentationData, setPresentationData] = useState<Presentation>();
-  const [slideData, setSlideData] = useState<CompactMultiChoiceSlide>();
+  const [slideData, setSlideData] = useState<CompactSlide>();
   const [slideType, setSlideType] = useState<string | null>(null);
   const [slideList, setSlideList] = useState<SlideInfo[]>([]);
   const [isLoading, setLoading] = useState(false);
@@ -69,7 +71,7 @@ export default function EditPresentation() {
         label: `Slide ${index + 1}`,
         title: i.title,
         url: `/presentation/${presentationId}/${i._id}/edit`,
-        type: SlideTypes.multipleChoice,
+        type: i.slideType,
       }));
 
       setSlideData(currentSlideData);
@@ -93,6 +95,17 @@ export default function EditPresentation() {
     { value: SlideTypes.paragraph, label: 'Paragraph' },
   ];
 
+  const handleSlideTypeChange = (type: string) => {
+    setSlideData((prevState) => ({
+      _id: prevState?._id || '',
+      slideType: prevState?.slideType || SlideTypes.multipleChoice,
+      title: prevState?.title || '',
+      content: '',
+      options: [],
+    }));
+    setSlideType(type);
+  };
+
   const handleCreateNewSlide = async () => {
     try {
       const { data: response } = await presentationApi.createSlide(presentationId);
@@ -108,10 +121,32 @@ export default function EditPresentation() {
 
   const handleSave = async () => {
     try {
-      const { data: response } = await presentationApi.updateMultipleChoiceSlide(slideId, {
-        question: form.values.question,
-        options: form.values.options.filter((i) => i.value),
-      });
+      const response = {} as BaseResponse<Slide>;
+
+      if (slideType === SlideTypes.multipleChoice) {
+        const { data: res } = await presentationApi.updateMultipleChoiceSlide(slideId, {
+          question: form.values.question,
+          options: form.values.options.filter((i) => i.value),
+        });
+
+        Object.assign(response, res);
+      } else if (slideType === SlideTypes.heading) {
+        const { data: res } = await presentationApi.updateHeadingParagraphSlide(slideId, {
+          title: form.values.heading,
+          content: form.values.subheading,
+          type: SlideTypes.heading,
+        });
+
+        Object.assign(response, res);
+      } else {
+        const { data: res } = await presentationApi.updateHeadingParagraphSlide(slideId, {
+          title: form.values.heading,
+          content: form.values.paragraph,
+          type: SlideTypes.paragraph,
+        });
+
+        Object.assign(response, res);
+      }
 
       notificationManager.showSuccess('', response.message);
       fetchData();
@@ -177,22 +212,22 @@ export default function EditPresentation() {
               : (
                 <Grid>
                   <Grid.Col span={8}>
-                    <MultiChoiceDisplaySlide
-                      title={slideData?.title}
-                      options={slideData?.options}
-                      randomData
-                    />
+                    <SlidePreview type={slideType} slideData={slideData} />
                   </Grid.Col>
                   <Grid.Col span={4} p={16}>
                     <Select
                       label="Slide type"
                       data={slideTypeOptions}
                       value={slideType}
-                      onChange={setSlideType}
+                      onChange={handleSlideTypeChange}
                       classNames={{ label: classes.inputLabel }}
                     />
                     <Divider my="md" />
-                    <SlideContentSetting slideInfo={slideData} form={form} slideType={slideType} />
+                    <SlideContentSetting
+                      slideInfo={slideData}
+                      form={form}
+                      slideType={slideType}
+                    />
                     <Divider my="xl" />
                     <Group position="center" mt="xl">
                       <Button
