@@ -5,10 +5,16 @@ import { useNavigate } from 'react-router-dom';
 
 import Header from './header';
 
-import { AUTH_COOKIE } from '@/utils/constants';
+import { AUTH_COOKIE, APP_LOGOUT_EVENT } from '@/utils/constants';
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function Layout({ noHeader, children }: { noHeader: boolean, children: React.ReactNode }) {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.addEventListener(APP_LOGOUT_EVENT, () => {
+      navigate('/logout');
+    });
+  });
 
   useEffect(() => {
     if (!Cookies.get(AUTH_COOKIE)) {
@@ -18,7 +24,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <AppShell
-      header={<Header />}
+      header={noHeader ? undefined : <Header />}
       styles={(theme) => ({
         main: {
           backgroundColor:

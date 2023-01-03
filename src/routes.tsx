@@ -1,7 +1,4 @@
-import { useEffect } from 'react';
-import {
-  createBrowserRouter, Outlet, useNavigate,
-} from 'react-router-dom';
+import { createBrowserRouter, Outlet } from 'react-router-dom';
 import type { RouteObject } from 'react-router-dom';
 
 import UnauthorizedLayout from './layout/unauthorizedLayout';
@@ -20,8 +17,6 @@ import ChangePasswordForm from './pages/user/changePassword';
 
 import ProfileEditor from './pages/user/editProfile';
 
-import { APP_LOGOUT_EVENT } from './utils/constants';
-
 import Layout from '@/layout/layout';
 import GuestPresentation from '@/pages/presentation/active/guestPresentation';
 import HostPresentation from '@/pages/presentation/active/hostPresentation';
@@ -29,14 +24,14 @@ import UserProfile from '@/pages/user/userProfile';
 
 type Props = RouteObject & {
   name: string;
+  noHeader?: boolean
 };
 
 export const AUTHORIZED_ROUTES: Props[] = [
   {
-    index: true,
+    path: '/',
     name: 'Home',
     element: <Home />,
-    errorElement: <NotFoundPage />,
   },
   {
     path: '/logout',
@@ -82,6 +77,7 @@ export const AUTHORIZED_ROUTES: Props[] = [
     path: '/presentation/active/:presentationId',
     name: 'Present',
     element: <HostPresentation />,
+    noHeader: true,
   },
   {
     path: '/presentation/join/',
@@ -89,22 +85,6 @@ export const AUTHORIZED_ROUTES: Props[] = [
     element: <GuestPresentation />,
   },
 ];
-
-const LayoutRoute = () => {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    document.addEventListener(APP_LOGOUT_EVENT, () => {
-      navigate('/logout');
-    });
-  });
-
-  return (
-    <Layout>
-      <Outlet />
-    </Layout>
-  );
-};
 
 const UNAUTHORIZED_ROUTES: Props[] = [
   {
@@ -132,17 +112,21 @@ const UNAUTHORIZED_ROUTES: Props[] = [
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <LayoutRoute />,
+    element: <Outlet />,
     errorElement: <NotFoundPage />,
-    children: AUTHORIZED_ROUTES,
+    children: [
+      ...AUTHORIZED_ROUTES.map(({ path, name, element, noHeader }) => ({
+        path,
+        name,
+        element: <Layout noHeader={noHeader || false}>{element}</Layout>,
+      })),
+      ...UNAUTHORIZED_ROUTES.map(({ path, name, element }) => ({
+        path,
+        name,
+        element: <UnauthorizedLayout>{element}</UnauthorizedLayout>,
+      })),
+    ],
   },
-  ...UNAUTHORIZED_ROUTES.map(({
-    path, name, element,
-  }) => ({
-    path,
-    name,
-    element: <UnauthorizedLayout>{element}</UnauthorizedLayout>,
-  })),
 ]);
 
 export default router;

@@ -9,8 +9,11 @@ import { ErrorResponse, isAxiosError } from '@/utils/axiosErrorHandler';
 
 export const useUser = () => {
   const [user, setUser] = useState<User>();
+  const [isLoading, setLoading] = useState(false);
+
   const fetchData = async () => {
     try {
+      setLoading(true);
       const { data: response } = await userApi.getMe();
 
       setUser(response.data);
@@ -19,13 +22,15 @@ export const useUser = () => {
         notificationManager.showFail('', error.response?.data.message);
       }
     }
+
+    setLoading(false);
   };
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  return { user };
+  return { user, isLoading };
 };
 
 export const usePresentation = (presentationId?: string) => {
@@ -51,4 +56,25 @@ export const usePresentation = (presentationId?: string) => {
   }, [fetchData]);
 
   return { presentation };
+};
+
+function getWindowDimensions() {
+  const { innerWidth: width, innerHeight: height } = window;
+
+  return { width, height };
+}
+
+export const useWindowDimensions = () => {
+  const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions());
+
+  useEffect(() => {
+    function handleResize() {
+      setWindowDimensions(getWindowDimensions());
+    }
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return windowDimensions;
 };

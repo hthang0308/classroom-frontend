@@ -1,10 +1,9 @@
 import {
-  BackgroundImage,
-  Group, Stack, Title,
+  BackgroundImage, Stack, Title,
 } from '@mantine/core';
-import React from 'react';
 
-import { HeadingSlide } from '@/pages/presentation/types';
+import BaseSlide from './baseSlide';
+
 import { isValidUrl } from '@/utils';
 
 interface ColorBackgroundProps {
@@ -33,18 +32,22 @@ function ImageBackground({ url, children }: ImageBackgroundProps) {
   );
 }
 
-export default function HeadingDisplaySlide(props: HeadingSlide) {
-  const {
-    title, subTitle, background,
-  } = props;
+interface HeadingDisplaySlideProps {
+  heading?: string
+  subHeading?: string
+  background?: string
+}
 
+export default function HeadingDisplaySlide({
+  heading = '', subHeading = '', background = '',
+}: HeadingDisplaySlideProps) {
   let Content = (
-    <Group sx={{ height: '100%' }} position="center">
+    <BaseSlide>
       <Stack align="center">
-        <Title order={1}>{title}</Title>
-        <Title order={3}>{subTitle}</Title>
+        <Title order={1} align="center">{heading}</Title>
+        <Title order={3} px="xl" mx="xl" align="center">{subHeading}</Title>
       </Stack>
-    </Group>
+    </BaseSlide>
   );
 
   if (background) {

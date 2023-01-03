@@ -2,13 +2,13 @@ import {
   Button,
   Container, Group, Skeleton, Stack, Text, Title,
 } from '@mantine/core';
-import { IconArrowLeft, IconArrowRight } from '@tabler/icons';
+import { IconArrowLeft, IconArrowRight, IconPresentationOff } from '@tabler/icons';
 import config from 'config';
-import React, {
+import {
   useEffect, useMemo, useState,
 } from 'react';
 
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { io as socketIO, Socket } from 'socket.io-client';
 
 import { MultiChoiceOption, PresentationWithUserInfo } from '@/api/presentation';
@@ -24,15 +24,18 @@ import {
   WaitInRoomNewVoteData,
   WaitInRoomType,
 } from '@/socket/types';
-import { SlideType } from '@/utils/constants';
+import { SlideTypes } from '@/utils/constants';
 import getJwtToken from '@/utils/getJwtToken';
 
 interface NavigationHeaderProps {
   roomId: string;
   invitationLink: string;
+  presentationData: PresentationWithUserInfo | undefined
 }
 
-function NavigationHeader({ roomId, invitationLink }: NavigationHeaderProps) {
+function NavigationHeader({ roomId, invitationLink, presentationData }: NavigationHeaderProps) {
+  const navigate = useNavigate();
+
   return (
     <Stack>
       <Group position="center">
@@ -46,7 +49,16 @@ function NavigationHeader({ roomId, invitationLink }: NavigationHeaderProps) {
           <Button><IconArrowLeft /></Button>
           <Button><IconArrowRight /></Button>
         </Group>
-        <FullScreenButton />
+        <Group>
+          <FullScreenButton />
+          <Button
+            color="red"
+            onClick={() => navigate(`/presentation/${presentationData?._id}/${presentationData?.slides[0]._id}/edit`)}
+            leftIcon={<IconPresentationOff />}
+          >
+            <Text>Stop present</Text>
+          </Button>
+        </Group>
       </Group>
     </Stack>
   );
@@ -60,7 +72,7 @@ function ShowPage({ presentation }: HostPresentationProps) {
   const [roomId, setRoomId] = useState<string>('');
   const { jwtToken } = getJwtToken();
 
-  const multiChoiceSlide = presentation.slides.find((s) => s.slideType === SlideType.multipleChoice);
+  const multiChoiceSlide = presentation.slides.find((s) => s.slideType === SlideTypes.multipleChoice);
   const [options, setOptions] = useState<MultiChoiceOption[]>(multiChoiceSlide?.options || []);
 
   const displaySlideData = useMemo(() => multiChoiceSlide, [multiChoiceSlide]);
@@ -79,7 +91,7 @@ function ShowPage({ presentation }: HostPresentationProps) {
 
         return socketIO(config.backendUrl, { extraHeaders: { Authorization: `Bearer ${jwtToken}` } });
       });
-      return () => {};
+      return () => { };
     }
 
     socket.on('connect', () => {
@@ -115,7 +127,7 @@ function ShowPage({ presentation }: HostPresentationProps) {
   return (
     <Skeleton visible={!isLoading}>
       <Stack>
-        <NavigationHeader roomId={roomId} invitationLink={invitationLink} />
+        <NavigationHeader roomId={roomId} invitationLink={invitationLink} presentationData={presentation} />
         {
           displaySlideData === undefined ? (
             <div>No Slide</div>
@@ -132,13 +144,13 @@ function ShowPage({ presentation }: HostPresentationProps) {
 
 export default function HostPresentation() {
   const { presentationId = '' } = useParams<string>();
-  const { user } = useUser();
+  const { user, isLoading } = useUser();
   const { presentation } = usePresentation(presentationId);
   const isHost = (user?._id || 'unknown') === presentation?.userCreated._id;
 
   return (
-    <Container fluid sx={{ height: '100%' }}>
-      <Skeleton visible={user === undefined}>
+    <Container fluid>
+      <Skeleton visible={isLoading}>
         {
           isHost ? (
             <ShowPage presentation={presentation as PresentationWithUserInfo} />

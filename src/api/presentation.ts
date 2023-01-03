@@ -2,7 +2,7 @@ import {
   BasicObject, CompactUser, BaseResponse,
 } from '@/api/types';
 import axiosClient from '@/utils/axiosClient';
-import { SlideType } from '@/utils/constants';
+import { SlideTypes, SlideTypesType } from '@/utils/constants';
 
 export interface MultiChoiceOption {
   value: string;
@@ -16,26 +16,45 @@ export interface MultipleChoiceDataType {
   options: MultiChoiceOption[]
 }
 
+export interface HeadingParagraphDataType {
+  title: string
+  content: string
+  type: string
+}
+
 export interface CompactMultiChoiceSlide {
   _id: string;
   title: string;
-  slideType: typeof SlideType.multipleChoice;
+  slideType: SlideTypesType;
   options: MultiChoiceOption[];
-  answer: string[];
 }
 
-export interface MultiChoiceSlide extends CompactMultiChoiceSlide, BasicObject {
+export interface CompactHeadingParagraphSlide {
+  _id: string;
+  title: string;
+  content?: string;
+  slideType: SlideTypesType;
+}
+
+interface ExtraProps {
   presentationId: string;
   userCreated: string;
   userUpdated: string;
 }
 
-interface BasePresentation<UserType> extends BasicObject {
+export interface MultiChoiceSlide extends CompactMultiChoiceSlide, BasicObject, ExtraProps { }
 
+export interface HeadingParagraphSlide extends CompactHeadingParagraphSlide, BasicObject, ExtraProps { }
+
+export interface CompactSlide extends CompactMultiChoiceSlide, CompactHeadingParagraphSlide { }
+
+export interface Slide extends MultiChoiceSlide, HeadingParagraphSlide { }
+
+interface BasePresentation<UserType> extends BasicObject {
   name: string;
   description: string;
   collaborators: CompactUser[];
-  slides: CompactMultiChoiceSlide[];
+  slides: CompactSlide[];
   userCreated: UserType;
 }
 
@@ -58,12 +77,23 @@ const presentationApi = {
   ),
   updateMultipleChoiceSlide: (id: string | undefined, data: MultipleChoiceDataType) => (
     axiosClient.put<BaseResponse<MultiChoiceSlide>>(`/slide/${id}`, {
+      slideType: SlideTypes.multipleChoice,
       title: data.question,
       options: data.options,
     })
   ),
+  updateHeadingParagraphSlide: (id: string | undefined, data: HeadingParagraphDataType) => (
+    axiosClient.put<BaseResponse<HeadingParagraphSlide>>(`/slide/${id}`, {
+      title: data.title,
+      content: data.content,
+      slideType: data.type,
+    })
+  ),
   createSlide: (presentationId?: string) => (
-    axiosClient.post<BaseResponse<MultiChoiceSlide>>('/slide', { presentationId })
+    axiosClient.post<BaseResponse<Slide>>('/slide', {
+      presentationId,
+      slideType: SlideTypes.multipleChoice,
+    })
   ),
   deleteSlide: (id?: string) => (
     axiosClient.delete<BaseResponse<null>>(`/slide/${id}`)
