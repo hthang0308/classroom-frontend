@@ -1,43 +1,109 @@
 import {
-  Button, Group, SimpleGrid, TextInput, Title, Text,
+  Alert,
+  Button, Group, Stack, TextInput,
 } from '@mantine/core';
 import config from 'config';
 import React, { useEffect, useState } from 'react';
 
+import { useParams } from 'react-router-dom';
 import { io as socketIO, Socket } from 'socket.io-client';
 
-import { PresentationWithUserInfo, MultiChoiceOption } from '@/api/presentation';
+import presentationApi, { CompactSlide, PresentationWithUserInfo, MultiChoiceOption } from '@/api/presentation';
 
+import MultiChoiceDisplaySlide from '@/pages/presentation/slides/guest/multiChoice';
 import {
   ClientToServerEvents,
   ClientToServerEventType,
   ServerToClientEvents,
-  ServerToClientEventType,
+  ServerToClientEventType, WaitInRoomType,
 } from '@/socket/types';
 import { SlideTypes } from '@/utils/constants';
 
 import getJwtToken from '@/utils/getJwtToken';
 
-export interface ShowPageProps {
-  roomId: string;
+interface InputCodePageProps {
+  initialRoomId?: string;
+  setRoomId: (_: string) => void;
+}
+function InputCodePage({ setRoomId, initialRoomId = '' }: InputCodePageProps) {
+  const [input, setInput] = useState(initialRoomId);
+  const [err, setErr] = useState('');
+
+  const checkRoomId = async (value: string) => {
+    try {
+      await presentationApi.getSocketRoom(value);
+      setErr('');
+      setRoomId(value);
+    } catch {
+      setErr(`You cannot access room with id '${value}'`);
+    }
+  };
+
+  useEffect(() => {
+    if (!initialRoomId) {
+      return;
+    }
+
+    checkRoomId(initialRoomId);
+  });
+
+  // noinspection RequiredAttributes
+  return (
+    <Stack align="center">
+      <Group position="center">
+        <TextInput placeholder="Enter room id here" value={input} onChange={(e) => setInput(e.currentTarget.value)} />
+        <Button onClick={() => checkRoomId(input)}>Join</Button>
+      </Group>
+      {
+        err && (
+          // eslint-disable-next-line
+          <Alert title={err} color="red" variant="filled" sx={{ width: 'fit-content'}}>
+          </Alert>
+        )
+      }
+    </Stack>
+  );
 }
 
-function InputCodePage({ setRoomId }: { setRoomId: (_: string) => void }) {
-  const [input, setInput] = useState('');
+interface SlideSwitcherProps {
+  slide?: CompactSlide;
+  options: MultiChoiceOption[];
+  sendVote: (_: MultiChoiceOption) => void;
+}
 
-  return (
-    <Group position="center">
-      <TextInput placeholder="Enter room id here" value={input} onChange={(e) => setInput(e.currentTarget.value)} />
-      <Button onClick={() => setRoomId(input)}>Join</Button>
-    </Group>
-  );
+function SlideSwitcher({ slide, options, sendVote }: SlideSwitcherProps) {
+  let Slide: React.ReactNode;
+
+  switch (slide?.slideType) {
+    case SlideTypes.multipleChoice: {
+      Slide = <MultiChoiceDisplaySlide title={slide?.title} options={options} sendVote={sendVote} />;
+      break;
+    }
+
+    default: {
+      Slide = (
+        <div>
+          No slide or wrong type
+          {' '}
+          {slide?.slideType}
+        </div>
+      );
+      break;
+    }
+  }
+
+  return Slide;
+}
+
+export interface ShowPageProps {
+  roomId: string;
 }
 
 function ShowPage({ roomId }: ShowPageProps) {
   const { jwtToken } = getJwtToken();
 
   const [presentation, setPresentation] = useState<PresentationWithUserInfo>();
-  const [voteValue, setVoteValue] = useState<MultiChoiceOption>();
+  const [currentSlide, setCurrentSlide] = useState<CompactSlide>();
 
   const multiChoiceSlide = (presentation?.slides || []).find((s) => s.slideType === SlideTypes.multipleChoice);
   const options = multiChoiceSlide?.options || [];
@@ -49,7 +115,6 @@ function ShowPage({ roomId }: ShowPageProps) {
       return;
     }
 
-    setVoteValue(option);
     socket.emit(ClientToServerEventType.memberVote, {
       slideId: multiChoiceSlide?._id || '',
       optionIndex: option.index === undefined ? -1 : option.index,
@@ -73,6 +138,19 @@ function ShowPage({ roomId }: ShowPageProps) {
         setPresentation(data.data);
       });
 
+      socket.on(ServerToClientEventType.waitInRoom, (data) => {
+        switch (data.type) {
+          case WaitInRoomType.newSlide: {
+            setCurrentSlide(data.data);
+            break;
+          }
+
+          default: {
+            break;
+          }
+        }
+      });
+
       socket.emit(ClientToServerEventType.joinRoom, { roomId });
     });
 
@@ -84,55 +162,20 @@ function ShowPage({ roomId }: ShowPageProps) {
 
   return (
     <div>
-      <Title order={3} sx={{ textAlign: 'center' }}>{multiChoiceSlide?.title}</Title>
-      {
-        voteValue ? (
-          <Text sx={{ textAlign: 'center' }}>
-            You voted for
-            {' '}
-            {voteValue.value}
-          </Text>
-        ) : (
-          <SimpleGrid
-            cols={4}
-            spacing="lg"
-            breakpoints={[
-              {
-                maxWidth: 980, cols: 3, spacing: 'md',
-              },
-              {
-                maxWidth: 755, cols: 2, spacing: 'sm',
-              },
-              {
-                maxWidth: 600, cols: 1, spacing: 'sm',
-              },
-            ]}
-          >
-            {
-              options.map((o) => (
-                <Button
-                  key={`${o.index}__${o.value}`}
-                  onClick={() => sendVote(o)}
-                >
-                  {o.value}
-                </Button>
-              ))
-            }
-          </SimpleGrid>
-        )
-      }
+      <SlideSwitcher options={options} sendVote={sendVote} slide={currentSlide} />
     </div>
   );
 }
 
 export default function GuestPresentation() {
+  const { roomId: paramRoomId } = useParams();
   const [roomId, setRoomId] = useState('');
 
   return (
     roomId ? (
       <ShowPage roomId={roomId} />
     ) : (
-      <InputCodePage setRoomId={setRoomId} />
+      <InputCodePage setRoomId={setRoomId} initialRoomId={paramRoomId} />
     )
   );
 }

@@ -140,7 +140,7 @@ function ShowPage({ presentation }: HostPresentationProps) {
   const currentSlide = presentation.slides[currentSlideIndex];
   const [options, setOptions] = useState<MultiChoiceOption[]>(currentSlide?.options || []);
 
-  const invitationLink = `${window.location.host}/presentation/join`;
+  const invitationLink = `${window.location.host}/presentation/join/${roomId}`;
 
   const isLoading = currentSlide === undefined || !!roomId;
 
