@@ -33,6 +33,7 @@ function MultiChoiceDisplaySlide({
       setData(options);
     }
   }, [randomData, options]);
+
   return (
     <BaseSlide>
       <Stack>
@@ -62,9 +63,7 @@ function MultiChoiceDisplaySlide({
                 </BarChart>
               </ResponsiveContainer>
             )
-            : (
-              null
-            )
+            : null
         }
       </Stack>
     </BaseSlide>

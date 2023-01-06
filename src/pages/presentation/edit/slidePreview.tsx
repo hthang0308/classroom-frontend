@@ -1,10 +1,9 @@
 import { Text } from '@mantine/core';
 
-import HeadingDisplaySlide from '../slides/heading';
-import MultiChoiceDisplaySlide from '../slides/multiChoice';
-import ParagraphDisplaySlide from '../slides/paragraph';
-
 import { CompactSlide } from '@/api/presentation';
+import HeadingDisplaySlide from '@/pages/presentation/slides/host/heading';
+import MultiChoiceDisplaySlide from '@/pages/presentation/slides/host/multiChoice';
+import ParagraphDisplaySlide from '@/pages/presentation/slides/host/paragraph';
 
 import { SlideTypes } from '@/utils/constants';
 

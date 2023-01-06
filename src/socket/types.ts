@@ -1,5 +1,5 @@
 import {
-  CompactMultiChoiceSlide, MultiChoiceOption, PresentationWithUserInfo,
+  CompactSlide, MultiChoiceOption, PresentationWithUserInfo,
 } from '@/api/presentation';
 
 export const ClientToServerEventType = {
@@ -65,7 +65,7 @@ export interface WaitInRoomInfoData {
 export interface WaitInRoomNewSlideData {
   type: typeof WaitInRoomType.newSlide;
   message: string;
-  data: CompactMultiChoiceSlide;
+  data: CompactSlide;
 }
 
 export type WaitInRoomData = WaitInRoomInfoData | WaitInRoomNewVoteData | WaitInRoomNewSlideData;

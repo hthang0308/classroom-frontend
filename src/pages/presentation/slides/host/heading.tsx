@@ -2,6 +2,8 @@ import {
   BackgroundImage, Stack, Title,
 } from '@mantine/core';
 
+import React from 'react';
+
 import BaseSlide from './baseSlide';
 
 import { isValidUrl } from '@/utils';

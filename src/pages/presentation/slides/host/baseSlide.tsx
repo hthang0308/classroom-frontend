@@ -1,7 +1,7 @@
 import { AspectRatio } from '@mantine/core';
 import { useRef, useEffect, useState } from 'react';
 
-import { useWindowDimensions } from '../hooks';
+import { useWindowDimensions } from '@/pages/presentation/hooks';
 
 const BaseSlide = ({ children }: { children: React.ReactNode }) => {
   const [slideDisplayHeight, setSlideDisplayHeight] = useState<number>(0);

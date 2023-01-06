@@ -4,24 +4,25 @@ import {
 } from '@mantine/core';
 import { IconArrowLeft, IconArrowRight, IconPresentationOff } from '@tabler/icons';
 import config from 'config';
-import {
-  useEffect, useMemo, useState,
+import React, {
+  useEffect, useState,
 } from 'react';
 
 import { useParams, useNavigate } from 'react-router-dom';
 import { io as socketIO, Socket } from 'socket.io-client';
 
-import { MultiChoiceOption, PresentationWithUserInfo } from '@/api/presentation';
+import { CompactSlide, MultiChoiceOption, PresentationWithUserInfo } from '@/api/presentation';
 import CopyButton from '@/pages/common/buttons/copyButton';
 import FullScreenButton from '@/pages/common/buttons/fullScreenButton';
 import { usePresentation, useUser } from '@/pages/presentation/hooks';
-import MultiChoiceDisplaySlide from '@/pages/presentation/slides/multiChoice';
+import HeadingDisplaySlide from '@/pages/presentation/slides/host/heading';
+import MultiChoiceDisplaySlide from '@/pages/presentation/slides/host/multiChoice';
+import ParagraphDisplaySlide from '@/pages/presentation/slides/host/paragraph';
 import {
   ClientToServerEvents,
   ClientToServerEventType,
   ServerToClientEvents,
   ServerToClientEventType,
-  WaitInRoomNewVoteData,
   WaitInRoomType,
 } from '@/socket/types';
 import { SlideTypes } from '@/utils/constants';
@@ -31,9 +32,14 @@ interface NavigationHeaderProps {
   roomId: string;
   invitationLink: string;
   presentationData: PresentationWithUserInfo | undefined
+
+  toNextSlide: () => void;
+  toPrevSlide: () => void;
 }
 
-function NavigationHeader({ roomId, invitationLink, presentationData }: NavigationHeaderProps) {
+function NavigationHeader({
+  roomId, invitationLink, presentationData, toNextSlide, toPrevSlide,
+}: NavigationHeaderProps) {
   const navigate = useNavigate();
 
   return (
@@ -46,8 +52,8 @@ function NavigationHeader({ roomId, invitationLink, presentationData }: Navigati
       </Group>
       <Group position="apart">
         <Group>
-          <Button><IconArrowLeft /></Button>
-          <Button><IconArrowRight /></Button>
+          <Button onClick={() => { toPrevSlide(); }}><IconArrowLeft /></Button>
+          <Button onClick={() => { toNextSlide(); }}><IconArrowRight /></Button>
         </Group>
         <Group>
           <FullScreenButton />
@@ -64,6 +70,44 @@ function NavigationHeader({ roomId, invitationLink, presentationData }: Navigati
   );
 }
 
+interface SlideSwitcherProps {
+  slide?: CompactSlide;
+  options: MultiChoiceOption[];
+}
+
+function SlideSwitcher({ slide, options }: SlideSwitcherProps) {
+  let Slide: React.ReactNode;
+
+  switch (slide?.slideType) {
+    case SlideTypes.multipleChoice: {
+      Slide = <MultiChoiceDisplaySlide title={slide?.title} options={options} />;
+      break;
+    }
+
+    case SlideTypes.heading: {
+      Slide = <HeadingDisplaySlide heading={slide.title} subHeading={slide.content} />;
+      break;
+    }
+
+    case SlideTypes.paragraph: {
+      Slide = <ParagraphDisplaySlide heading={slide.title} paragraph={slide.content} />;
+      break;
+    }
+
+    default: {
+      Slide = (
+        <div>
+          No slide or wrong type
+          {slide?.slideType}
+        </div>
+      );
+      break;
+    }
+  }
+
+  return Slide;
+}
+
 interface HostPresentationProps {
   presentation: PresentationWithUserInfo;
 }
@@ -72,15 +116,33 @@ function ShowPage({ presentation }: HostPresentationProps) {
   const [roomId, setRoomId] = useState<string>('');
   const { jwtToken } = getJwtToken();
 
-  const multiChoiceSlide = presentation.slides.find((s) => s.slideType === SlideTypes.multipleChoice);
-  const [options, setOptions] = useState<MultiChoiceOption[]>(multiChoiceSlide?.options || []);
+  const [socket, setSocket] = useState<Socket<ServerToClientEvents, ClientToServerEvents>>();
 
-  const displaySlideData = useMemo(() => multiChoiceSlide, [multiChoiceSlide]);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+
+  const handleChangeSlide = (index: number) => {
+    if (index === currentSlideIndex) {
+      return;
+    }
+
+    socket?.emit(ClientToServerEventType.hostStartSlide, { slideId: presentation.slides[index]._id });
+    setCurrentSlideIndex(index);
+  };
+
+  const toNextSlide = () => {
+    handleChangeSlide(Math.min(presentation.slides.length, currentSlideIndex + 1));
+  };
+
+  const toPrevSlide = () => {
+    handleChangeSlide(Math.max(0, currentSlideIndex - 1));
+  };
+
+  const currentSlide = presentation.slides[currentSlideIndex];
+  const [options, setOptions] = useState<MultiChoiceOption[]>(currentSlide?.options || []);
+
   const invitationLink = `${window.location.host}/presentation/join`;
 
-  const isLoading = multiChoiceSlide === undefined || !!roomId;
-
-  const [socket, setSocket] = useState<Socket<ServerToClientEvents, ClientToServerEvents>>();
+  const isLoading = currentSlide === undefined || !!roomId;
 
   useEffect(() => {
     if (!socket) {
@@ -102,9 +164,7 @@ function ShowPage({ presentation }: HostPresentationProps) {
       socket.on(ServerToClientEventType.waitInRoom, (data) => {
         switch (data.type) {
           case WaitInRoomType.newVote: {
-            if (displaySlideData) {
-              setOptions((data as WaitInRoomNewVoteData).data);
-            }
+            setOptions(data.data);
 
             break;
           }
@@ -122,21 +182,21 @@ function ShowPage({ presentation }: HostPresentationProps) {
       socket.emit(ClientToServerEventType.hostStopPresentation, { presentationId: presentation._id });
       socket.disconnect();
     };
-  }, [displaySlideData, jwtToken, presentation._id, socket]);
+  }, [jwtToken, presentation._id, socket]);
 
   return (
     <Skeleton visible={!isLoading}>
       <Stack>
-        <NavigationHeader roomId={roomId} invitationLink={invitationLink} presentationData={presentation} />
-        {
-          displaySlideData === undefined ? (
-            <div>No Slide</div>
-          ) : (
-            <div style={{ padding: 20 }}>
-              <MultiChoiceDisplaySlide title={multiChoiceSlide?.title} options={options} />
-            </div>
-          )
-        }
+        <NavigationHeader
+          roomId={roomId}
+          invitationLink={invitationLink}
+          presentationData={presentation}
+          toNextSlide={toNextSlide}
+          toPrevSlide={toPrevSlide}
+        />
+        <div style={{ padding: 20 }}>
+          <SlideSwitcher options={options} slide={currentSlide} />
+        </div>
       </Stack>
     </Skeleton>
   );
@@ -147,15 +207,21 @@ export default function HostPresentation() {
   const { user, isLoading } = useUser();
   const { presentation } = usePresentation(presentationId);
   const isHost = (user?._id || 'unknown') === presentation?.userCreated._id;
+  const hasSlide = !!presentation?.slides?.length;
 
   return (
     <Container fluid>
       <Skeleton visible={isLoading}>
         {
+          // eslint-disable-next-line no-nested-ternary
           isHost ? (
             <ShowPage presentation={presentation as PresentationWithUserInfo} />
           ) : (
-            <Title order={3} sx={{ textAlign: 'center' }}>You cannot start a presentation that is not yours</Title>
+            hasSlide ? (
+              <Title order={3} sx={{ textAlign: 'center' }}>You cannot start a presentation that is not yours</Title>
+            ) : (
+              <Title order={3} sx={{ textAlign: 'center' }}>You have no slide</Title>
+            )
           )
         }
       </Skeleton>

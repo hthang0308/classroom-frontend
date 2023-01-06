@@ -80,7 +80,7 @@ export const AUTHORIZED_ROUTES: Props[] = [
     noHeader: true,
   },
   {
-    path: '/presentation/join/',
+    path: '/presentation/join/:roomId',
     name: 'Join Present',
     element: <GuestPresentation />,
   },

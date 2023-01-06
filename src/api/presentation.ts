@@ -1,5 +1,5 @@
 import {
-  BasicObject, CompactUser, BaseResponse,
+  BasicObject, CompactUser, BaseResponse, BasicResponse,
 } from '@/api/types';
 import axiosClient from '@/utils/axiosClient';
 import { SlideTypes, SlideTypesType } from '@/utils/constants';
@@ -97,6 +97,10 @@ const presentationApi = {
   ),
   deleteSlide: (id?: string) => (
     axiosClient.delete<BaseResponse<null>>(`/slide/${id}`)
+  ),
+
+  getSocketRoom: (roomId: string) => (
+    axiosClient.get<BasicResponse>(`/presentation/get-socket-room/${roomId}`)
   ),
 };
 
