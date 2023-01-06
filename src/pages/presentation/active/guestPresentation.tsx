@@ -5,7 +5,7 @@ import {
 import config from 'config';
 import React, { useEffect, useState } from 'react';
 
-import { useParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { io as socketIO, Socket } from 'socket.io-client';
 
 import presentationApi, { CompactSlide, PresentationWithUserInfo, MultiChoiceOption } from '@/api/presentation';
@@ -22,11 +22,11 @@ import { SlideTypes } from '@/utils/constants';
 import getJwtToken from '@/utils/getJwtToken';
 
 interface InputCodePageProps {
-  initialRoomId?: string;
+  initialRoomId?: string | null;
   setRoomId: (_: string) => void;
 }
 function InputCodePage({ setRoomId, initialRoomId = '' }: InputCodePageProps) {
-  const [input, setInput] = useState(initialRoomId);
+  const [input, setInput] = useState<string>(initialRoomId || '');
   const [err, setErr] = useState('');
 
   const checkRoomId = async (value: string) => {
@@ -168,7 +168,8 @@ function ShowPage({ roomId }: ShowPageProps) {
 }
 
 export default function GuestPresentation() {
-  const { roomId: paramRoomId } = useParams();
+  const [searchParams] = useSearchParams();
+  const paramRoomId = searchParams.get('roomId');
   const [roomId, setRoomId] = useState('');
 
   return (
