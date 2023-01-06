@@ -5,7 +5,7 @@ import {
 import config from 'config';
 import React, { useEffect, useState } from 'react';
 
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { io as socketIO, Socket } from 'socket.io-client';
 
 import presentationApi, { CompactSlide, PresentationWithUserInfo, MultiChoiceOption } from '@/api/presentation';
@@ -86,6 +86,8 @@ function SlideSwitcher({ slide, options, sendVote }: SlideSwitcherProps) {
           No slide or wrong type
           {' '}
           {slide?.slideType}
+          {' '}
+          {slide?._id}
         </div>
       );
       break;
@@ -102,13 +104,13 @@ export interface ShowPageProps {
 function ShowPage({ roomId }: ShowPageProps) {
   const { jwtToken } = getJwtToken();
 
-  const [presentation, setPresentation] = useState<PresentationWithUserInfo>();
+  const [, setPresentation] = useState<PresentationWithUserInfo>();
   const [currentSlide, setCurrentSlide] = useState<CompactSlide>();
-
-  const multiChoiceSlide = (presentation?.slides || []).find((s) => s.slideType === SlideTypes.multipleChoice);
-  const options = multiChoiceSlide?.options || [];
+  const [options, setOptions] = useState<MultiChoiceOption[]>([]);
 
   const [socket, setSocket] = useState<Socket<ServerToClientEvents, ClientToServerEvents>>();
+
+  const navigate = useNavigate();
 
   const sendVote = (option: MultiChoiceOption) => {
     if (!socket) {
@@ -116,7 +118,7 @@ function ShowPage({ roomId }: ShowPageProps) {
     }
 
     socket.emit(ClientToServerEventType.memberVote, {
-      slideId: multiChoiceSlide?._id || '',
+      slideId: currentSlide?._id || '',
       optionIndex: option.index === undefined ? -1 : option.index,
     });
   };
@@ -142,6 +144,12 @@ function ShowPage({ roomId }: ShowPageProps) {
         switch (data.type) {
           case WaitInRoomType.newSlide: {
             setCurrentSlide(data.data);
+            setOptions(data.data.options);
+            break;
+          }
+
+          case WaitInRoomType.stopPresentation: {
+            navigate('/presentations');
             break;
           }
 
@@ -158,7 +166,7 @@ function ShowPage({ roomId }: ShowPageProps) {
       socket.emit(ClientToServerEventType.leaveRoom, { roomId });
       socket.disconnect();
     };
-  }, [jwtToken, roomId, socket]);
+  }, [jwtToken, navigate, roomId, socket]);
 
   return (
     <div>

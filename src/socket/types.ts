@@ -22,6 +22,7 @@ export const WaitInRoomType = {
   info: 'info',
   newSlide: 'new-slide',
   newVote: 'new-vote',
+  stopPresentation: 'stop-presentation',
 } as const;
 
 export interface HostStartStopRoomData {
@@ -68,7 +69,12 @@ export interface WaitInRoomNewSlideData {
   data: CompactSlide;
 }
 
-export type WaitInRoomData = WaitInRoomInfoData | WaitInRoomNewVoteData | WaitInRoomNewSlideData;
+export interface WaitInRoomStopPresentation {
+  type: typeof WaitInRoomType.stopPresentation;
+}
+
+export type WaitInRoomData = WaitInRoomInfoData | WaitInRoomNewVoteData
+| WaitInRoomNewSlideData | WaitInRoomStopPresentation;
 
 export interface ClientToServerEvents {
   [ClientToServerEventType.hostCreateRoom]: (data: HostStartStopRoomData) => void;
