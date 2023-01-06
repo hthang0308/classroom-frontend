@@ -11,6 +11,8 @@ import { io as socketIO, Socket } from 'socket.io-client';
 import presentationApi, { CompactSlide, PresentationWithUserInfo, MultiChoiceOption } from '@/api/presentation';
 
 import MultiChoiceDisplaySlide from '@/pages/presentation/slides/guest/multiChoice';
+import HeadingDisplaySlide from '@/pages/presentation/slides/host/heading';
+import ParagraphDisplaySlide from '@/pages/presentation/slides/host/paragraph';
 import {
   ClientToServerEvents,
   ClientToServerEventType,
@@ -77,6 +79,16 @@ function SlideSwitcher({ slide, options, sendVote }: SlideSwitcherProps) {
   switch (slide?.slideType) {
     case SlideTypes.multipleChoice: {
       Slide = <MultiChoiceDisplaySlide title={slide?.title} options={options} sendVote={sendVote} />;
+      break;
+    }
+
+    case SlideTypes.heading: {
+      Slide = <HeadingDisplaySlide heading={slide.title} subHeading={slide.content} />;
+      break;
+    }
+
+    case SlideTypes.paragraph: {
+      Slide = <ParagraphDisplaySlide heading={slide.title} paragraph={slide.content} />;
       break;
     }
 
