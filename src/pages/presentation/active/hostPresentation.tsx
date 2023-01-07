@@ -1,6 +1,5 @@
 import {
-  Button,
-  Container, Group, Skeleton, Stack, Text, Title,
+  Button, Container, Group, Skeleton, Stack, Text, Title, Grid,
 } from '@mantine/core';
 import { IconArrowLeft, IconArrowRight, IconPresentationOff } from '@tabler/icons';
 import config from 'config';
@@ -11,7 +10,10 @@ import React, {
 import { useParams, useNavigate } from 'react-router-dom';
 import { io as socketIO, Socket } from 'socket.io-client';
 
-import { CompactSlide, MultiChoiceOption, PresentationWithUserInfo } from '@/api/presentation';
+import ChatBox from './chatBox';
+import QuestionBox from './questionBox';
+
+import { MultiChoiceOption, PresentationWithUserInfo } from '@/api/presentation';
 import CopyButton from '@/pages/common/buttons/copyButton';
 import FullScreenButton from '@/pages/common/buttons/fullScreenButton';
 import { usePresentation, useUser } from '@/pages/presentation/hooks';
@@ -194,9 +196,17 @@ function ShowPage({ presentation }: HostPresentationProps) {
           toNextSlide={toNextSlide}
           toPrevSlide={toPrevSlide}
         />
-        <div style={{ padding: 20 }}>
+            <Grid>
+              <Grid.Col span={9}>
           <SlideSwitcher options={options} slide={currentSlide} />
-        </div>
+              </Grid.Col>
+              <Grid.Col span={3}>
+                <Stack spacing={15}>
+                  <QuestionBox />
+                  <ChatBox />
+                </Stack>
+              </Grid.Col>
+            </Grid>
       </Stack>
     </Skeleton>
   );
