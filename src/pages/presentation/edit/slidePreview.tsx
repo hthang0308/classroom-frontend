@@ -1,6 +1,8 @@
 import { Text } from '@mantine/core';
+import { UseFormReturnType } from '@mantine/form';
 
-import { CompactSlide } from '@/api/presentation';
+import { FormProps } from './types';
+
 import HeadingDisplaySlide from '@/pages/presentation/slides/host/heading';
 import MultiChoiceDisplaySlide from '@/pages/presentation/slides/host/multiChoice';
 import ParagraphDisplaySlide from '@/pages/presentation/slides/host/paragraph';
@@ -9,20 +11,20 @@ import { SlideTypes } from '@/utils/constants';
 
 interface SlidePreviewProps {
   type: string | null
-  slideData: CompactSlide | undefined
+  form: UseFormReturnType<FormProps>
 }
 
 const NoSlidePreview = () => <Text>No slide preview</Text>;
 
-export default function SlidePreview({ type, slideData }: SlidePreviewProps) {
+export default function SlidePreview({ type, form }: SlidePreviewProps) {
   let Slide = null;
   const props = {};
 
   switch (type) {
     case SlideTypes.multipleChoice: {
       Object.assign(props, {
-        title: slideData?.title,
-        options: slideData?.options,
+        title: form.values.question,
+        options: form.values.options,
         randomData: true,
       });
       Slide = MultiChoiceDisplaySlide;
@@ -31,8 +33,8 @@ export default function SlidePreview({ type, slideData }: SlidePreviewProps) {
 
     case SlideTypes.heading: {
       Object.assign(props, {
-        heading: slideData?.title,
-        subHeading: slideData?.content,
+        heading: form.values.heading,
+        subHeading: form.values.subheading,
       });
       Slide = HeadingDisplaySlide;
       break;
@@ -40,8 +42,8 @@ export default function SlidePreview({ type, slideData }: SlidePreviewProps) {
 
     case SlideTypes.paragraph: {
       Object.assign(props, {
-        heading: slideData?.title,
-        paragraph: slideData?.content,
+        heading: form.values.heading,
+        paragraph: form.values.paragraph,
       });
       Slide = ParagraphDisplaySlide;
       break;

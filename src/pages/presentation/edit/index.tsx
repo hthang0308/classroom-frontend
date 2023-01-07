@@ -15,7 +15,6 @@ import { SlideInfo, FormProps } from './types';
 
 import presentationApi, {
   PresentationWithUserInfo as Presentation,
-  CompactSlide,
   Slide,
 } from '@/api/presentation';
 import { BaseResponse } from '@/api/types';
@@ -25,7 +24,6 @@ import { SlideTypes } from '@/utils/constants';
 
 export default function EditPresentation() {
   const [presentationData, setPresentationData] = useState<Presentation>();
-  const [slideData, setSlideData] = useState<CompactSlide>();
   const [slideType, setSlideType] = useState<string | null>(null);
   const [slideList, setSlideList] = useState<SlideInfo[]>([]);
   const [isLoading, setLoading] = useState(false);
@@ -48,12 +46,22 @@ export default function EditPresentation() {
     },
   });
 
-  const fetchData = useCallback(async () => {
+  const fetchPresentationData = useCallback(async () => {
     try {
       setLoading(true);
       const { data: response } = await presentationApi.getPresentationById(presentationId);
 
       setPresentationData(response.data);
+
+      const slideListData = response.data.slides.map((i, index) => ({
+        id: i._id,
+        label: `Slide ${index + 1}`,
+        title: i.title,
+        url: `/presentation/${presentationId}/${i._id}/edit`,
+        type: i.slideType,
+      }));
+
+      setSlideList(slideListData);
     } catch (error) {
       if (isAxiosError<ErrorResponse>(error)) {
         notificationManager.showFail('', error.response?.data.message);
@@ -64,45 +72,57 @@ export default function EditPresentation() {
   }, [presentationId]);
 
   useEffect(() => {
-    if (presentationData) {
-      const currentSlideData = presentationData.slides.find((i) => i._id === slideId);
-      const slideListData = presentationData.slides.map((i, index) => ({
-        id: i._id,
-        label: `Slide ${index + 1}`,
-        title: i.title,
-        url: `/presentation/${presentationId}/${i._id}/edit`,
-        type: i.slideType,
-      }));
+    fetchPresentationData();
+  }, [fetchPresentationData]);
 
-      setSlideData(currentSlideData);
-      setSlideType(currentSlideData?.slideType || null);
-      setSlideList(slideListData);
+  const fetchSlideData = useCallback(async () => {
+    if (slideId) {
+      try {
+        const { data: response } = await presentationApi.getSlide(slideId);
+
+        const slideDataTemp = response.data;
+        const slideTypeTemp = slideDataTemp.slideType;
+
+        setSlideType(slideTypeTemp);
+
+        switch (slideTypeTemp) {
+          case SlideTypes.multipleChoice: {
+            form.setFieldValue('question', slideDataTemp.title || '');
+            form.setFieldValue('options', slideDataTemp.options.map((i) => ({ ...i, quantity: i.quantity || 0 })) || []);
+            break;
+          }
+
+          case SlideTypes.heading: {
+            form.setFieldValue('heading', slideDataTemp.title || '');
+            form.setFieldValue('subheading', slideDataTemp.content || '');
+            break;
+          }
+
+          case SlideTypes.paragraph: {
+            form.setFieldValue('heading', slideDataTemp.title || '');
+            form.setFieldValue('paragraph', slideDataTemp.content || '');
+            break;
+          }
+
+          default: {
+            break;
+          }
+        }
+      } catch (error) {
+        if (isAxiosError<ErrorResponse>(error)) {
+          notificationManager.showFail('', error.response?.data.message);
+        }
+      }
     }
-  }, [presentationData, presentationId, slideId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slideId]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const breadcrumbsItems = [
-    { title: 'My presentations', to: '/presentations' },
-    { title: presentationData?.name || '', to: '#' },
-  ];
-
-  const slideTypeOptions = [
-    { value: SlideTypes.multipleChoice, label: 'Multiple Choice' },
-    { value: SlideTypes.heading, label: 'Heading' },
-    { value: SlideTypes.paragraph, label: 'Paragraph' },
-  ];
+    fetchSlideData();
+  }, [fetchSlideData]);
 
   const handleSlideTypeChange = (type: string) => {
-    setSlideData((prevState) => ({
-      _id: prevState?._id || '',
-      slideType: prevState?.slideType || SlideTypes.multipleChoice,
-      title: prevState?.title || '',
-      content: '',
-      options: [],
-    }));
+    form.reset();
     setSlideType(type);
   };
 
@@ -111,7 +131,7 @@ export default function EditPresentation() {
       const { data: response } = await presentationApi.createSlide(presentationId);
 
       notificationManager.showSuccess('', response.message);
-      fetchData();
+      fetchPresentationData();
     } catch (error) {
       if (isAxiosError<ErrorResponse>(error)) {
         notificationManager.showFail('', error.response?.data.message);
@@ -149,7 +169,7 @@ export default function EditPresentation() {
       }
 
       notificationManager.showSuccess('', response.message);
-      fetchData();
+      fetchPresentationData();
     } catch (error) {
       if (isAxiosError<ErrorResponse>(error)) {
         notificationManager.showFail('', error.response?.data.message);
@@ -164,13 +184,24 @@ export default function EditPresentation() {
 
       notificationManager.showSuccess('', response.message);
       navigate(`/presentation/${presentationId}/${randomSlide?.id}/edit`);
-      fetchData();
+      fetchPresentationData();
     } catch (error) {
       if (isAxiosError<ErrorResponse>(error)) {
         notificationManager.showFail('', error.response?.data.message);
       }
     }
   };
+
+  const breadcrumbsItems = [
+    { title: 'My presentations', to: '/presentations' },
+    { title: presentationData?.name || '', to: '#' },
+  ];
+
+  const slideTypeOptions = [
+    { value: SlideTypes.multipleChoice, label: 'Multiple Choice' },
+    { value: SlideTypes.heading, label: 'Heading' },
+    { value: SlideTypes.paragraph, label: 'Paragraph' },
+  ];
 
   return (
     <Container fluid>
@@ -212,7 +243,7 @@ export default function EditPresentation() {
               : (
                 <Grid>
                   <Grid.Col span={8}>
-                    <SlidePreview type={slideType} slideData={slideData} />
+                    <SlidePreview type={slideType} form={form} />
                   </Grid.Col>
                   <Grid.Col span={4} p={16}>
                     <Select
@@ -224,7 +255,6 @@ export default function EditPresentation() {
                     />
                     <Divider my="md" />
                     <SlideContentSetting
-                      slideInfo={slideData}
                       form={form}
                       slideType={slideType}
                     />

@@ -75,6 +75,9 @@ const presentationApi = {
   deletePresentation: (id?: string) => (
     axiosClient.delete<BaseResponse<null>>(`/presentation/${id}`)
   ),
+  getSlide: (id: string) => (
+    axiosClient.get<BaseResponse<Slide>>(`/slide/${id}`)
+  ),
   updateMultipleChoiceSlide: (id: string | undefined, data: MultipleChoiceDataType) => (
     axiosClient.put<BaseResponse<MultiChoiceSlide>>(`/slide/${id}`, {
       slideType: SlideTypes.multipleChoice,
