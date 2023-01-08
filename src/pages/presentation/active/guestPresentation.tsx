@@ -150,6 +150,8 @@ function ShowPage({ roomId }: ShowPageProps) {
     socket.on('connect', () => {
       socket.on(ServerToClientEventType.waitJoinRoom, (data) => {
         setPresentation(data.data);
+        setCurrentSlide(data.data.currentSlideInfo);
+        setOptions(data.data.currentSlideInfo.options);
       });
 
       socket.on(ServerToClientEventType.waitInRoom, (data) => {
