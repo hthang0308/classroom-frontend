@@ -1,99 +1,34 @@
-import { Box, Flex, Stack, Group, TextInput, Tooltip, ActionIcon, Checkbox } from '@mantine/core';
+import { Box, Flex, Stack, Group, TextInput, Tooltip, ActionIcon, Checkbox, Text } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconSend } from '@tabler/icons';
 import sortBy from 'lodash.sortby';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { useState, useEffect } from 'react';
 
-const FAKE_DATA = [
-  {
-    id: '1',
-    question: 'Compellingly formulate frictionless action items',
-    answer: false,
-    vote: 5,
-    timestamp: '04/01/2022',
-  },
-  {
-    id: '2',
-    question: 'Compellingly formulate frictionless action items',
-    answer: false,
-    vote: 10,
-    timestamp: '03/01/2022',
-  },
-  {
-    id: '3',
-    question: 'Compellingly formulate frictionless action items',
-    answer: true,
-    vote: -7,
-    timestamp: '07/01/2022',
-  },
-  {
-    id: '4',
-    question: 'Compellingly formulate frictionless action items',
-    answer: true,
-    vote: 0,
-    timestamp: '05/01/2022',
-  },
-  {
-    id: '5',
-    question: 'Compellingly formulate frictionless action items',
-    answer: false,
-    vote: -10,
-    timestamp: '01/01/2022',
-  },
-  {
-    id: '6',
-    question: 'Compellingly formulate frictionless action items',
-    answer: true,
-    vote: -7,
-    timestamp: '07/01/2022',
-  },
-  {
-    id: '7',
-    question: 'Compellingly formulate frictionless action items',
-    answer: true,
-    vote: 0,
-    timestamp: '05/01/2022',
-  },
-  {
-    id: '8',
-    question: 'Compellingly formulate frictionless action items',
-    answer: false,
-    vote: -10,
-    timestamp: '01/01/2022',
-  },
-];
+import { Question } from '../types';
 
-const QuestionInput = () => {
-  const form = useForm({
-    initialValues: {
-      message: '',
-    },
-  });
+interface HostQuestionBoxProps {
+  answerQuestion: (questionId: string) => void
+  dataSource: Question[]
+}
 
-  return (
-    <Box sx={{ flexGrow: 2 }}>
-      <TextInput
-        placeholder="Type your question..."
-        {...form.getInputProps('message')}
-      />
-    </Box>
-  );
-};
-
-export function HostQuestionBox() {
-  const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'vote', direction: 'desc' });
-  const [dataSource, setDataSource] = useState(FAKE_DATA);
-  const [sortedData, setSortedData] = useState(sortBy(dataSource, 'vote'));
+export function HostQuestionBox({ answerQuestion, dataSource }: HostQuestionBoxProps) {
+  const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'time', direction: 'desc' });
+  const [data, setData] = useState<Question[]>([]);
+  const [sortedData, setSortedData] = useState<Question[]>(sortBy(dataSource, 'vote'));
 
   useEffect(() => {
-    const data = sortBy(dataSource, sortStatus.columnAccessor);
+    setData(dataSource);
+  }, [dataSource]);
 
-    setSortedData(sortStatus.direction === 'desc' ? data.reverse() : data);
-  }, [sortStatus, dataSource]);
+  useEffect(() => {
+    const dataTemp = sortBy(data, sortStatus.columnAccessor);
 
-  const handleChangeQuestionStatus = (value: boolean, id: string) => {
-    setDataSource(dataSource.map((i) => (i.id === id ? ({ ...i, answer: value }) : i)));
+    setSortedData(sortStatus.direction === 'desc' ? dataTemp.reverse() : data);
+  }, [sortStatus, data]);
+
+  const handleMarkQuestionAnswered = (questionId: string) => {
+    answerQuestion(questionId);
   };
 
   return (
@@ -104,30 +39,38 @@ export function HostQuestionBox() {
             accessor: 'question',
             title: 'Question',
             textAlignment: 'left',
+            sortable: true,
           },
           {
-            accessor: 'vote',
+            accessor: 'totalVotes',
             title: 'Vote',
             textAlignment: 'center',
             sortable: true,
           },
           {
-            accessor: 'timestamp',
-            title: 'Time Asked',
+            accessor: 'time',
+            title: 'Time',
             textAlignment: 'center',
             sortable: true,
+            render: (record: Question) => (
+              <Text>{(new Date(record.time)).toLocaleString('en-US')}</Text>
+            ),
           },
           {
-            accessor: 'answer',
+            accessor: 'isAnswered',
             title: '',
             textAlignment: 'center',
             sortable: true,
             render: (record) => (
               <Group position="center">
-                <Tooltip label={record.answer ? 'Answered' : 'Unanswer'}>
+                <Tooltip label="Answer Question">
                   <Checkbox
-                    checked={record.answer}
-                    onChange={(e) => handleChangeQuestionStatus(e.target.checked, record.id)}
+                    checked={record.isAnswered}
+                    onChange={() => {
+                      if (!record.isAnswered) {
+                        handleMarkQuestionAnswered(record.questionId);
+                      }
+                    }}
                   />
                 </Tooltip>
               </Group>
@@ -136,6 +79,7 @@ export function HostQuestionBox() {
         ]}
         records={sortedData}
         noRecordsText="No questions"
+        idAccessor="questionId"
         sortStatus={sortStatus}
         onSortStatusChange={setSortStatus}
       />
@@ -143,7 +87,73 @@ export function HostQuestionBox() {
   );
 }
 
-export function GuestQuestionBox() {
+interface UpVoteCellProps {
+  data: Question
+  handleUpvoteQuestion: (questionId: string) => void
+}
+
+const UpVoteCell = ({ data, handleUpvoteQuestion }: UpVoteCellProps) => {
+  const [isChecked, setChecked] = useState(false);
+
+  return (
+    <Group position="center">
+      <Tooltip label="Upvote">
+        <Checkbox
+          checked={isChecked}
+          onChange={() => {
+            if (!isChecked) {
+              setChecked(true);
+              handleUpvoteQuestion(data.questionId);
+            }
+          }}
+        />
+      </Tooltip>
+    </Group>
+  );
+};
+
+interface GuestQuestionBoxProps {
+  sendQuestion: (question: string) => void
+  upvoteQuestion: (questionId: string) => void
+  dataSource: Question[]
+}
+
+export function GuestQuestionBox({ sendQuestion, upvoteQuestion, dataSource }: GuestQuestionBoxProps) {
+  const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'time', direction: 'desc' });
+  const [data, setData] = useState<Question[]>([]);
+  const [sortedData, setSortedData] = useState<Question[]>(sortBy(dataSource, 'vote'));
+
+  const form = useForm({
+    initialValues: {
+      question: '',
+    },
+  });
+
+  useEffect(() => {
+    setData(dataSource);
+  }, [dataSource]);
+
+  useEffect(() => {
+    const dataTemp = sortBy(data, sortStatus.columnAccessor);
+
+    setSortedData(sortStatus.direction === 'desc' ? dataTemp.reverse() : data);
+  }, [sortStatus, data]);
+
+  const handleSendQuestion = () => {
+    const { question } = form.values;
+
+    if (question) {
+      sendQuestion(question);
+      form.reset();
+    }
+  };
+
+  const handleUpvoteQuestion = (questionId: string) => {
+    if (questionId) {
+      upvoteQuestion(questionId);
+    }
+  };
+
   return (
     <Stack spacing={2}>
       <Box h="calc(50vh - 90px)">
@@ -153,31 +163,71 @@ export function GuestQuestionBox() {
               accessor: 'question',
               title: 'Question',
               textAlignment: 'left',
+              sortable: true,
             },
             {
-              accessor: 'answer',
-              title: 'Answer',
-              textAlignment: 'center',
-            },
-            {
-              accessor: 'vote',
+              accessor: 'totalVotes',
               title: 'Vote',
               textAlignment: 'center',
+              sortable: true,
             },
             {
-              accessor: 'timestamp',
-              title: 'Time Asked',
+              accessor: 'time',
+              title: 'Time',
               textAlignment: 'center',
+              sortable: true,
+              render: (record: Question) => (
+                <Text>{(new Date(record.time)).toLocaleString('en-US')}</Text>
+              ),
+            },
+            {
+              accessor: '',
+              title: 'Upvote',
+              textAlignment: 'center',
+              render: (record: Question) => <UpVoteCell data={record} handleUpvoteQuestion={handleUpvoteQuestion} />,
+            },
+            {
+              accessor: 'isAnswered',
+              title: '',
+              textAlignment: 'center',
+              sortable: true,
+              render: (record) => (
+                <Group position="center">
+                  <Tooltip label={record.isAnswered ? 'Answered' : 'Unanswered'}>
+                    <Checkbox checked={record.isAnswered} readOnly />
+                  </Tooltip>
+                </Group>
+              ),
             },
           ]}
-          records={FAKE_DATA}
+          records={sortedData}
+          idAccessor="questionId"
           noRecordsText="No questions"
+          sortStatus={sortStatus}
+          onSortStatusChange={setSortStatus}
         />
       </Box>
       <Flex justify="center" align="center" columnGap={5}>
-        <QuestionInput />
+        <Box sx={{ flexGrow: 2 }}>
+          <TextInput
+            placeholder="Type your question..."
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSendQuestion();
+              }
+            }}
+            {...form.getInputProps('question')}
+          />
+        </Box>
         <Tooltip label="Send">
-          <ActionIcon color="blue" variant="light" size="lg"><IconSend /></ActionIcon>
+          <ActionIcon
+            color="blue"
+            variant="light"
+            size="lg"
+            onClick={handleSendQuestion}
+          >
+            <IconSend />
+          </ActionIcon>
         </Tooltip>
       </Flex>
     </Stack>

@@ -10,10 +10,9 @@ import React, {
 import { useParams, useNavigate } from 'react-router-dom';
 import { io as socketIO, Socket } from 'socket.io-client';
 
-import { Chat } from '../slides/types';
-
 import ChatBox from './chatBox';
 import { HostQuestionBox } from './questionBox';
+import { Chat, Question } from './types';
 
 import presentationApi, { CompactSlide, MultiChoiceOption, PresentationWithUserInfo } from '@/api/presentation';
 import CopyButton from '@/pages/common/buttons/copyButton';
@@ -130,6 +129,8 @@ function ShowPage({ presentation }: HostPresentationProps) {
   const [nextOffset, setNextOffset] = useState(-1);
   const [isLoadMore, setLoadMore] = useState(false);
 
+  const [allQuestions, setAllQuestions] = useState<Question[]>([]);
+
   const handleChangeSlide = (index: number) => {
     if (index === currentSlideIndex) {
       return;
@@ -150,6 +151,12 @@ function ShowPage({ presentation }: HostPresentationProps) {
   const handleSendChatMessage = (message: string) => {
     if (socket) {
       socket.emit(ClientToServerEventType.memberChat, { message });
+    }
+  };
+
+  const handleAnswerQuestion = (questionId: string) => {
+    if (socket) {
+      socket.emit(ClientToServerEventType.hostAnswerQuestion, { questionId });
     }
   };
 
@@ -210,6 +217,25 @@ function ShowPage({ presentation }: HostPresentationProps) {
             break;
           }
 
+          case WaitInRoomType.newQuestion: {
+            setAllQuestions((prevState) => ([...prevState, data.data]));
+            break;
+          }
+
+          case WaitInRoomType.answerQuestion: {
+            setAllQuestions(
+              (prevState) => prevState.map((i) => (i.questionId === data.data.questionId ? data.data : i)),
+            );
+            break;
+          }
+
+          case WaitInRoomType.upvoteQuestion: {
+            setAllQuestions(
+              (prevState) => prevState.map((i) => (i.questionId === data.data.questionId ? data.data : i)),
+            );
+            break;
+          }
+
           default: {
             break;
           }
@@ -250,7 +276,10 @@ function ShowPage({ presentation }: HostPresentationProps) {
                 isLoadMore={isLoadMore}
                 setLoadMore={setLoadMore}
               />
-              <HostQuestionBox />
+              <HostQuestionBox
+                dataSource={allQuestions}
+                answerQuestion={handleAnswerQuestion}
+              />
             </Stack>
           </Grid.Col>
         </Grid>
