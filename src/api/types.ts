@@ -9,6 +9,14 @@ export interface BaseResponse<T> extends BasicResponse {
   data: T
 }
 
+export interface BaseResponseWithMeta<T> extends BaseResponse<T> {
+  meta: {
+    total: number
+    offset: number
+    nextOffset?: number
+  }
+}
+
 export interface BasicObject {
   _id: string;
   createdAt: Date;

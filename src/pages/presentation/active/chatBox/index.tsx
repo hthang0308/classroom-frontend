@@ -1,45 +1,11 @@
 import { Group, Stack, Box, Flex, Paper, Text, ScrollArea, TextInput, ActionIcon, Tooltip } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconSend } from '@tabler/icons';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 
-const FAKE_CHAT_DATA = [
-  {
-    id: '1',
-    createdBy: 'A',
-    content: 'Lorem ipsum',
-  },
-  {
-    id: '2',
-    createdBy: 'B',
-    content: 'Lorem ipsum dolor sit amet consectetur',
-  },
-  {
-    id: '3',
-    createdBy: 'C',
-    content: 'Lorem ipsum dolor sit amet consectetur',
-  },
-  {
-    id: '4',
-    createdBy: 'A',
-    content: 'Lorem ipsum dolor sit amet consectetur',
-  },
-  {
-    id: '5',
-    createdBy: 'C',
-    content: 'Lorem ipsum dolor sit amet consectetur',
-  },
-  {
-    id: '6',
-    createdBy: 'A',
-    content: 'Lorem ipsum dolor sit amet consectetur',
-  },
-  {
-    id: '7',
-    createdBy: 'B',
-    content: 'Lorem ipsum dolor sit amet consectetur',
-  },
-];
+import { Chat } from '../../slides/types';
+
+import { getUserId } from '@/utils';
 
 interface MessageBoxProps {
   message: string
@@ -70,65 +36,115 @@ const MessageBox = ({ message, isRightSide, sender }: MessageBoxProps) => (
   </Group>
 );
 
-const ChatDisplay = ({ currentUser }: { currentUser: string }) => (
-  <Box
-    sx={() => ({
-      padding: '0px 16px',
-    })}
-  >
-    {
-      FAKE_CHAT_DATA.map((i, index) => (
-        <MessageBox
-          key={index}
-          sender={i.createdBy}
-          message={i.content}
-          isRightSide={currentUser === i.createdBy}
-        />
-      ))
-    }
-  </Box>
-);
+interface ChatBoxProps {
+  height?: string | number
+  sendChatMessage: (message: string) => void
+  dataSource: Chat[]
+  loadMore: (offset: number) => Promise<void>
+  nextOffset: number
+  isLoadMore: boolean
+  setLoadMore: React.Dispatch<React.SetStateAction<boolean>>
+}
 
-const ChatInput = () => {
-  const form = useForm({
+interface FormProps {
+  message: string
+}
+
+export default function ChatBox({
+  height = '', sendChatMessage, dataSource, loadMore, nextOffset, setLoadMore, isLoadMore,
+}: ChatBoxProps) {
+  const viewport = useRef<HTMLDivElement>(null);
+  const chatInputRef = useRef<HTMLDivElement>(null);
+
+  const currentUserId = getUserId();
+
+  const form = useForm<FormProps>({
     initialValues: {
       message: '',
     },
   });
 
-  return (
-    <Box sx={{ flexGrow: 2 }}>
-      <TextInput
-        placeholder="Type something..."
-        {...form.getInputProps('message')}
-      />
-    </Box>
-  );
-};
+  useEffect(() => {
+    if (isLoadMore) {
+      setLoadMore(false);
+    } else {
+      viewport.current?.scrollTo({ top: viewport.current.scrollHeight, behavior: 'smooth' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataSource]);
 
-export default function ChatBox() {
-  const viewport = useRef<HTMLDivElement>(null);
+  const handleSendChatMessage = () => {
+    if (form.values.message) {
+      sendChatMessage(form.values.message);
+      form.reset();
+    }
+  };
+
+  const scrollToLoadMore = useCallback(() => {
+    if (viewport.current?.scrollTop === 0 && loadMore && nextOffset) {
+      loadMore(nextOffset);
+      setLoadMore(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadMore, nextOffset]);
 
   useEffect(() => {
-    viewport.current?.scrollTo({ top: viewport.current.scrollHeight, behavior: 'smooth' });
-  }, []);
+    const element = viewport.current;
+
+    if (element) {
+      element.addEventListener('scroll', scrollToLoadMore);
+    }
+
+    return () => {
+      if (element) {
+        element.removeEventListener('scroll', scrollToLoadMore);
+      }
+    };
+  }, [viewport, scrollToLoadMore]);
 
   return (
-    <Stack spacing={2} h="calc(50vh - 57px)">
-      <ScrollArea.Autosize
+    <Stack spacing={2} h={height}>
+      <ScrollArea
         viewportRef={viewport}
-        maxHeight="90%"
+        h={`calc(100% - ${chatInputRef.current?.clientHeight || 0}px)`}
         sx={(theme) => ({
           backgroundColor: theme.colorScheme === 'dark' ? theme.colors.gray[5] : 'white',
+          padding: '0px 16px',
         })}
         offsetScrollbars
       >
-        <ChatDisplay currentUser="A" />
-      </ScrollArea.Autosize>
-      <Flex justify="center" align="center" columnGap={5}>
-        <ChatInput />
+        {
+          dataSource.map((i, index) => (
+            <MessageBox
+              key={index}
+              sender={i.user.name}
+              message={i.message}
+              isRightSide={currentUserId === i.user._id}
+            />
+          ))
+        }
+      </ScrollArea>
+      <Flex justify="center" align="center" columnGap={5} ref={chatInputRef}>
+        <Box sx={{ flexGrow: 2 }}>
+          <TextInput
+            placeholder="Type something..."
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSendChatMessage();
+              }
+            }}
+            {...form.getInputProps('message')}
+          />
+        </Box>
         <Tooltip label="Send">
-          <ActionIcon color="blue" variant="light" size="lg"><IconSend /></ActionIcon>
+          <ActionIcon
+            color="blue"
+            variant="light"
+            size="lg"
+            onClick={handleSendChatMessage}
+          >
+            <IconSend />
+          </ActionIcon>
         </Tooltip>
       </Flex>
     </Stack>
