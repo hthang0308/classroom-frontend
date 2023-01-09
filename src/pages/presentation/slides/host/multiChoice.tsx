@@ -14,10 +14,6 @@ interface MultiChoiceDisplaySlideProps {
   options?: MultiChoiceOption[];
 }
 
-function randInt(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min) + min);
-}
-
 function MultiChoiceDisplaySlide({
   title = '', options = [], randomData = false,
 }: MultiChoiceDisplaySlideProps) {
@@ -25,9 +21,9 @@ function MultiChoiceDisplaySlide({
 
   useEffect(() => {
     if (randomData) {
-      setData(options.map((i) => ({
+      setData(options.map((i, index) => ({
         ...i,
-        quantity: randInt(2, 10),
+        quantity: index * 3 + 5,
       })));
     } else {
       setData(options);

@@ -1,19 +1,24 @@
 import {
-  Button,
-  Container, Group, Skeleton, Stack, Text, Title,
+  Button, Container, Group, Skeleton, Stack, Text, Title, Grid,
 } from '@mantine/core';
 import { IconArrowLeft, IconArrowRight, IconPresentationOff } from '@tabler/icons';
 import config from 'config';
 import React, {
-  useEffect, useState,
+  useEffect, useState, useCallback,
 } from 'react';
 
 import { useParams, useNavigate } from 'react-router-dom';
 import { io as socketIO, Socket } from 'socket.io-client';
 
-import { CompactSlide, MultiChoiceOption, PresentationWithUserInfo } from '@/api/presentation';
+import { Chat } from '../slides/types';
+
+import ChatBox from './chatBox';
+import { HostQuestionBox } from './questionBox';
+
+import presentationApi, { CompactSlide, MultiChoiceOption, PresentationWithUserInfo } from '@/api/presentation';
 import CopyButton from '@/pages/common/buttons/copyButton';
 import FullScreenButton from '@/pages/common/buttons/fullScreenButton';
+import * as notificationManager from '@/pages/common/notificationManager';
 import { usePresentation, useUser } from '@/pages/presentation/hooks';
 import HeadingDisplaySlide from '@/pages/presentation/slides/host/heading';
 import MultiChoiceDisplaySlide from '@/pages/presentation/slides/host/multiChoice';
@@ -25,6 +30,7 @@ import {
   ServerToClientEventType,
   WaitInRoomType,
 } from '@/socket/types';
+import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 import { SlideTypes } from '@/utils/constants';
 import getJwtToken from '@/utils/getJwtToken';
 
@@ -120,6 +126,10 @@ function ShowPage({ presentation }: HostPresentationProps) {
 
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
+  const [chatHistory, setChatHistory] = useState<Chat[]>([]);
+  const [nextOffset, setNextOffset] = useState(-1);
+  const [isLoadMore, setLoadMore] = useState(false);
+
   const handleChangeSlide = (index: number) => {
     if (index === currentSlideIndex) {
       return;
@@ -136,6 +146,33 @@ function ShowPage({ presentation }: HostPresentationProps) {
   const toPrevSlide = () => {
     handleChangeSlide(Math.max(0, currentSlideIndex - 1));
   };
+
+  const handleSendChatMessage = (message: string) => {
+    if (socket) {
+      socket.emit(ClientToServerEventType.memberChat, { message });
+    }
+  };
+
+  const loadOldChat = useCallback(async (offset: number) => {
+    if (offset === -2) {
+      return;
+    }
+
+    try {
+      const { data: response } = await presentationApi.getAllChat(roomId, offset);
+
+      setChatHistory((prevState) => ([...response.data, ...prevState]));
+      if (response.meta.nextOffset !== undefined && response.meta.nextOffset >= 0) {
+        setNextOffset(response.meta.nextOffset);
+      } else {
+        setNextOffset(-2);
+      }
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
+  }, [roomId]);
 
   const currentSlide = presentation.slides[currentSlideIndex];
   const [options, setOptions] = useState<MultiChoiceOption[]>(currentSlide?.options || []);
@@ -165,7 +202,11 @@ function ShowPage({ presentation }: HostPresentationProps) {
         switch (data.type) {
           case WaitInRoomType.newVote: {
             setOptions(data.data);
+            break;
+          }
 
+          case WaitInRoomType.newChat: {
+            setChatHistory((prevState) => ([...prevState, data.data]));
             break;
           }
 
@@ -194,9 +235,25 @@ function ShowPage({ presentation }: HostPresentationProps) {
           toNextSlide={toNextSlide}
           toPrevSlide={toPrevSlide}
         />
-        <div style={{ padding: 20 }}>
-          <SlideSwitcher options={options} slide={currentSlide} />
-        </div>
+        <Grid>
+          <Grid.Col span={9}>
+            <SlideSwitcher options={options} slide={currentSlide} />
+          </Grid.Col>
+          <Grid.Col span={3}>
+            <Stack spacing={15}>
+              <ChatBox
+                height="calc(50vh - 57px)"
+                sendChatMessage={handleSendChatMessage}
+                dataSource={chatHistory}
+                loadMore={loadOldChat}
+                nextOffset={nextOffset}
+                isLoadMore={isLoadMore}
+                setLoadMore={setLoadMore}
+              />
+              <HostQuestionBox />
+            </Stack>
+          </Grid.Col>
+        </Grid>
       </Stack>
     </Skeleton>
   );

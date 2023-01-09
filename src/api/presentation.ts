@@ -1,6 +1,7 @@
 import {
-  BasicObject, CompactUser, BaseResponse, BasicResponse,
+  BasicObject, CompactUser, BaseResponse, BasicResponse, BaseResponseWithMeta,
 } from '@/api/types';
+import { Chat } from '@/pages/presentation/slides/types';
 import axiosClient from '@/utils/axiosClient';
 import { SlideTypes, SlideTypesType } from '@/utils/constants';
 
@@ -76,6 +77,9 @@ const presentationApi = {
   deletePresentation: (id?: string) => (
     axiosClient.delete<BaseResponse<null>>(`/presentation/${id}`)
   ),
+  getSlide: (id: string) => (
+    axiosClient.get<BaseResponse<Slide>>(`/slide/${id}`)
+  ),
   updateMultipleChoiceSlide: (id: string | undefined, data: MultipleChoiceDataType) => (
     axiosClient.put<BaseResponse<MultiChoiceSlide>>(`/slide/${id}`, {
       slideType: SlideTypes.multipleChoice,
@@ -102,6 +106,11 @@ const presentationApi = {
 
   getSocketRoom: (roomId: string) => (
     axiosClient.get<BasicResponse>(`/presentation/get-socket-room/${roomId}`)
+  ),
+  getAllChat: (roomId: string, offset = -1, size = 7) => (
+    axiosClient.get<BaseResponseWithMeta<Chat[]>>(
+      `/presentation/get-socket-room/${roomId}/chat?size=${size}${offset !== -1 ? `&offset=${offset}` : ''}`,
+    )
   ),
 };
 

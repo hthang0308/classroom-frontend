@@ -1,14 +1,19 @@
 import {
-  Alert,
-  Button, Group, Stack, TextInput,
+  Alert, Button, Group, Stack, TextInput, Grid,
 } from '@mantine/core';
 import config from 'config';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { io as socketIO, Socket } from 'socket.io-client';
 
+import { Chat } from '../slides/types';
+
+import ChatBox from './chatBox';
+import { GuestQuestionBox } from './questionBox';
+
 import presentationApi, { CompactSlide, PresentationWithUserInfo, MultiChoiceOption } from '@/api/presentation';
+import * as notificationManager from '@/pages/common/notificationManager';
 
 import MultiChoiceDisplaySlide from '@/pages/presentation/slides/guest/multiChoice';
 import HeadingDisplaySlide from '@/pages/presentation/slides/host/heading';
@@ -19,6 +24,7 @@ import {
   ServerToClientEvents,
   ServerToClientEventType, WaitInRoomType,
 } from '@/socket/types';
+import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 import { SlideTypes } from '@/utils/constants';
 
 import getJwtToken from '@/utils/getJwtToken';
@@ -27,6 +33,7 @@ interface InputCodePageProps {
   initialRoomId?: string | null;
   setRoomId: (_: string) => void;
 }
+
 function InputCodePage({ setRoomId, initialRoomId = '' }: InputCodePageProps) {
   const [input, setInput] = useState<string>(initialRoomId || '');
   const [err, setErr] = useState('');
@@ -59,7 +66,7 @@ function InputCodePage({ setRoomId, initialRoomId = '' }: InputCodePageProps) {
       {
         err && (
           // eslint-disable-next-line
-          <Alert title={err} color="red" variant="filled" sx={{ width: 'fit-content'}}>
+          <Alert title={err} color="red" variant="filled" sx={{ width: 'fit-content' }}>
           </Alert>
         )
       }
@@ -122,6 +129,10 @@ function ShowPage({ roomId }: ShowPageProps) {
 
   const [socket, setSocket] = useState<Socket<ServerToClientEvents, ClientToServerEvents>>();
 
+  const [chatHistory, setChatHistory] = useState<Chat[]>([]);
+  const [nextOffset, setNextOffset] = useState(-1);
+  const [isLoadMore, setLoadMore] = useState(false);
+
   const navigate = useNavigate();
 
   const sendVote = (option: MultiChoiceOption) => {
@@ -134,6 +145,33 @@ function ShowPage({ roomId }: ShowPageProps) {
       optionIndex: option.index === undefined ? -1 : option.index,
     });
   };
+
+  const handleSendChatMessage = (message: string) => {
+    if (socket) {
+      socket.emit(ClientToServerEventType.memberChat, { message });
+    }
+  };
+
+  const loadOldChat = useCallback(async (offset: number) => {
+    if (offset === -2) {
+      return;
+    }
+
+    try {
+      const { data: response } = await presentationApi.getAllChat(roomId, offset);
+
+      setChatHistory((prevState) => ([...response.data, ...prevState]));
+      if (response.meta.nextOffset !== undefined && response.meta.nextOffset >= 0) {
+        setNextOffset(response.meta.nextOffset);
+      } else {
+        setNextOffset(-2);
+      }
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
+  }, [roomId]);
 
   useEffect(() => {
     if (!socket) {
@@ -152,6 +190,7 @@ function ShowPage({ roomId }: ShowPageProps) {
         setPresentation(data.data);
         setCurrentSlide(data.data.currentSlideInfo);
         setOptions(data.data.currentSlideInfo.options);
+        loadOldChat(-1);
       });
 
       socket.on(ServerToClientEventType.waitInRoom, (data) => {
@@ -164,6 +203,11 @@ function ShowPage({ roomId }: ShowPageProps) {
 
           case WaitInRoomType.stopPresentation: {
             navigate('/presentations');
+            break;
+          }
+
+          case WaitInRoomType.newChat: {
+            setChatHistory((prevState) => ([...prevState, data.data]));
             break;
           }
 
@@ -180,12 +224,28 @@ function ShowPage({ roomId }: ShowPageProps) {
       socket.emit(ClientToServerEventType.leaveRoom, { roomId });
       socket.disconnect();
     };
-  }, [jwtToken, navigate, roomId, socket]);
+  }, [jwtToken, navigate, roomId, socket, loadOldChat]);
 
   return (
-    <div>
-      <SlideSwitcher options={options} sendVote={sendVote} slide={currentSlide} />
-    </div>
+    <Grid>
+      <Grid.Col span={9}>
+        <SlideSwitcher options={options} sendVote={sendVote} slide={currentSlide} />
+      </Grid.Col>
+      <Grid.Col span={3}>
+        <Stack spacing={15}>
+          <ChatBox
+            height="calc(50vh - 55px)"
+            sendChatMessage={handleSendChatMessage}
+            dataSource={chatHistory}
+            loadMore={loadOldChat}
+            nextOffset={nextOffset}
+            isLoadMore={isLoadMore}
+            setLoadMore={setLoadMore}
+          />
+          <GuestQuestionBox />
+        </Stack>
+      </Grid.Col>
+    </Grid>
   );
 }
 

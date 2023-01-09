@@ -1,11 +1,10 @@
-import { Button, SimpleGrid, Text, Title } from '@mantine/core';
-import React, { useState } from 'react';
+import { Button, Text, Title, Stack } from '@mantine/core';
+import { useState } from 'react';
 
 import { MultiChoiceOption } from '@/api/presentation';
 
 interface DisplayMultiChoiceSlideProps {
   title: string;
-
   options: MultiChoiceOption[];
   sendVote: (_: MultiChoiceOption) => void;
 }
@@ -13,45 +12,36 @@ interface DisplayMultiChoiceSlideProps {
 export default function DisplayMultiChoiceSlide({ sendVote, options, title }: DisplayMultiChoiceSlideProps) {
   const [voteValue, setVoteValue] = useState<MultiChoiceOption>();
 
+  const handleVote = (option: MultiChoiceOption) => {
+    setVoteValue(option);
+    sendVote(option);
+  };
+
   return (
-    <>
-      <Title order={3} sx={{ textAlign: 'center' }}>{title}</Title>
+    <Stack spacing="xl">
+      <Title order={1} align="center">{title}</Title>
       {
         voteValue ? (
-          <Text sx={{ textAlign: 'center' }}>
-            You voted for
-            {' '}
-            {voteValue.value}
+          <Text size="lg" align="center">
+            {`You voted for ${voteValue.value}`}
           </Text>
         ) : (
-          <SimpleGrid
-            cols={4}
-            spacing="lg"
-            breakpoints={[
-              {
-                maxWidth: 980, cols: 3, spacing: 'md',
-              },
-              {
-                maxWidth: 755, cols: 2, spacing: 'sm',
-              },
-              {
-                maxWidth: 600, cols: 1, spacing: 'sm',
-              },
-            ]}
-          >
+          <Stack align="center" justify="flex-start">
             {
               options.map((o) => (
                 <Button
                   key={`${o.index}__${o.value}`}
-                  onClick={() => sendVote(o)}
+                  onClick={() => handleVote(o)}
+                  w={500}
+                  size="xl"
                 >
                   {o.value}
                 </Button>
               ))
             }
-          </SimpleGrid>
+          </Stack>
         )
       }
-    </>
+    </Stack>
   );
 }

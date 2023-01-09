@@ -1,6 +1,7 @@
 import {
   CompactSlide, MultiChoiceOption, PresentationWithUserInfo,
 } from '@/api/presentation';
+import { Chat } from '@/pages/presentation/slides/types';
 
 export const ClientToServerEventType = {
   hostCreateRoom: 'host-create-room',
@@ -9,6 +10,7 @@ export const ClientToServerEventType = {
   hostStartSlide: 'host-start-slide',
   hostStopPresentation: 'host-stop-presentation',
   memberVote: 'member-vote',
+  memberChat: 'member-chat',
 } as const;
 
 export const ServerToClientEventType = {
@@ -22,6 +24,7 @@ export const WaitInRoomType = {
   info: 'info',
   newSlide: 'new-slide',
   newVote: 'new-vote',
+  newChat: 'new-chat',
   stopPresentation: 'stop-presentation',
 } as const;
 
@@ -42,6 +45,10 @@ export interface MemberVoteData {
   optionIndex: number;
 }
 
+export interface MemberChatData {
+  message: string;
+}
+
 export interface WaitHostCreateRoomData {
   roomId: string;
   message: string;
@@ -56,6 +63,12 @@ export interface WaitInRoomNewVoteData {
   type: typeof WaitInRoomType.newVote;
   message: string;
   data: Required<MultiChoiceOption>[]
+}
+
+export interface WaitInRoomNewChatData {
+  type: typeof WaitInRoomType.newChat;
+  message: string;
+  data: Chat;
 }
 
 export interface WaitInRoomInfoData {
@@ -74,7 +87,7 @@ export interface WaitInRoomStopPresentation {
 }
 
 export type WaitInRoomData = WaitInRoomInfoData | WaitInRoomNewVoteData
-| WaitInRoomNewSlideData | WaitInRoomStopPresentation;
+| WaitInRoomNewSlideData | WaitInRoomStopPresentation | WaitInRoomNewChatData;
 
 export interface ClientToServerEvents {
   [ClientToServerEventType.hostCreateRoom]: (data: HostStartStopRoomData) => void;
@@ -83,6 +96,7 @@ export interface ClientToServerEvents {
   [ClientToServerEventType.leaveRoom]: (data: JoinLeaveRoomData) => void;
   [ClientToServerEventType.hostStartSlide]: (data: HostStartSlideData) => void;
   [ClientToServerEventType.memberVote]: (data: MemberVoteData) => void;
+  [ClientToServerEventType.memberChat]: (data: MemberChatData) => void;
 }
 
 export interface ServerToClientEvents {
