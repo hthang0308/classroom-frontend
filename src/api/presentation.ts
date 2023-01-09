@@ -56,6 +56,7 @@ interface BasePresentation<UserType> extends BasicObject {
   description: string;
   collaborators: CompactUser[];
   slides: CompactSlide[];
+  currentSlideInfo: Slide;
   userCreated: UserType;
 }
 
