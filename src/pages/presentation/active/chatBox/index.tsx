@@ -3,7 +3,7 @@ import { useForm } from '@mantine/form';
 import { IconSend } from '@tabler/icons';
 import { useRef, useEffect, useCallback } from 'react';
 
-import { Chat } from '../../slides/types';
+import { Chat } from '../types';
 
 import { getUserId } from '@/utils';
 

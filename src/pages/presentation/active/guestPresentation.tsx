@@ -7,10 +7,9 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { io as socketIO, Socket } from 'socket.io-client';
 
-import { Chat } from '../slides/types';
-
 import ChatBox from './chatBox';
 import { GuestQuestionBox } from './questionBox';
+import { Chat, Question } from './types';
 
 import presentationApi, { CompactSlide, PresentationWithUserInfo, MultiChoiceOption } from '@/api/presentation';
 import * as notificationManager from '@/pages/common/notificationManager';
@@ -133,6 +132,8 @@ function ShowPage({ roomId }: ShowPageProps) {
   const [nextOffset, setNextOffset] = useState(-1);
   const [isLoadMore, setLoadMore] = useState(false);
 
+  const [allQuestions, setAllQuestions] = useState<Question[]>([]);
+
   const navigate = useNavigate();
 
   const sendVote = (option: MultiChoiceOption) => {
@@ -152,6 +153,18 @@ function ShowPage({ roomId }: ShowPageProps) {
     }
   };
 
+  const handleSendQuestion = (question: string) => {
+    if (socket) {
+      socket.emit(ClientToServerEventType.memberQuestion, { question });
+    }
+  };
+
+  const handleUpvoteQuestion = (questionId: string) => {
+    if (socket) {
+      socket.emit(ClientToServerEventType.memberUpvoteQuestion, { questionId });
+    }
+  };
+
   const loadOldChat = useCallback(async (offset: number) => {
     if (offset === -2) {
       return;
@@ -166,6 +179,18 @@ function ShowPage({ roomId }: ShowPageProps) {
       } else {
         setNextOffset(-2);
       }
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
+  }, [roomId]);
+
+  const loadOldQuestion = useCallback(async () => {
+    try {
+      const { data: response } = await presentationApi.getAllQuestion(roomId);
+
+      setAllQuestions(response.data);
     } catch (error) {
       if (isAxiosError<ErrorResponse>(error)) {
         notificationManager.showFail('', error.response?.data.message);
@@ -191,6 +216,7 @@ function ShowPage({ roomId }: ShowPageProps) {
         setCurrentSlide(data.data.currentSlideInfo);
         setOptions(data.data.currentSlideInfo.options);
         loadOldChat(-1);
+        loadOldQuestion();
       });
 
       socket.on(ServerToClientEventType.waitInRoom, (data) => {
@@ -216,6 +242,25 @@ function ShowPage({ roomId }: ShowPageProps) {
             break;
           }
 
+          case WaitInRoomType.newQuestion: {
+            setAllQuestions((prevState) => ([...prevState, data.data]));
+            break;
+          }
+
+          case WaitInRoomType.answerQuestion: {
+            setAllQuestions(
+              (prevState) => prevState.map((i) => (i.questionId === data.data.questionId ? data.data : i)),
+            );
+            break;
+          }
+
+          case WaitInRoomType.upvoteQuestion: {
+            setAllQuestions(
+              (prevState) => prevState.map((i) => (i.questionId === data.data.questionId ? data.data : i)),
+            );
+            break;
+          }
+
           default: {
             break;
           }
@@ -229,7 +274,7 @@ function ShowPage({ roomId }: ShowPageProps) {
       socket.emit(ClientToServerEventType.leaveRoom, { roomId });
       socket.disconnect();
     };
-  }, [jwtToken, navigate, roomId, socket, loadOldChat]);
+  }, [jwtToken, navigate, roomId, socket, loadOldChat, loadOldQuestion]);
 
   return (
     <Grid>
@@ -247,7 +292,11 @@ function ShowPage({ roomId }: ShowPageProps) {
             isLoadMore={isLoadMore}
             setLoadMore={setLoadMore}
           />
-          <GuestQuestionBox />
+          <GuestQuestionBox
+            sendQuestion={handleSendQuestion}
+            upvoteQuestion={handleUpvoteQuestion}
+            dataSource={allQuestions}
+          />
         </Stack>
       </Grid.Col>
     </Grid>

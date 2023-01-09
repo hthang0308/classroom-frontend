@@ -1,7 +1,7 @@
 import {
   BasicObject, CompactUser, BaseResponse, BasicResponse, BaseResponseWithMeta,
 } from '@/api/types';
-import { Chat } from '@/pages/presentation/slides/types';
+import { Chat, Question } from '@/pages/presentation/active/types';
 import axiosClient from '@/utils/axiosClient';
 import { SlideTypes, SlideTypesType } from '@/utils/constants';
 
@@ -77,6 +77,7 @@ const presentationApi = {
   deletePresentation: (id?: string) => (
     axiosClient.delete<BaseResponse<null>>(`/presentation/${id}`)
   ),
+
   getSlide: (id: string) => (
     axiosClient.get<BaseResponse<Slide>>(`/slide/${id}`)
   ),
@@ -111,6 +112,9 @@ const presentationApi = {
     axiosClient.get<BaseResponseWithMeta<Chat[]>>(
       `/presentation/get-socket-room/${roomId}/chat?size=${size}${offset !== -1 ? `&offset=${offset}` : ''}`,
     )
+  ),
+  getAllQuestion: (roomId: string) => (
+    axiosClient.get<BaseResponse<Question[]>>(`presentation/get-socket-room/${roomId}/question`)
   ),
 };
 
