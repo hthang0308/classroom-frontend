@@ -1,7 +1,9 @@
-import { Button, Text, Title, Stack } from '@mantine/core';
+import { Button, Title, Stack } from '@mantine/core';
 import { useState } from 'react';
 
 import { MultiChoiceOption } from '@/api/presentation';
+
+import MultiChoiceDisplaySlide from '@/pages/presentation/slides/host/multiChoice';
 
 interface DisplayMultiChoiceSlideProps {
   title: string;
@@ -18,30 +20,26 @@ export default function DisplayMultiChoiceSlide({ sendVote, options, title }: Di
   };
 
   return (
-    <Stack spacing="xl">
-      <Title order={1} align="center">{title}</Title>
-      {
-        voteValue ? (
-          <Text size="lg" align="center">
-            {`You voted for ${voteValue.value}`}
-          </Text>
-        ) : (
-          <Stack align="center" justify="flex-start">
-            {
-              options.map((o) => (
-                <Button
-                  key={`${o.index}__${o.value}`}
-                  onClick={() => handleVote(o)}
-                  w={500}
-                  size="xl"
-                >
-                  {o.value}
-                </Button>
-              ))
-            }
-          </Stack>
-        )
-      }
-    </Stack>
+    voteValue ? (
+      <MultiChoiceDisplaySlide title={title} options={options} />
+    ) : (
+      <Stack spacing="xl">
+        <Title order={1} align="center">{title}</Title>
+        <Stack align="center" justify="flex-start">
+          {
+            options.map((o) => (
+              <Button
+                key={`${o.index}__${o.value}`}
+                onClick={() => handleVote(o)}
+                w={500}
+                size="xl"
+              >
+                {o.value}
+              </Button>
+            ))
+          }
+        </Stack>
+      </Stack>
+    )
   );
 }

@@ -211,6 +211,11 @@ function ShowPage({ roomId }: ShowPageProps) {
             break;
           }
 
+          case WaitInRoomType.newVote: {
+            setOptions(data.data);
+            break;
+          }
+
           default: {
             break;
           }
