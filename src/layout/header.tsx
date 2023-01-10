@@ -8,17 +8,22 @@ import {
   Burger,
   Drawer,
   Image,
-  ScrollArea, useMantineColorScheme,
+  ScrollArea, useMantineColorScheme, Menu, Button,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 
+import { IconBellRinging } from '@tabler/icons';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
+import presentationApi from '@/api/presentation';
 import BlackLogo from '@/assets/logo-low-res-black.png';
 import WhiteLogo from '@/assets/logo-low-res-white.png';
 
 import useUserInfo, { UserInfo } from '@/hooks/useUserInfo';
 import ThemeSwitcher from '@/pages/common/buttons/themeSwitcher';
+import * as notificationManager from '@/pages/common/notificationManager';
+import { ErrorResponse, isAxiosError } from '@/utils/axiosErrorHandler';
 
 const useStyles = createStyles((theme) => ({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -56,6 +61,31 @@ const UserAvatar = ({ userInfo }: { userInfo: UserInfo }) => (
 const NavLinks = () => {
   const { classes } = useStyles();
 
+  const [presentations, setPresentations] = useState<any[]>([]);
+
+  const loadActiveGroupPresentation = useCallback(async () => {
+    try {
+      const { data: response } = await presentationApi.getActiveGroupPresentation();
+
+      setPresentations(response.data);
+      // setAllQuestions(response.data);
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    // load active group presentation every 5 seconds and when component is mounted
+    loadActiveGroupPresentation();
+    const interval = setInterval(() => {
+      loadActiveGroupPresentation();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <>
       <Link to="/groups" className={classes.link}>
@@ -64,6 +94,25 @@ const NavLinks = () => {
       <Link to="/presentations" className={classes.link}>
         Presentations
       </Link>
+      {presentations.length > 0 && (
+        <Menu position="bottom-end" shadow="md">
+          <Menu.Target>
+            <Button>
+              <IconBellRinging />
+              {presentations.length}
+            </Button>
+          </Menu.Target>
+          <Menu.Dropdown>
+            {presentations.map((presentation) => (
+              <Menu.Item color="red" key={presentation.roomId}>
+                <Link to={`/presentation/join?roomId=${presentation.roomId}`} className={classes.link}>
+                  {presentation.groupName}
+                </Link>
+              </Menu.Item>
+            ))}
+          </Menu.Dropdown>
+        </Menu>
+      ) }
     </>
   );
 };

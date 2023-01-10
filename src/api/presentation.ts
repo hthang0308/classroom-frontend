@@ -122,6 +122,9 @@ const presentationApi = {
   getAllQuestion: (roomId: string) => (
     axiosClient.get<BaseResponse<Question[]>>(`presentation/get-socket-room/${roomId}/question`)
   ),
+  getActiveGroupPresentation: () => (
+    axiosClient.get<BaseResponse<PresentationWithUserInfo[]>>('/presentation/check-active-group-presentation')
+  ),
 };
 
 export default presentationApi;
