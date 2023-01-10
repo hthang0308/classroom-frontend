@@ -1,3 +1,5 @@
+import { ActivePresentationRoom } from './presentation';
+
 import {
   BasicObject, BasicResponse, CompactUser, PagingData, BaseResponse,
 } from '@/api/types';
@@ -87,6 +89,10 @@ const groupApi = {
   ),
   deleteGroup: (groupId?: string) => (
     axiosClient.delete<BasicResponse>(`/group/${groupId}`)
+  ),
+
+  getActivePresentation: (groupId?: string) => (
+    axiosClient.get<BaseResponse<ActivePresentationRoom | null>>(`/group/${groupId}/active-presentation`)
   ),
 };
 

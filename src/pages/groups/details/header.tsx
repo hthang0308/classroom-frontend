@@ -5,12 +5,13 @@ import { useForm } from '@mantine/form';
 import {
   IconUserPlus, IconTrash, IconCategory, IconLogout,
 } from '@tabler/icons';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   useParams, useNavigate, Link,
 } from 'react-router-dom';
 
 import groupApi, { Group as GroupType } from '@/api/group';
+import { ActivePresentationRoom } from '@/api/presentation';
 import * as notificationManager from '@/pages/common/notificationManager';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 import { UserRole } from '@/utils/constants';
@@ -24,6 +25,7 @@ export default function Header({ role }: PropsType) {
   const [inviteViaEmailOpened, setInviteViaEmailOpened] = useState(false);
   const [groupData, setGroupData] = useState<GroupType>();
   const [invitationLink, setInvitationLink] = useState('');
+  const [activePresentationRoom, setActivePresentationRoom] = useState<ActivePresentationRoom | null>(null);
   const [isLoading, setLoading] = useState(false);
   const { groupId } = useParams<string>();
   const navigate = useNavigate();
@@ -53,6 +55,22 @@ export default function Header({ role }: PropsType) {
 
     fetchData();
   }, [groupId]);
+
+  const getActivePresentation = useCallback(async () => {
+    try {
+      const { data: response } = await groupApi.getActivePresentation(groupId);
+
+      setActivePresentationRoom(response.data);
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
+  }, [groupId]);
+
+  useEffect(() => {
+    getActivePresentation();
+  }, [getActivePresentation]);
 
   const handleOpenInvitationModal = async () => {
     try {
@@ -174,76 +192,92 @@ export default function Header({ role }: PropsType) {
             </Anchor>
           ))}
         </Breadcrumbs>
-        {
-          // eslint-disable-next-line no-nested-ternary
-          role === UserRole.Owner || role === UserRole.CoOwner
-            ? (
-              <Group>
-                <Menu position="bottom-end" shadow="md">
-                  <Menu.Target>
-                    <Tooltip label="Invite people">
-                      <Button>
-                        <IconUserPlus />
-                      </Button>
-                    </Tooltip>
-                  </Menu.Target>
-                  <Menu.Dropdown>
-                    <Menu.Item onClick={handleOpenInvitationModal}>
-                      Get invitation link
-                    </Menu.Item>
-                    <Menu.Item onClick={handleOpenInviteViaEmailModal}>
-                      Send invitation via email
-                    </Menu.Item>
-                  </Menu.Dropdown>
-                </Menu>
-                <Menu position="bottom-end" shadow="md">
-                  <Menu.Target>
-                    <Tooltip label="Menu">
-                      <Button>
-                        <IconCategory />
-                      </Button>
-                    </Tooltip>
-                  </Menu.Target>
-                  <Menu.Dropdown>
-                    {
-                      role === UserRole.Owner
-                        ? (
-                          <Menu.Item
-                            color="red"
-                            icon={<IconTrash size={14} />}
-                            onClick={handleDeleteGroup}
-                          >
-                            Delete group
-                          </Menu.Item>
-                        )
-                        : (
-                          <>
-                            <Menu.Label>Danger zone</Menu.Label>
+        <Group>
+          {
+            activePresentationRoom !== null
+              ? (
+                <Button
+                  component={Link}
+                  color="red"
+                  variant="outline"
+                  to={`/presentation/join?roomId=${activePresentationRoom.roomId}`}
+                >
+                  Click to join a presentation !!!
+                </Button>
+              )
+              : null
+          }
+          {
+            // eslint-disable-next-line no-nested-ternary
+            role === UserRole.Owner || role === UserRole.CoOwner
+              ? (
+                <Group>
+                  <Menu position="bottom-end" shadow="md">
+                    <Menu.Target>
+                      <Tooltip label="Invite people">
+                        <Button>
+                          <IconUserPlus />
+                        </Button>
+                      </Tooltip>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                      <Menu.Item onClick={handleOpenInvitationModal}>
+                        Get invitation link
+                      </Menu.Item>
+                      <Menu.Item onClick={handleOpenInviteViaEmailModal}>
+                        Send invitation via email
+                      </Menu.Item>
+                    </Menu.Dropdown>
+                  </Menu>
+                  <Menu position="bottom-end" shadow="md">
+                    <Menu.Target>
+                      <Tooltip label="Menu">
+                        <Button>
+                          <IconCategory />
+                        </Button>
+                      </Tooltip>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                      {
+                        role === UserRole.Owner
+                          ? (
                             <Menu.Item
                               color="red"
-                              icon={<IconLogout size={14} />}
-                              onClick={handleMemberLeaveGroup}
+                              icon={<IconTrash size={14} />}
+                              onClick={handleDeleteGroup}
                             >
-                              Leave group
+                              Delete group
                             </Menu.Item>
-                          </>
-                        )
-                    }
-                  </Menu.Dropdown>
-                </Menu>
-              </Group>
-            )
-            : (
-              role === UserRole.Member
-              && (
-                <Tooltip label="Leave group">
-                  <Button color="red" onClick={handleMemberLeaveGroup}>
-                    <IconLogout />
-                  </Button>
-                </Tooltip>
+                          )
+                          : (
+                            <>
+                              <Menu.Label>Danger zone</Menu.Label>
+                              <Menu.Item
+                                color="red"
+                                icon={<IconLogout size={14} />}
+                                onClick={handleMemberLeaveGroup}
+                              >
+                                Leave group
+                              </Menu.Item>
+                            </>
+                          )
+                      }
+                    </Menu.Dropdown>
+                  </Menu>
+                </Group>
               )
-            )
-        }
+              : (
+                role === UserRole.Member
+                && (
+                  <Tooltip label="Leave group">
+                    <Button color="red" onClick={handleMemberLeaveGroup}>
+                      <IconLogout />
+                    </Button>
+                  </Tooltip>
+                )
+              )
+          }
+        </Group>
       </Group>
     </>
   );
