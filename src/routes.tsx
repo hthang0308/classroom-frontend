@@ -2,10 +2,12 @@ import { createBrowserRouter, Outlet } from 'react-router-dom';
 import type { RouteObject } from 'react-router-dom';
 
 import UnauthorizedLayout from './layout/unauthorizedLayout';
+import ForgotPasswordPage from './pages/authentication/forgotPassword';
 import LoginPage from './pages/authentication/login';
 import LoginGoogle from './pages/authentication/login/loginGoogle';
 import Logout from './pages/authentication/logout';
 import RegisterPage from './pages/authentication/register';
+import RenewPasswordPage from './pages/authentication/renewPassword';
 import NotFoundPage from './pages/errorPage/notFound';
 import GroupDetail from './pages/groups/details';
 import JoinGroup from './pages/groups/join';
@@ -27,7 +29,7 @@ type Props = RouteObject & {
   noHeader?: boolean
 };
 
-export const AUTHORIZED_ROUTES: Props[] = [
+const AUTHORIZED_ROUTES: Props[] = [
   {
     path: '/',
     name: 'Home',
@@ -96,6 +98,16 @@ const UNAUTHORIZED_ROUTES: Props[] = [
     path: '/login',
     name: 'Login',
     element: <LoginPage />,
+  },
+  {
+    path: '/forgot-password',
+    name: 'Forgot Password',
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: '/renew-password',
+    name: 'Renew Password',
+    element: <RenewPasswordPage />,
   },
   {
     path: '/login/google',
