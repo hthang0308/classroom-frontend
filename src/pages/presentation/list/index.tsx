@@ -2,7 +2,7 @@ import {
   Container, Box, Text, ActionIcon, Group, Menu, Tooltip, Modal, Button,
 } from '@mantine/core';
 import {
-  IconEdit, IconPresentation, IconTrash, IconDots,
+  IconEdit, IconPresentation, IconTrash, IconDots, IconUsers,
 } from '@tabler/icons';
 import sortBy from 'lodash.sortby';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
@@ -122,10 +122,10 @@ export default function PresentationList() {
     {
       accessor: 'action',
       title: '',
-      width: 100,
+      width: 150,
       render: (record: PresentationType) => (
         <Group position="center">
-          <Menu shadow="sm" width={100}>
+          <Menu shadow="sm" width={150}>
             <Menu.Target>
               <ActionIcon><IconDots /></ActionIcon>
             </Menu.Target>
@@ -137,9 +137,26 @@ export default function PresentationList() {
               >
                 Edit
               </Menu.Item>
-              <Link to={`/presentation/active/${record._id}`}>
-                <Menu.Item icon={<IconPresentation size={18} />}>Present</Menu.Item>
-              </Link>
+              <Menu.Item
+                component={Link}
+                to={`/presentation/active/${record._id}`}
+                icon={<IconPresentation size={18} />}
+              >
+                Present
+              </Menu.Item>
+              {
+                currentUserId === record.userCreated._id
+                  ? (
+                    <Menu.Item
+                      component={Link}
+                      to={`/presentation/${record._id}/collaboration`}
+                      icon={<IconUsers size={18} />}
+                    >
+                      Collaboration
+                    </Menu.Item>
+                  )
+                  : null
+              }
               <Menu.Divider />
               <Menu.Item
                 color="red"

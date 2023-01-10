@@ -77,6 +77,12 @@ const presentationApi = {
   deletePresentation: (id?: string) => (
     axiosClient.delete<BaseResponse<null>>(`/presentation/${id}`)
   ),
+  addCollaborator: (id: string | undefined, email: string) => (
+    axiosClient.put<BaseResponse<null>>(`/presentation/${id}/collaborator`, { email })
+  ),
+  removeCollaborator: (id: string | undefined, email: string) => (
+    axiosClient.delete<BaseResponse<null>>(`/presentation/${id}/collaborator`, { data: { email } })
+  ),
 
   getSlide: (id: string) => (
     axiosClient.get<BaseResponse<Slide>>(`/slide/${id}`)

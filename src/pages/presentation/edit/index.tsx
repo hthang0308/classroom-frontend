@@ -1,11 +1,11 @@
 import {
-  Container, Group, Button, Breadcrumbs, Anchor, Grid, Loader, Select, Divider, Center, Text,
+  Container, Group, Button, Breadcrumbs, Anchor, Grid, Loader, Select, Divider, Center, Text, Menu,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import {
   IconPlus, IconDeviceFloppy, IconPresentationAnalytics, IconTrash,
 } from '@tabler/icons';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 
 import SlideContentSetting, { useStyles } from './slideContentSetting';
@@ -19,6 +19,7 @@ import presentationApi, {
 } from '@/api/presentation';
 import { BaseResponse } from '@/api/types';
 import * as notificationManager from '@/pages/common/notificationManager';
+import { getUserId } from '@/utils';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
 import { SlideTypes } from '@/utils/constants';
 
@@ -30,6 +31,8 @@ export default function EditPresentation() {
   const { presentationId, slideId } = useParams();
   const { classes } = useStyles();
   const navigate = useNavigate();
+
+  const currentUserId = useMemo(() => getUserId(), []);
 
   const form = useForm<FormProps>({
     initialValues: {
@@ -220,11 +223,27 @@ export default function EditPresentation() {
           <Button leftIcon={<IconDeviceFloppy />} variant="outline" onClick={handleSave}>
             <Text>Save</Text>
           </Button>
-          <Link to={`/presentation/active/${presentationId}`}>
-            <Button leftIcon={<IconPresentationAnalytics />}>
-              <Text>Present</Text>
-            </Button>
-          </Link>
+          {
+            currentUserId === presentationData?.userCreated._id
+              ? (
+                <Menu>
+                  <Menu.Target>
+                    <Button leftIcon={<IconPresentationAnalytics />}>
+                      <Text>Present</Text>
+                    </Button>
+                  </Menu.Target>
+                  <Menu.Dropdown>
+                    <Menu.Item component={Link} to={`/presentation/active/${presentationId}`}>
+                      Public present
+                    </Menu.Item>
+                    <Menu.Item>
+                      Group present
+                    </Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
+              )
+              : null
+          }
         </Group>
       </Group>
 

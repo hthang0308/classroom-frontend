@@ -32,7 +32,6 @@ export interface PagingData {
 }
 
 export interface CompactUser {
-
   _id: string;
   email: string;
   name: string;

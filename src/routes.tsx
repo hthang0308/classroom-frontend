@@ -13,6 +13,7 @@ import GroupDetail from './pages/groups/details';
 import JoinGroup from './pages/groups/join';
 import GroupsPage from './pages/groups/list';
 import Home from './pages/home';
+import PresentationCollaboration from './pages/presentation/collaboration';
 import EditPresentation from './pages/presentation/edit';
 import PresentationList from './pages/presentation/list';
 import ChangePasswordForm from './pages/user/changePassword';
@@ -74,6 +75,11 @@ const AUTHORIZED_ROUTES: Props[] = [
     path: '/presentation/:presentationId/:slideId/edit',
     name: 'Presentation',
     element: <EditPresentation />,
+  },
+  {
+    path: '/presentation/:presentationId/collaboration',
+    name: 'Presentation Collaboration',
+    element: <PresentationCollaboration />,
   },
   {
     path: '/presentation/active/:presentationId',
