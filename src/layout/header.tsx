@@ -1,29 +1,21 @@
 import {
-  createStyles,
-  Avatar,
-  Header,
-  Group,
-  Divider,
-  Box,
-  Burger,
-  Drawer,
-  Image,
-  ScrollArea, useMantineColorScheme, Menu, Button,
+  createStyles, Avatar, Header, Group, Divider, Box, Burger, Drawer, Image,
+  ScrollArea, useMantineColorScheme, Menu, Button, ActionIcon, Indicator,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-
 import { IconBellRinging } from '@tabler/icons';
-import { useCallback, useEffect, useState } from 'react';
+import Cookies from 'js-cookie';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
-import presentationApi from '@/api/presentation';
+import presentationApi, { ActivePresentationRoom } from '@/api/presentation';
 import BlackLogo from '@/assets/logo-low-res-black.png';
 import WhiteLogo from '@/assets/logo-low-res-white.png';
 
 import useUserInfo, { UserInfo } from '@/hooks/useUserInfo';
 import ThemeSwitcher from '@/pages/common/buttons/themeSwitcher';
-import * as notificationManager from '@/pages/common/notificationManager';
-import { ErrorResponse, isAxiosError } from '@/utils/axiosErrorHandler';
+
+import { AUTH_COOKIE } from '@/utils/constants';
 
 const useStyles = createStyles((theme) => ({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -53,38 +45,12 @@ const useStyles = createStyles((theme) => ({
   hiddenDesktop: { [theme.fn.largerThan('sm')]: { display: 'none' } },
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const UserAvatar = ({ userInfo }: { userInfo: UserInfo }) => (
   <Avatar src={`https://avatars.dicebear.com/api/identicon/${userInfo.email}.svg`} size="sm" />
 );
 
 const NavLinks = () => {
   const { classes } = useStyles();
-
-  const [presentations, setPresentations] = useState<any[]>([]);
-
-  const loadActiveGroupPresentation = useCallback(async () => {
-    try {
-      const { data: response } = await presentationApi.getActiveGroupPresentation();
-
-      setPresentations(response.data);
-      // setAllQuestions(response.data);
-    } catch (error) {
-      if (isAxiosError<ErrorResponse>(error)) {
-        notificationManager.showFail('', error.response?.data.message);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    // load active group presentation every 5 seconds and when component is mounted
-    loadActiveGroupPresentation();
-    const interval = setInterval(() => {
-      loadActiveGroupPresentation();
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <>
@@ -94,25 +60,6 @@ const NavLinks = () => {
       <Link to="/presentations" className={classes.link}>
         Presentations
       </Link>
-      {presentations.length > 0 && (
-        <Menu position="bottom-end" shadow="md">
-          <Menu.Target>
-            <Button>
-              <IconBellRinging />
-              {presentations.length}
-            </Button>
-          </Menu.Target>
-          <Menu.Dropdown>
-            {presentations.map((presentation) => (
-              <Menu.Item color="red" key={presentation.roomId}>
-                <Link to={`/presentation/join?roomId=${presentation.roomId}`} className={classes.link}>
-                  {presentation.groupName}
-                </Link>
-              </Menu.Item>
-            ))}
-          </Menu.Dropdown>
-        </Menu>
-      ) }
     </>
   );
 };
@@ -120,9 +67,59 @@ const NavLinks = () => {
 const RightButtons = () => {
   const { userInfo } = useUserInfo();
 
+  const intervalId = useRef<number>();
+
+  const [activeRooms, setActiveRooms] = useState<ActivePresentationRoom[]>([]);
+
+  const loadActiveGroupPresentation = useCallback(async () => {
+    if (!Cookies.get(AUTH_COOKIE)) {
+      return;
+    }
+
+    try {
+      const { data: response } = await presentationApi.getActiveGroupPresentation();
+
+      setActiveRooms(response.data);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log(error);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadActiveGroupPresentation();
+    intervalId.current = window.setInterval(() => {
+      loadActiveGroupPresentation();
+    }, 5000);
+
+    return () => window.clearInterval(intervalId.current);
+  }, [loadActiveGroupPresentation]);
+
   return (
-    <>
+    <Group spacing="xl">
       <ThemeSwitcher />
+      <Menu position="bottom-end" shadow="md">
+        <Menu.Target>
+          <Indicator label={activeRooms.length} showZero={false} inline dot={false} size={16}>
+            <ActionIcon>
+              <IconBellRinging size={28} />
+            </ActionIcon>
+          </Indicator>
+        </Menu.Target>
+        <Menu.Dropdown>
+          {
+            activeRooms.length > 0
+              ? (
+                activeRooms.map((i) => (
+                  <Menu.Item key={i.roomId} component={Link} to={`/presentation/join?roomId=${i.roomId}`}>
+                    {i.groupName}
+                  </Menu.Item>
+                ))
+              )
+              : <Menu.Item>No presentation now</Menu.Item>
+          }
+        </Menu.Dropdown>
+      </Menu>
       {
         userInfo
           ? (
@@ -132,7 +129,7 @@ const RightButtons = () => {
           )
           : null
       }
-    </>
+    </Group>
   );
 };
 

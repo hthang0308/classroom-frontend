@@ -20,7 +20,6 @@ interface PropsType {
 }
 
 export default function Header({ role }: PropsType) {
-  // const [opened, setOpened] = useState(false);
   const [invitationModalOpened, setInvitationModalOpened] = useState(false);
   const [inviteViaEmailOpened, setInviteViaEmailOpened] = useState(false);
   const [groupData, setGroupData] = useState<GroupType>();
@@ -54,14 +53,6 @@ export default function Header({ role }: PropsType) {
 
     fetchData();
   }, [groupId]);
-
-  // const handleOpenModal = () => {
-  //   setOpened(true);
-  // };
-
-  // const handleCloseModal = () => {
-  //   setOpened(false);
-  // };
 
   const handleOpenInvitationModal = async () => {
     try {
@@ -141,13 +132,6 @@ export default function Header({ role }: PropsType) {
 
   return (
     <>
-      {/* <Modal
-        title="Settings"
-        opened={opened}
-        onClose={handleCloseModal}
-      >
-        Settings
-      </Modal> */}
       <Modal
         title="Invitation link"
         opened={invitationModalOpened}
@@ -221,22 +205,16 @@ export default function Header({ role }: PropsType) {
                     </Tooltip>
                   </Menu.Target>
                   <Menu.Dropdown>
-                    {/* <Menu.Label>Application</Menu.Label>
-                    <Menu.Item icon={<IconSettings size={14} />}>Settings</Menu.Item>
-                    <Menu.Divider /> */}
                     {
                       role === UserRole.Owner
                         ? (
-                          <>
-                            {/* <Menu.Label>Danger zone</Menu.Label> */}
-                            <Menu.Item
-                              color="red"
-                              icon={<IconTrash size={14} />}
-                              onClick={handleDeleteGroup}
-                            >
-                              Delete group
-                            </Menu.Item>
-                          </>
+                          <Menu.Item
+                            color="red"
+                            icon={<IconTrash size={14} />}
+                            onClick={handleDeleteGroup}
+                          >
+                            Delete group
+                          </Menu.Item>
                         )
                         : (
                           <>
@@ -257,13 +235,13 @@ export default function Header({ role }: PropsType) {
             )
             : (
               role === UserRole.Member
-                && (
-                  <Tooltip label="Leave group">
-                    <Button color="red" onClick={handleMemberLeaveGroup}>
-                      <IconLogout />
-                    </Button>
-                  </Tooltip>
-                )
+              && (
+                <Tooltip label="Leave group">
+                  <Button color="red" onClick={handleMemberLeaveGroup}>
+                    <IconLogout />
+                  </Button>
+                </Tooltip>
+              )
             )
         }
       </Group>
