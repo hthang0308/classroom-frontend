@@ -28,6 +28,7 @@ export interface CompactMultiChoiceSlide {
   title: string;
   slideType: SlideTypesType;
   options: MultiChoiceOption[];
+  userVotes?: any[];
 }
 
 export interface CompactHeadingParagraphSlide {

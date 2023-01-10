@@ -84,7 +84,8 @@ function SlideSwitcher({ slide, options, sendVote }: SlideSwitcherProps) {
 
   switch (slide?.slideType) {
     case SlideTypes.multipleChoice: {
-      Slide = <MultiChoiceDisplaySlide title={slide?.title} options={options} sendVote={sendVote} />;
+      // eslint-disable-next-line max-len
+      Slide = <MultiChoiceDisplaySlide title={slide?.title} userVotes={slide?.userVotes?.length} options={options} sendVote={sendVote} />;
       break;
     }
 

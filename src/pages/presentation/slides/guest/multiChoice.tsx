@@ -1,5 +1,5 @@
 import { Button, Title, Stack } from '@mantine/core';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { MultiChoiceOption } from '@/api/presentation';
 
@@ -7,24 +7,31 @@ import MultiChoiceDisplaySlide from '@/pages/presentation/slides/host/multiChoic
 
 interface DisplayMultiChoiceSlideProps {
   title: string;
+  userVotes: any,
   options: MultiChoiceOption[];
   sendVote: (_: MultiChoiceOption) => void;
 }
 
-export default function DisplayMultiChoiceSlide({ sendVote, options, title }: DisplayMultiChoiceSlideProps) {
+export default function DisplayMultiChoiceSlide({ sendVote, userVotes, options, title }: DisplayMultiChoiceSlideProps) {
   const [voteValue, setVoteValue] = useState<MultiChoiceOption>();
-
   const handleVote = (option: MultiChoiceOption) => {
     setVoteValue(option);
     sendVote(option);
   };
 
+  useEffect(() => {
+    // eslint-disable-next-line unicorn/no-useless-undefined
+    setVoteValue(undefined);
+  }, [title]);
+
   return (
-    voteValue ? (
+    (voteValue || userVotes) ? (
       <MultiChoiceDisplaySlide title={title} options={options} />
     ) : (
       <Stack spacing="xl">
-        <Title order={1} align="center">{title}</Title>
+        <Title order={1} align="center">
+          {title}
+        </Title>
         <Stack align="center" justify="flex-start">
           {
             options.map((o) => (

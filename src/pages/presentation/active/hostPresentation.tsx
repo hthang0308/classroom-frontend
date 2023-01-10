@@ -206,6 +206,12 @@ function ShowPage({ presentation, groupId = '' }: HostPresentationProps) {
         switch (data.type) {
           case WaitInRoomType.newVote: {
             setOptions(data.data);
+            currentSlide.options = data.data;
+            break;
+          }
+
+          case WaitInRoomType.newSlide: {
+            setOptions(data.data.options);
             break;
           }
 
