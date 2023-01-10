@@ -58,6 +58,9 @@ const groupApi = {
   getMyGroups: () => (
     axiosClient.get<BaseResponse<Group[]>>('/group/my-group')
   ),
+  getMyCreatedGroups: () => (
+    axiosClient.get<BaseResponse<Group[]>>('/group/my-created-group')
+  ),
   getInvitationLink: (id?: string) => (
     axiosClient.get<BaseResponse<string>>(`/group/${id}/get-invite-link`)
   ),

@@ -21,6 +21,7 @@ import ChangePasswordForm from './pages/user/changePassword';
 import ProfileEditor from './pages/user/editProfile';
 
 import Layout from '@/layout/layout';
+import GroupPresentation from '@/pages/presentation/active/groupPresentation';
 import GuestPresentation from '@/pages/presentation/active/guestPresentation';
 import HostPresentation from '@/pages/presentation/active/hostPresentation';
 import UserProfile from '@/pages/user/userProfile';
@@ -86,6 +87,11 @@ const AUTHORIZED_ROUTES: Props[] = [
     name: 'Present',
     element: <HostPresentation />,
     noHeader: true,
+  },
+  {
+    path: '/presentation/active/:presentationId/group',
+    name: 'Present',
+    element: <GroupPresentation />,
   },
   {
     path: '/presentation/join',

@@ -137,34 +137,37 @@ export default function PresentationList() {
               >
                 Edit
               </Menu.Item>
-              <Menu.Item
-                component={Link}
-                to={`/presentation/active/${record._id}`}
-                icon={<IconPresentation size={18} />}
-              >
-                Present
-              </Menu.Item>
+
               {
                 currentUserId === record.userCreated._id
                   ? (
-                    <Menu.Item
-                      component={Link}
-                      to={`/presentation/${record._id}/collaboration`}
-                      icon={<IconUsers size={18} />}
-                    >
-                      Collaboration
-                    </Menu.Item>
+                    <>
+                      <Menu.Item
+                        component={Link}
+                        to={`/presentation/active/${record._id}`}
+                        icon={<IconPresentation size={18} />}
+                      >
+                        Present
+                      </Menu.Item>
+                      <Menu.Item
+                        component={Link}
+                        to={`/presentation/${record._id}/collaboration`}
+                        icon={<IconUsers size={18} />}
+                      >
+                        Collaboration
+                      </Menu.Item>
+                      <Menu.Divider />
+                      <Menu.Item
+                        color="red"
+                        icon={<IconTrash size={18} />}
+                        onClick={() => handleOpenModal(record.name, record._id)}
+                      >
+                        Delete
+                      </Menu.Item>
+                    </>
                   )
                   : null
               }
-              <Menu.Divider />
-              <Menu.Item
-                color="red"
-                icon={<IconTrash size={18} />}
-                onClick={() => handleOpenModal(record.name, record._id)}
-              >
-                Delete
-              </Menu.Item>
             </Menu.Dropdown>
           </Menu>
         </Group>

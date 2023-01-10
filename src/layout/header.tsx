@@ -1,6 +1,6 @@
 import {
   createStyles, Avatar, Header, Group, Divider, Box, Burger, Drawer, Image,
-  ScrollArea, useMantineColorScheme, Menu, Button, ActionIcon, Indicator,
+  ScrollArea, useMantineColorScheme, Menu, ActionIcon, Indicator,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconBellRinging } from '@tabler/icons';

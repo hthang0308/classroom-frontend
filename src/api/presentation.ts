@@ -64,6 +64,15 @@ export type Presentation = BasePresentation<string>;
 
 export type PresentationWithUserInfo = BasePresentation<CompactUser>;
 
+export interface ActivePresentationRoom {
+  roomId: string
+  groupName: string
+  presentationName: string
+  presentationId: string
+  startTime: Date
+  message: string
+}
+
 const presentationApi = {
   createPresentation: (name: string) => (
     axiosClient.post<BaseResponse<Presentation>>('/presentation', { name })
@@ -123,7 +132,7 @@ const presentationApi = {
     axiosClient.get<BaseResponse<Question[]>>(`presentation/get-socket-room/${roomId}/question`)
   ),
   getActiveGroupPresentation: () => (
-    axiosClient.get<BaseResponse<PresentationWithUserInfo[]>>('/presentation/check-active-group-presentation')
+    axiosClient.get<BaseResponse<ActivePresentationRoom[]>>('/presentation/check-active-group-presentation')
   ),
 };
 

@@ -36,6 +36,8 @@ export const WaitInRoomType = {
 
 export interface HostStartStopRoomData {
   presentationId: string;
+  groupId?: string;
+  roomType?: string;
 }
 
 export interface HostStartSlideData {

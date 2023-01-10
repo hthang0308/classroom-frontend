@@ -236,7 +236,7 @@ export default function EditPresentation() {
                     <Menu.Item component={Link} to={`/presentation/active/${presentationId}`}>
                       Public present
                     </Menu.Item>
-                    <Menu.Item>
+                    <Menu.Item component={Link} to={`/presentation/active/${presentationId}/group`}>
                       Group present
                     </Menu.Item>
                   </Menu.Dropdown>

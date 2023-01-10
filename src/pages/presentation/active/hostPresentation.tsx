@@ -1,13 +1,9 @@
-import {
-  Button, Container, Group, Skeleton, Stack, Text, Title, Grid,
-} from '@mantine/core';
+import { Button, Container, Group, Skeleton, Stack, Text, Title, Grid } from '@mantine/core';
 import { IconArrowLeft, IconArrowRight, IconPresentationOff } from '@tabler/icons';
 import config from 'config';
-import React, {
-  useEffect, useState, useCallback,
-} from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { io as socketIO, Socket } from 'socket.io-client';
 
 import ChatBox from './chatBox';
@@ -115,9 +111,10 @@ function SlideSwitcher({ slide, options }: SlideSwitcherProps) {
 
 interface HostPresentationProps {
   presentation: PresentationWithUserInfo;
+  groupId?: string;
 }
 
-function ShowPage({ presentation }: HostPresentationProps) {
+function ShowPage({ presentation, groupId = '' }: HostPresentationProps) {
   const [roomId, setRoomId] = useState<string>('');
   const { jwtToken } = getJwtToken();
 
@@ -242,14 +239,23 @@ function ShowPage({ presentation }: HostPresentationProps) {
         }
       });
 
-      socket.emit(ClientToServerEventType.hostCreateRoom, { presentationId: presentation._id });
+      const payload = { presentationId: presentation._id };
+
+      if (groupId) {
+        Object.assign(payload, {
+          groupId,
+          roomType: 'GROUP',
+        });
+      }
+
+      socket.emit(ClientToServerEventType.hostCreateRoom, payload);
     });
 
     return () => {
       socket.emit(ClientToServerEventType.hostStopPresentation, { presentationId: presentation._id });
       socket.disconnect();
     };
-  }, [jwtToken, presentation._id, socket]);
+  }, [jwtToken, presentation._id, socket, groupId]);
 
   return (
     <Skeleton visible={!isLoading}>
@@ -289,9 +295,11 @@ function ShowPage({ presentation }: HostPresentationProps) {
 }
 
 export default function HostPresentation() {
+  const locationState = useLocation().state as { groupId: string };
   const { presentationId = '' } = useParams<string>();
   const { user, isLoading } = useUser();
   const { presentation } = usePresentation(presentationId);
+
   const isHost = (user?._id || 'unknown') === presentation?.userCreated._id;
   const hasSlide = !!presentation?.slides?.length;
 
@@ -301,7 +309,7 @@ export default function HostPresentation() {
         {
           // eslint-disable-next-line no-nested-ternary
           isHost ? (
-            <ShowPage presentation={presentation as PresentationWithUserInfo} />
+            <ShowPage presentation={presentation as PresentationWithUserInfo} groupId={locationState?.groupId} />
           ) : (
             hasSlide ? (
               <Title order={3} sx={{ textAlign: 'center' }}>You cannot start a presentation that is not yours</Title>
