@@ -5,7 +5,6 @@ import { ResponsiveContainer, BarChart, Tooltip, Bar, XAxis, YAxis, CartesianGri
 import BaseSlide from './baseSlide';
 
 import { MultiChoiceOption } from '@/api/presentation';
-
 import { Colors } from '@/utils/constants';
 
 interface MultiChoiceDisplaySlideProps {

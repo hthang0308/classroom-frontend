@@ -9,9 +9,9 @@ import { io as socketIO, Socket } from 'socket.io-client';
 
 import ChatBox from './chatBox';
 import { GuestQuestionBox } from './questionBox';
-import { Chat, Question } from './types';
+import { Chat, Question, CompactSlideWithUserVotes } from './types';
 
-import presentationApi, { CompactSlide, PresentationWithUserInfo, MultiChoiceOption } from '@/api/presentation';
+import presentationApi, { PresentationWithUserInfo, MultiChoiceOption } from '@/api/presentation';
 import * as notificationManager from '@/pages/common/notificationManager';
 
 import MultiChoiceDisplaySlide from '@/pages/presentation/slides/guest/multiChoice';
@@ -74,7 +74,7 @@ function InputCodePage({ setRoomId, initialRoomId = '' }: InputCodePageProps) {
 }
 
 interface SlideSwitcherProps {
-  slide?: CompactSlide;
+  slide?: CompactSlideWithUserVotes;
   options: MultiChoiceOption[];
   sendVote: (_: MultiChoiceOption) => void;
 }
@@ -84,8 +84,14 @@ function SlideSwitcher({ slide, options, sendVote }: SlideSwitcherProps) {
 
   switch (slide?.slideType) {
     case SlideTypes.multipleChoice: {
-      // eslint-disable-next-line max-len
-      Slide = <MultiChoiceDisplaySlide title={slide?.title} userVotes={slide?.userVotes?.length} options={options} sendVote={sendVote} />;
+      Slide = (
+        <MultiChoiceDisplaySlide
+          title={slide?.title}
+          userVotes={slide?.userVotes}
+          options={options}
+          sendVote={sendVote}
+        />
+      );
       break;
     }
 
@@ -124,7 +130,7 @@ function ShowPage({ roomId }: ShowPageProps) {
   const { jwtToken } = getJwtToken();
 
   const [, setPresentation] = useState<PresentationWithUserInfo>();
-  const [currentSlide, setCurrentSlide] = useState<CompactSlide>();
+  const [currentSlide, setCurrentSlide] = useState<CompactSlideWithUserVotes>();
   const [options, setOptions] = useState<MultiChoiceOption[]>([]);
 
   const [socket, setSocket] = useState<Socket<ServerToClientEvents, ClientToServerEvents>>();
