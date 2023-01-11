@@ -1,14 +1,14 @@
-import { Button, Container, Group, Skeleton, Stack, Text, Title, Grid } from '@mantine/core';
-import { IconArrowLeft, IconArrowRight, IconPresentationOff } from '@tabler/icons';
+import { Button, Container, Group, Skeleton, Stack, Text, Title, Grid, Modal } from '@mantine/core';
+import { IconArrowLeft, IconArrowRight, IconPresentationOff, IconList } from '@tabler/icons';
 import config from 'config';
-import { useEffect, useState, useCallback } from 'react';
-
+import { DataTable } from 'mantine-datatable';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { io as socketIO, Socket } from 'socket.io-client';
 
 import ChatBox from './chatBox';
 import { HostQuestionBox } from './questionBox';
-import { Chat, Question } from './types';
+import { Chat, Question, UserVote } from './types';
 
 import presentationApi, { CompactSlide, MultiChoiceOption, PresentationWithUserInfo } from '@/api/presentation';
 import CopyButton from '@/pages/common/buttons/copyButton';
@@ -33,41 +33,113 @@ interface NavigationHeaderProps {
   roomId: string;
   invitationLink: string;
   presentationData: PresentationWithUserInfo | undefined
+  slideType: string
+  userVotes: UserVote[]
+  options: MultiChoiceOption[]
 
   toNextSlide: () => void;
   toPrevSlide: () => void;
 }
 
 function NavigationHeader({
-  roomId, invitationLink, presentationData, toNextSlide, toPrevSlide,
+  roomId, invitationLink, presentationData, toNextSlide, toPrevSlide, slideType, userVotes, options,
 }: NavigationHeaderProps) {
   const navigate = useNavigate();
+  const [opened, setOpened] = useState(false);
+
+  const handleOpenModal = () => {
+    setOpened(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpened(false);
+  };
 
   return (
-    <Stack>
-      <Group position="center">
-        <Text>Copy the code</Text>
-        <CopyButton value={roomId} />
-        <Text>or the link</Text>
-        <CopyButton value={invitationLink} />
-      </Group>
-      <Group position="apart">
-        <Group>
-          <Button onClick={() => { toPrevSlide(); }}><IconArrowLeft /></Button>
-          <Button onClick={() => { toNextSlide(); }}><IconArrowRight /></Button>
+    <>
+      {
+        slideType === SlideTypes.multipleChoice
+          ? (
+            <Modal
+              title="Multiple choice result list"
+              opened={opened}
+              onClose={handleCloseModal}
+              size="50%"
+            >
+              <DataTable
+                columns={[
+                  {
+                    accessor: 'index',
+                    title: '#',
+                    textAlignment: 'center',
+                    render: (_, index) => index + 1,
+                  },
+                  {
+                    accessor: 'user.name',
+                    title: 'Name',
+                  },
+                  {
+                    accessor: 'user.email',
+                    title: 'Email',
+                  },
+                  {
+                    accessor: 'optionIndex',
+                    title: 'Choice',
+                    textAlignment: 'center',
+                    render: (record: UserVote) => (
+                      <Text>{(options.find((i) => i?.index === record.optionIndex))?.value || ''}</Text>
+                    ),
+                  },
+                  {
+                    accessor: 'createdAt',
+                    title: 'Time vote',
+                    textAlignment: 'center',
+                    render: (record: UserVote) => (
+                      <Text>{(new Date(record.createdAt)).toLocaleString('en-US')}</Text>
+                    ),
+                  },
+                ]}
+                records={userVotes}
+                idAccessor="user._id"
+                noRecordsText="No result"
+                minHeight={150}
+              />
+            </Modal>
+          )
+          : null
+      }
+      <Stack>
+        <Group position="center">
+          <Text>Copy the code</Text>
+          <CopyButton value={roomId} />
+          <Text>or the link</Text>
+          <CopyButton value={invitationLink} />
         </Group>
-        <Group>
-          <FullScreenButton />
-          <Button
-            color="red"
-            onClick={() => navigate(`/presentation/${presentationData?._id}/${presentationData?.slides[0]._id}/edit`)}
-            leftIcon={<IconPresentationOff />}
-          >
-            <Text>Stop present</Text>
-          </Button>
+        <Group position="apart">
+          <Group>
+            <Button onClick={() => { toPrevSlide(); }}><IconArrowLeft /></Button>
+            <Button onClick={() => { toNextSlide(); }}><IconArrowRight /></Button>
+            {
+              slideType === SlideTypes.multipleChoice
+                ? (
+                  <Button leftIcon={<IconList />} onClick={handleOpenModal}>Result List</Button>
+                )
+                : null
+            }
+          </Group>
+          <Group>
+            <FullScreenButton />
+            <Button
+              color="red"
+              onClick={() => navigate(`/presentation/${presentationData?._id}/${presentationData?.slides[0]._id}/edit`)}
+              leftIcon={<IconPresentationOff />}
+            >
+              <Text>Stop present</Text>
+            </Button>
+          </Group>
         </Group>
-      </Group>
-    </Stack>
+      </Stack>
+    </>
   );
 }
 
@@ -185,6 +257,33 @@ function ShowPage({ presentation, groupId = '' }: HostPresentationProps) {
 
   const isLoading = currentSlide === undefined || !!roomId;
 
+  const [userVotes, setUserVotes] = useState<UserVote[]>([]);
+
+  const getMultiChoiceResultList = useCallback(async () => {
+    if (!roomId || currentSlide.slideType !== SlideTypes.multipleChoice) {
+      return;
+    }
+
+    try {
+      const { data: response } = await presentationApi.getMultiChoiceResult(roomId);
+
+      setUserVotes((response.data.find((i) => i._id === currentSlide._id)?.userVotes || []));
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log(error);
+    }
+  }, [roomId, currentSlide._id, currentSlide.slideType]);
+
+  const intervalId = useRef<number>();
+
+  useEffect(() => {
+    intervalId.current = window.setInterval(() => {
+      getMultiChoiceResultList();
+    }, 3000);
+
+    return () => window.clearInterval(intervalId.current);
+  }, [getMultiChoiceResultList]);
+
   useEffect(() => {
     if (!socket) {
       setSocket((prevState) => {
@@ -261,6 +360,7 @@ function ShowPage({ presentation, groupId = '' }: HostPresentationProps) {
       socket.emit(ClientToServerEventType.hostStopPresentation, { presentationId: presentation._id });
       socket.disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jwtToken, presentation._id, socket, groupId]);
 
   return (
@@ -272,6 +372,9 @@ function ShowPage({ presentation, groupId = '' }: HostPresentationProps) {
           presentationData={presentation}
           toNextSlide={toNextSlide}
           toPrevSlide={toPrevSlide}
+          slideType={currentSlide.slideType}
+          userVotes={userVotes}
+          options={options}
         />
         <Grid>
           <Grid.Col span={9}>

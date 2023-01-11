@@ -1,7 +1,7 @@
 import {
   BasicObject, CompactUser, BaseResponse, BasicResponse, BaseResponseWithMeta,
 } from '@/api/types';
-import { Chat, Question } from '@/pages/presentation/active/types';
+import { Chat, Question, CompactSlideWithUserVotes } from '@/pages/presentation/active/types';
 import axiosClient from '@/utils/axiosClient';
 import { SlideTypes, SlideTypesType } from '@/utils/constants';
 
@@ -130,6 +130,9 @@ const presentationApi = {
   ),
   getAllQuestion: (roomId: string) => (
     axiosClient.get<BaseResponse<Question[]>>(`presentation/get-socket-room/${roomId}/question`)
+  ),
+  getMultiChoiceResult: (roomId: string) => (
+    axiosClient.get<BaseResponse<CompactSlideWithUserVotes[]>>(`/presentation/get-socket-room/${roomId}/submit-result`)
   ),
   getActiveGroupPresentation: () => (
     axiosClient.get<BaseResponse<ActivePresentationRoom[]>>('/presentation/check-active-group-presentation')
