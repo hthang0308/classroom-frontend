@@ -1,8 +1,6 @@
 import { useEffect } from 'react';
-import {
-  createBrowserRouter, Outlet, useNavigate,
-} from 'react-router-dom';
 import type { RouteObject } from 'react-router-dom';
+import { createBrowserRouter, Outlet, useNavigate } from 'react-router-dom';
 
 import UnauthorizedLayout from './layout/UnauthorizedLayout';
 import LoginPage from './pages/authentication/login';
@@ -106,9 +104,7 @@ const router = createBrowserRouter([
     errorElement: <NotFoundPage />,
     children: AUTHORIZED_ROUTES,
   },
-  ...UNAUTHORIZED_ROUTES.map(({
-    path, name, element,
-  }) => ({
+  ...UNAUTHORIZED_ROUTES.map(({ path, name, element }) => ({
     path,
     name,
     element: <UnauthorizedLayout>{element}</UnauthorizedLayout>,
