@@ -1,49 +1,16 @@
-import {
-  createStyles,
-  Paper,
-  Title,
-  Text,
-  TextInput,
-  Button,
-  Container,
-  Group,
-  Anchor,
-  Center,
-  Box,
-} from '@mantine/core';
+import { Anchor, Button, Container, Paper, Text, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconArrowLeft } from '@tabler/icons';
-import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import authApi from '@/api/auth';
 import * as notificationManager from '@/pages/common/notificationManager';
-import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
+import { ErrorResponse, isAxiosError } from '@/utils/axiosErrorHandler';
 
-const useStyles = createStyles((theme) => ({
-  title: {
-    fontSize: 26,
-    fontWeight: 900,
-    fontFamily: `Greycliff CF, ${theme.fontFamily}`,
-  },
+interface FormProps {
+  email: string;
+}
 
-  controls: {
-    [theme.fn.smallerThan('xs')]: {
-      flexDirection: 'column-reverse',
-    },
-  },
-
-  control: {
-    [theme.fn.smallerThan('xs')]: {
-      width: '100%',
-      textAlign: 'center',
-    },
-  },
-}));
-
-export default function ForgotPasswordPage() {
-  const [isLoading, setLoading] = useState(false);
-  const { classes } = useStyles();
+const ForgotPasswordPage = () => {
   const navigate = useNavigate();
 
   const form = useForm({
@@ -55,50 +22,50 @@ export default function ForgotPasswordPage() {
     },
   });
 
-  const handleSubmitForm = async ({ email }: { email: string }) => {
-    setLoading(true);
+  const handleSubmitForm = async (values: FormProps) => {
     try {
-      const { data: response } = await authApi.resetPassword(email);
-
-      notificationManager.showSuccess('Reset password successfully', response.message);
+      const response = await authApi.resetPassword(values.email);
+      notificationManager.showSuccess('', response.data.message);
       navigate('/login');
-    } catch (error: unknown) {
+    } catch (error) {
       if (isAxiosError<ErrorResponse>(error)) {
-        notificationManager.showFail('Reset password unsuccessfully', error.response?.data.message);
+        notificationManager.showFail('', error.response?.data.message);
       }
     }
-
-    setLoading(false);
   };
 
   return (
-    <Container size={460} my={30}>
-      <Title className={classes.title} align="center">
+    <Container size={420} my={40}>
+      <Title
+        align="center"
+        sx={(theme) => ({
+          fontFamily: `Greycliff CF, ${theme.fontFamily}`,
+          fontWeight: 900,
+          color: theme.colorScheme === 'dark' ? theme.colors.gray[1] : theme.colors.dark[4],
+        })}
+      >
         Forgot your password?
       </Title>
-      <Text color="dimmed" size="sm" align="center">
+      <Text color="dimmed" size="sm" align="center" mt={5}>
         Enter your email to get a reset link
       </Text>
 
-      <Paper withBorder shadow="md" p={30} radius="md" mt="xl">
+      <Paper withBorder shadow="md" p={30} mt={30} radius="md">
         <form onSubmit={form.onSubmit(handleSubmitForm)}>
-          <TextInput
-            label="Email"
-            placeholder="abc@gmail.com"
-            required
-            {...form.getInputProps('email')}
-          />
-          <Group position="apart" mt="lg" className={classes.controls}>
-            <Anchor component={Link} color="dimmed" size="sm" className={classes.control} to="/login">
-              <Center inline>
-                <IconArrowLeft size={12} stroke={1.5} />
-                <Box ml={5}>Back to login page</Box>
-              </Center>
+          <TextInput label="Email" placeholder="Your email" required {...form.getInputProps('email')} />
+          <Button fullWidth mt="xl" type="submit">
+            Send Reset Link
+          </Button>
+          <Text color="dimmed" size="sm" align="center" mt="lg">
+            Remember your password?{' '}
+            <Anchor component={Link} size="sm" to="/login">
+              Back to login
             </Anchor>
-            <Button className={classes.control} type="submit" loading={isLoading}>Reset password</Button>
-          </Group>
+          </Text>
         </form>
       </Paper>
     </Container>
   );
-}
+};
+
+export default ForgotPasswordPage;
