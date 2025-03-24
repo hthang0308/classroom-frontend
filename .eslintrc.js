@@ -79,19 +79,14 @@ module.exports = {
 			{
 				"selector": "WithStatement",
 				"message": "`with` is disallowed in strict mode because it makes code impossible to predict and optimize."
+			},
+			{
+				"selector": "TSEnumDeclaration",
+				"message": "Typescript enums does not follow structural type pattern and does not play well with JavaScript"
 			}
 		],
 		"no-void": "off",
 		"function-paren-newline": ["error", "consistent"],
-		"object-curly-newline": [
-			"error",
-			{
-				"ObjectExpression": { "multiline": true, "minProperties": 3 },
-				"ObjectPattern": { "multiline": true, "minProperties": 3 },
-				"ImportDeclaration": { "multiline": true, "minProperties": 3 },
-				"ExportDeclaration": "always"
-			}
-		],
 		"unicorn/no-abusive-eslint-disable": "off",
 		"@typescript-eslint/no-unsafe-assignment": "warn",
 		"@typescript-eslint/no-type-alias": "off",
@@ -191,6 +186,9 @@ module.exports = {
 		"react/sort-comp": "off",
 		"react/state-in-constructor": "off",
 		"react/static-property-placement": "off",
+		"react/require-default-props": ['warn', {
+			"functions": "defaultArguments"
+		}],
 		"react/jsx-tag-spacing": [
 			"error", {
 				"beforeSelfClosing": "always",
@@ -244,7 +242,7 @@ module.exports = {
 		"unicorn/no-array-reduce": "off",
 		"unicorn/no-useless-undefined": "warn",
 		"@typescript-eslint/no-unused-vars": [
-			"error",
+			"warn",
 			{
 				"argsIgnorePattern": "^_",
 				"varsIgnorePattern": "^_"
@@ -280,6 +278,7 @@ module.exports = {
 		"react/no-array-index-key": 0,
 		"unicorn/numeric-separators-style": 0,
 		"no-underscore-dangle": 0,
+		"object-curly-newline": 0,
 	},
 	"settings": {
 		"react": {

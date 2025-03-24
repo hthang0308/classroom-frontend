@@ -1,135 +1,49 @@
-import axiosClient from '@/utils/axiosClient';
+import { ActivePresentationRoom } from './presentation';
 
-export interface User {
-  _id: string;
-  email: string;
-  name: string;
-}
+import {
+  BasicObject, BasicResponse, CompactUser, PagingData, BaseResponse,
+} from '@/api/types';
+import axiosClient from '@/utils/axiosClient';
+import { UserRoleType } from '@/utils/constants';
 
 export interface UsersAndRole {
   user: string
-  role: string
+  role: UserRoleType
 }
 
 export interface UsersInfoAndRole {
-  user: User;
-  role: string;
+  user: CompactUser;
+  role: UserRoleType;
 }
 
-export interface UserCreated {
-  _id: string
-  email: string
-  name: string
-}
-
-export interface Group {
-  _id: string
+interface BasicGroup extends BasicObject {
   name: string
   description: string;
-  usersAndRoles: UsersAndRole[]
-  userCreated: UserCreated
   userUpdated: string
-  createdAt: Date
-  updatedAt: Date
-  __v: number
 }
 
-export interface Group2 {
-  _id: string;
-  name: string;
-  description: string;
+export interface Group extends BasicGroup {
+  usersAndRoles: UsersAndRole[]
+  userCreated: CompactUser;
+}
+
+export interface Group2 extends BasicGroup {
   usersAndRoles: UsersInfoAndRole[];
-  userCreated: UserCreated;
-  userUpdated: string;
-  createdAt: Date;
-  updatedAt: Date;
-  __v: number;
+  userCreated: CompactUser;
 }
 
-export interface Group3 {
-  _id: string;
-  name: string;
-  description: string;
+export interface Group3 extends BasicGroup {
   usersAndRoles: UsersInfoAndRole[];
   userCreated: string;
-  userUpdated: string;
-  createdAt: Date;
-  updatedAt: Date;
-  __v: number;
 }
 
-export interface Meta {
-  currentPage: number
-  pageSize: number
-  totalPages: number
-  totalRows: number
-}
-
-interface SuccessResponseType {
-  statusCode: string
-  data: Group
-  message: string
-}
-
-interface GetAllResponseType {
-  statusCode: string
-  data: Group[]
-  message: string
-  meta: Meta
-}
-
-interface GetMyGroupResponseType {
-  statusCode: string
-  data: Group[]
-  message: string
-}
-
-interface GetLinkResponseType {
-  statusCode: string
-  data: string
-  message: string
-}
-
-interface InviteViaEmailResponseType {
-  statusCode: string
-  message: string
-}
-
-interface JoinGroupResponseType {
-  statusCode: string
-  data: Group3
-  message: string
-}
-
-interface GetAllMemberResponseType {
-  statusCode: string
-  data: Group2
-  message: string
-}
-
-interface AssignRoleResponseType {
-  statusCode: string
-  message: string
-}
-
-interface LeaveGroupResponseType {
-  statusCode: string
-  message: string
-}
-
-interface KickOutResponseType {
-  statusCode: string
-  message: string
-}
-
-interface DeleteGroupResponseType {
-  statusCode: string
-  message: string
+interface GetAllResponseType extends BaseResponse<Group[]> {
+  meta: PagingData
 }
 
 const groupApi = {
-  createGroup: (name: string, description: string | undefined) => (
-    axiosClient.post<SuccessResponseType>('/group', {
+  createGroup: (name: string, description?: string) => (
+    axiosClient.post<BaseResponse<Group>>('/group', {
       name,
       description,
     })
@@ -140,38 +54,45 @@ const groupApi = {
 
     return axiosClient.get<GetAllResponseType>(`/group?size=${pageSize}&page=${page}`);
   },
-  getGroupById: (id: string | undefined) => (
-    axiosClient.get<SuccessResponseType>(`/group/${id}`)
+  getGroupById: (id?: string) => (
+    axiosClient.get<BaseResponse<Group>>(`/group/${id}`)
   ),
   getMyGroups: () => (
-    axiosClient.get<GetMyGroupResponseType>('/group/my-group')
+    axiosClient.get<BaseResponse<Group[]>>('/group/my-group')
   ),
-  getInvitationLink: (id: string | undefined) => (
-    axiosClient.get<GetLinkResponseType>(`/group/${id}/get-invite-link`)
+  getMyCreatedGroups: () => (
+    axiosClient.get<BaseResponse<Group[]>>('/group/my-created-group')
+  ),
+  getInvitationLink: (id?: string) => (
+    axiosClient.get<BaseResponse<string>>(`/group/${id}/get-invite-link`)
   ),
   inviteUserViaEmail: (id: string | undefined, email: string) => (
-    axiosClient.post<InviteViaEmailResponseType>(`/group/${id}/invite-user-by-email`, { email })
+    axiosClient.post<BasicResponse>(`/group/${id}/invite-user-by-email`, { email })
   ),
   joinGroup: (token: string) => (
-    axiosClient.get<JoinGroupResponseType>(`/group/invite/${token}`)
+    axiosClient.get<BaseResponse<Group3>>(`/group/invite/${token}`)
   ),
   getAllMembers: (id: string | undefined) => (
-    axiosClient.get<GetAllMemberResponseType>(`/group/${id}`)
+    axiosClient.get<BaseResponse<Group2>>(`/group/${id}`)
   ),
-  assignMemberRole: (groupId: string | undefined, userId: string | undefined, role: string) => (
-    axiosClient.post<AssignRoleResponseType>(`/group/${groupId}/assign-role`, {
+  assignMemberRole: (groupId: string | undefined, userId: string | undefined, role: UserRoleType) => (
+    axiosClient.post<BasicResponse>(`/group/${groupId}/assign-role`, {
       user: userId,
       role,
     })
   ),
-  leaveGroup: (groupId: string | undefined) => (
-    axiosClient.get<LeaveGroupResponseType>(`/group/${groupId}/leave`)
+  leaveGroup: (groupId?: string) => (
+    axiosClient.get<BasicResponse>(`/group/${groupId}/leave`)
   ),
-  kickOutMember: (groupId: string | undefined, userId: string | undefined) => (
-    axiosClient.get<KickOutResponseType>(`/group/${groupId}/kick?userId=${userId}`)
+  kickOutMember: (groupId?: string, userId?: string) => (
+    axiosClient.get<BasicResponse>(`/group/${groupId}/kick?userId=${userId}`)
   ),
-  deleteGroup: (groupId: string | undefined) => (
-    axiosClient.delete<DeleteGroupResponseType>(`/group/${groupId}`)
+  deleteGroup: (groupId?: string) => (
+    axiosClient.delete<BasicResponse>(`/group/${groupId}`)
+  ),
+
+  getActivePresentation: (groupId?: string) => (
+    axiosClient.get<BaseResponse<ActivePresentationRoom | null>>(`/group/${groupId}/active-presentation`)
   ),
 };
 

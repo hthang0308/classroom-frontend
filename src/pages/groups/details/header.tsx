@@ -5,26 +5,27 @@ import { useForm } from '@mantine/form';
 import {
   IconUserPlus, IconTrash, IconCategory, IconLogout,
 } from '@tabler/icons';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   useParams, useNavigate, Link,
 } from 'react-router-dom';
 
 import groupApi, { Group as GroupType } from '@/api/group';
+import { ActivePresentationRoom } from '@/api/presentation';
 import * as notificationManager from '@/pages/common/notificationManager';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
-import { USER_ROLE } from '@/utils/constants';
+import { UserRole } from '@/utils/constants';
 
 interface PropsType {
   role: string
 }
 
 export default function Header({ role }: PropsType) {
-  // const [opened, setOpened] = useState(false);
   const [invitationModalOpened, setInvitationModalOpened] = useState(false);
   const [inviteViaEmailOpened, setInviteViaEmailOpened] = useState(false);
   const [groupData, setGroupData] = useState<GroupType>();
   const [invitationLink, setInvitationLink] = useState('');
+  const [activePresentationRoom, setActivePresentationRoom] = useState<ActivePresentationRoom | null>(null);
   const [isLoading, setLoading] = useState(false);
   const { groupId } = useParams<string>();
   const navigate = useNavigate();
@@ -55,13 +56,21 @@ export default function Header({ role }: PropsType) {
     fetchData();
   }, [groupId]);
 
-  // const handleOpenModal = () => {
-  //   setOpened(true);
-  // };
+  const getActivePresentation = useCallback(async () => {
+    try {
+      const { data: response } = await groupApi.getActivePresentation(groupId);
 
-  // const handleCloseModal = () => {
-  //   setOpened(false);
-  // };
+      setActivePresentationRoom(response.data);
+    } catch (error) {
+      if (isAxiosError<ErrorResponse>(error)) {
+        notificationManager.showFail('', error.response?.data.message);
+      }
+    }
+  }, [groupId]);
+
+  useEffect(() => {
+    getActivePresentation();
+  }, [getActivePresentation]);
 
   const handleOpenInvitationModal = async () => {
     try {
@@ -141,13 +150,6 @@ export default function Header({ role }: PropsType) {
 
   return (
     <>
-      {/* <Modal
-        title="Settings"
-        opened={opened}
-        onClose={handleCloseModal}
-      >
-        Settings
-      </Modal> */}
       <Modal
         title="Invitation link"
         opened={invitationModalOpened}
@@ -190,45 +192,55 @@ export default function Header({ role }: PropsType) {
             </Anchor>
           ))}
         </Breadcrumbs>
-        {
-          // eslint-disable-next-line no-nested-ternary
-          role === USER_ROLE.OWNER || role === USER_ROLE.CO_OWNER
-            ? (
-              <Group>
-                <Menu position="bottom-end" shadow="md">
-                  <Menu.Target>
-                    <Tooltip label="Invite people">
-                      <Button>
-                        <IconUserPlus />
-                      </Button>
-                    </Tooltip>
-                  </Menu.Target>
-                  <Menu.Dropdown>
-                    <Menu.Item onClick={handleOpenInvitationModal}>
-                      Get invitation link
-                    </Menu.Item>
-                    <Menu.Item onClick={handleOpenInviteViaEmailModal}>
-                      Send invitation via email
-                    </Menu.Item>
-                  </Menu.Dropdown>
-                </Menu>
-                <Menu position="bottom-end" shadow="md">
-                  <Menu.Target>
-                    <Tooltip label="Menu">
-                      <Button>
-                        <IconCategory />
-                      </Button>
-                    </Tooltip>
-                  </Menu.Target>
-                  <Menu.Dropdown>
-                    {/* <Menu.Label>Application</Menu.Label>
-                    <Menu.Item icon={<IconSettings size={14} />}>Settings</Menu.Item>
-                    <Menu.Divider /> */}
-                    {
-                      role === USER_ROLE.OWNER
-                        ? (
-                          <>
-                            {/* <Menu.Label>Danger zone</Menu.Label> */}
+        <Group>
+          {
+            activePresentationRoom !== null
+              ? (
+                <Button
+                  component={Link}
+                  color="red"
+                  variant="outline"
+                  to={`/presentation/join?roomId=${activePresentationRoom.roomId}`}
+                >
+                  Click to join a presentation !!!
+                </Button>
+              )
+              : null
+          }
+          {
+            // eslint-disable-next-line no-nested-ternary
+            role === UserRole.Owner || role === UserRole.CoOwner
+              ? (
+                <Group>
+                  <Menu position="bottom-end" shadow="md">
+                    <Menu.Target>
+                      <Tooltip label="Invite people">
+                        <Button>
+                          <IconUserPlus />
+                        </Button>
+                      </Tooltip>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                      <Menu.Item onClick={handleOpenInvitationModal}>
+                        Get invitation link
+                      </Menu.Item>
+                      <Menu.Item onClick={handleOpenInviteViaEmailModal}>
+                        Send invitation via email
+                      </Menu.Item>
+                    </Menu.Dropdown>
+                  </Menu>
+                  <Menu position="bottom-end" shadow="md">
+                    <Menu.Target>
+                      <Tooltip label="Menu">
+                        <Button>
+                          <IconCategory />
+                        </Button>
+                      </Tooltip>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                      {
+                        role === UserRole.Owner
+                          ? (
                             <Menu.Item
                               color="red"
                               icon={<IconTrash size={14} />}
@@ -236,37 +248,36 @@ export default function Header({ role }: PropsType) {
                             >
                               Delete group
                             </Menu.Item>
-                          </>
-                        )
-                        : (
-                          <>
-                            <Menu.Label>Danger zone</Menu.Label>
-                            <Menu.Item
-                              color="red"
-                              icon={<IconLogout size={14} />}
-                              onClick={handleMemberLeaveGroup}
-                            >
-                              Leave group
-                            </Menu.Item>
-                          </>
-                        )
-                    }
-                  </Menu.Dropdown>
-                </Menu>
-              </Group>
-            )
-            : (
-              role === USER_ROLE.MEMBER
-                ? (
+                          )
+                          : (
+                            <>
+                              <Menu.Label>Danger zone</Menu.Label>
+                              <Menu.Item
+                                color="red"
+                                icon={<IconLogout size={14} />}
+                                onClick={handleMemberLeaveGroup}
+                              >
+                                Leave group
+                              </Menu.Item>
+                            </>
+                          )
+                      }
+                    </Menu.Dropdown>
+                  </Menu>
+                </Group>
+              )
+              : (
+                role === UserRole.Member
+                && (
                   <Tooltip label="Leave group">
                     <Button color="red" onClick={handleMemberLeaveGroup}>
                       <IconLogout />
                     </Button>
                   </Tooltip>
                 )
-                : null
-            )
-        }
+              )
+          }
+        </Group>
       </Group>
     </>
   );

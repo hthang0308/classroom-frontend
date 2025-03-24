@@ -1,39 +1,30 @@
 import {
-  Button, Group, Title, Tooltip, Modal, TextInput, Textarea, Select,
+  Group, Title, Button, Tooltip, Modal, TextInput,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconPlus } from '@tabler/icons';
-import React, { useState } from 'react';
+import { IconPlus, IconArrowsJoin } from '@tabler/icons';
+import { useState } from 'react';
 
-import groupApi from '@/api/group';
+import { Link } from 'react-router-dom';
+
+import presentationApi from '@/api/presentation';
 import * as notificationManager from '@/pages/common/notificationManager';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
-import { GROUP_FILTER_TYPE } from '@/utils/constants';
 
 interface Props {
   fetchData: () => void
-  groupFilter: string | null
-  setGroupFilter: React.Dispatch<React.SetStateAction<string | null>>
 }
 
 interface FormProps {
   name: string
-  desc: string
 }
 
-// eslint-disable-next-line object-curly-newline
-export default function Header({ fetchData, groupFilter, setGroupFilter }: Props) {
+export default function PresentationListHeader({ fetchData }: Props) {
   const [opened, setOpened] = useState(false);
 
-  const form = useForm({
-    initialValues: {
-      name: '',
-      desc: '',
-    },
-  });
+  const form = useForm({ initialValues: { name: '' } });
 
   const handleOpenModal = () => {
-    form.reset();
     setOpened(true);
   };
 
@@ -44,7 +35,7 @@ export default function Header({ fetchData, groupFilter, setGroupFilter }: Props
 
   const handleSubmitForm = async (values: FormProps) => {
     try {
-      const { data: response } = await groupApi.createGroup(values.name, values.desc);
+      const { data: response } = await presentationApi.createPresentation(values.name);
 
       notificationManager.showSuccess('', response.message);
       handleCloseModal();
@@ -59,24 +50,19 @@ export default function Header({ fetchData, groupFilter, setGroupFilter }: Props
   return (
     <>
       <Modal
-        title="Create a group"
+        title="Create new presentation"
         opened={opened}
         onClose={handleCloseModal}
       >
         <form onSubmit={form.onSubmit(handleSubmitForm)}>
           <TextInput
-            label="Name"
-            placeholder="Your group name"
+            label="Presentation name"
+            placeholder="Your presentation name"
             required
             {...form.getInputProps('name')}
           />
-          <Textarea
-            label="Description"
-            placeholder="Your group description"
-            my="md"
-            {...form.getInputProps('desc')}
-          />
-          <Group position="center">
+          <Group position="right" mt="md">
+            <Button onClick={handleCloseModal}>Cancel</Button>
             <Button type="submit">Create</Button>
           </Group>
         </form>
@@ -86,18 +72,20 @@ export default function Header({ fetchData, groupFilter, setGroupFilter }: Props
           order={3}
           sx={(theme) => ({ color: theme.colorScheme === 'dark' ? theme.colors.gray[1] : theme.colors.dark[4] })}
         >
-          Groups
+          My presentations
         </Title>
         <Group>
-          <Select
-            data={[GROUP_FILTER_TYPE.ALL, GROUP_FILTER_TYPE.GROUP_YOU_CREATED, GROUP_FILTER_TYPE.GROUP_YOU_JOINED]}
-            value={groupFilter}
-            onChange={setGroupFilter}
-          />
-          <Tooltip label="Create a group">
+          <Tooltip label="Create a presentation">
             <Button onClick={handleOpenModal}>
               <IconPlus />
             </Button>
+          </Tooltip>
+          <Tooltip label="Join a presentation">
+            <Link to="/presentation/join">
+              <Button>
+                <IconArrowsJoin />
+              </Button>
+            </Link>
           </Tooltip>
         </Group>
       </Group>

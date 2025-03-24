@@ -1,3 +1,5 @@
+import { User } from './user';
+
 import axiosClient from '@/utils/axiosClient';
 
 interface SignInResponseType {
@@ -25,6 +27,18 @@ interface ForgotPasswordResponseType {
   message: string
 }
 
+interface ResetPasswordResponse {
+  message: string
+}
+
+interface RenewPasswordResponse {
+  message: string
+  data: User & {
+    password: string
+    description: string
+  }
+}
+
 const authApi = {
   signIn: (email: string, password: string) => (
     axiosClient.post<SignInResponseType>('/auth/sign-in', {
@@ -41,6 +55,12 @@ const authApi = {
   ),
   forgotPassword: (email: string) => (
     axiosClient.post<ForgotPasswordResponseType>('/auth/forgot-password', { email })
+  ),
+  resetPassword: (email: string) => (
+    axiosClient.post<ResetPasswordResponse>('/auth/reset-password', { email })
+  ),
+  renewPassword: (token: string, password: string) => (
+    axiosClient.post<RenewPasswordResponse>('/auth/reset-password/confirm', { token, password })
   ),
 };
 

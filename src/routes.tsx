@@ -1,36 +1,41 @@
-import { useEffect } from 'react';
 import type { RouteObject } from 'react-router-dom';
-import { createBrowserRouter, Outlet, useNavigate } from 'react-router-dom';
+import { createBrowserRouter, Outlet } from 'react-router-dom';
 
-import UnauthorizedLayout from './layout/UnauthorizedLayout';
-import ForgotPasswordPage from './pages/authentication/forgot-password';
+import UnauthorizedLayout from './layout/unauthorizedLayout';
+import ForgotPasswordPage from './pages/authentication/forgotPassword';
 import LoginPage from './pages/authentication/login';
+import LoginGoogle from './pages/authentication/login/loginGoogle';
 import Logout from './pages/authentication/logout';
 import RegisterPage from './pages/authentication/register';
+import RenewPasswordPage from './pages/authentication/renewPassword';
 import NotFoundPage from './pages/errorPage/notFound';
-import GroupDetail from './pages/groups/groupDetail';
-import JoinGroup from './pages/groups/joinGroup';
+import GroupDetail from './pages/groups/details';
+import JoinGroup from './pages/groups/join';
 import GroupsPage from './pages/groups/list';
 import Home from './pages/home';
-import ChangePasswordForm from './pages/user/change-password';
+import PresentationCollaboration from './pages/presentation/collaboration';
+import EditPresentation from './pages/presentation/edit';
+import PresentationList from './pages/presentation/list';
+import ChangePasswordForm from './pages/user/changePassword';
 
-import ProfileEditor from './pages/user/edit-profile';
+import ProfileEditor from './pages/user/editProfile';
 
-import { APP_LOGOUT_EVENT } from './utils/constants';
-
-import Layout from '@/layout/Layout';
-import UserProfile from '@/pages/user/user-profile';
+import Layout from '@/layout/layout';
+import GroupPresentation from '@/pages/presentation/active/groupPresentation';
+import GuestPresentation from '@/pages/presentation/active/guestPresentation';
+import HostPresentation from '@/pages/presentation/active/hostPresentation';
+import UserProfile from '@/pages/user/userProfile';
 
 type Props = RouteObject & {
   name: string;
+  noHeader?: boolean;
 };
 
-export const AUTHORIZED_ROUTES: Props[] = [
+const AUTHORIZED_ROUTES: Props[] = [
   {
-    index: true,
+    path: '/',
     name: 'Home',
     element: <Home />,
-    errorElement: <NotFoundPage />,
   },
   {
     path: '/logout',
@@ -62,23 +67,38 @@ export const AUTHORIZED_ROUTES: Props[] = [
     name: 'Group',
     element: <GroupDetail />,
   },
+  {
+    path: '/presentations',
+    name: 'Presentations',
+    element: <PresentationList />,
+  },
+  {
+    path: '/presentation/:presentationId/:slideId/edit',
+    name: 'Presentation',
+    element: <EditPresentation />,
+  },
+  {
+    path: '/presentation/:presentationId/collaboration',
+    name: 'Presentation Collaboration',
+    element: <PresentationCollaboration />,
+  },
+  {
+    path: '/presentation/active/:presentationId',
+    name: 'Present',
+    element: <HostPresentation />,
+    noHeader: true,
+  },
+  {
+    path: '/presentation/active/:presentationId/group',
+    name: 'Present',
+    element: <GroupPresentation />,
+  },
+  {
+    path: '/presentation/join',
+    name: 'Join Present',
+    element: <GuestPresentation />,
+  },
 ];
-
-const LayoutRoute = () => {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    document.addEventListener(APP_LOGOUT_EVENT, () => {
-      navigate('/logout');
-    });
-  });
-
-  return (
-    <Layout>
-      <Outlet />
-    </Layout>
-  );
-};
 
 const UNAUTHORIZED_ROUTES: Props[] = [
   {
@@ -97,6 +117,16 @@ const UNAUTHORIZED_ROUTES: Props[] = [
     element: <ForgotPasswordPage />,
   },
   {
+    path: '/renew-password',
+    name: 'Renew Password',
+    element: <RenewPasswordPage />,
+  },
+  {
+    path: '/login/google',
+    name: 'Login Google',
+    element: <LoginGoogle />,
+  },
+  {
     path: '/group/invite',
     name: 'Invite',
     element: <JoinGroup />,
@@ -106,15 +136,21 @@ const UNAUTHORIZED_ROUTES: Props[] = [
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <LayoutRoute />,
+    element: <Outlet />,
     errorElement: <NotFoundPage />,
-    children: AUTHORIZED_ROUTES,
+    children: [
+      ...AUTHORIZED_ROUTES.map(({ path, name, element, noHeader }) => ({
+        path,
+        name,
+        element: <Layout noHeader={noHeader || false}>{element}</Layout>,
+      })),
+      ...UNAUTHORIZED_ROUTES.map(({ path, name, element }) => ({
+        path,
+        name,
+        element: <UnauthorizedLayout>{element}</UnauthorizedLayout>,
+      })),
+    ],
   },
-  ...UNAUTHORIZED_ROUTES.map(({ path, name, element }) => ({
-    path,
-    name,
-    element: <UnauthorizedLayout>{element}</UnauthorizedLayout>,
-  })),
 ]);
 
 export default router;

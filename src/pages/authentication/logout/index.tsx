@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { AUTH_COOKIE } from '@/utils/constants';

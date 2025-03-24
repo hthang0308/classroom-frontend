@@ -1,16 +1,19 @@
 import { Box, Group } from '@mantine/core';
 import { DataTable, DataTableColumn } from 'mantine-datatable';
-import {
+import React, {
   useState, useEffect, useCallback,
 } from 'react';
 import { useParams } from 'react-router-dom';
 
+import { ConfirmPopoverAssignRole, ConfirmPopoverKickOut } from './confirmPopovers';
+
 import groupApi, { UsersInfoAndRole } from '@/api/group';
-import { ConfirmPopoverAssignRole, ConfirmPopoverKickOut } from '@/pages/common/confirmPopover';
 import * as notificationManager from '@/pages/common/notificationManager';
 import { sortMemberListByRole, getUserId } from '@/utils';
 import { isAxiosError, ErrorResponse } from '@/utils/axiosErrorHandler';
-import { USER_ROLE } from '@/utils/constants';
+import {
+  UserRole, UserRoleDisplay, UserRoleType,
+} from '@/utils/constants';
 
 interface PropsType {
   role: string
@@ -31,7 +34,7 @@ export default function MemberList({ role, setRole }: PropsType) {
 
       const convertedData = response.data.usersAndRoles.map((item) => ({
         ...item,
-        role: USER_ROLE[item.role],
+        role: item.role,
       }));
 
       const user = convertedData.find((item) => item.user._id === userId);
@@ -51,7 +54,7 @@ export default function MemberList({ role, setRole }: PropsType) {
     fetchData();
   }, [fetchData]);
 
-  const handleAssignMemberRole = async (userId: string, roleAssign: string) => {
+  const handleAssignMemberRole = async (userId: string, roleAssign: UserRoleType) => {
     try {
       const { data: response } = await groupApi.assignMemberRole(groupId, userId, roleAssign);
 
@@ -87,7 +90,11 @@ export default function MemberList({ role, setRole }: PropsType) {
     },
     { accessor: 'user.name', title: 'Name' },
     { accessor: 'user.email', title: 'Email' },
-    { accessor: 'role', textAlignment: 'center' },
+    {
+      accessor: 'role',
+      textAlignment: 'center',
+      render: (({ role: currentRole }: UsersInfoAndRole) => UserRoleDisplay[currentRole]),
+    },
   ];
 
   const ACTION_COLUMNS: DataTableColumn<UsersInfoAndRole>[] = [
@@ -98,27 +105,21 @@ export default function MemberList({ role, setRole }: PropsType) {
       width: 100,
       render: (record: UsersInfoAndRole) => {
         const onAssignRoleConfirm = () => {
-          const roleAssign = record.role === USER_ROLE.MEMBER ? 'CO_OWNER' : 'MEMBER';
+          const roleAssign = record.role === UserRole.Member ? UserRole.CoOwner : UserRole.Member;
 
           handleAssignMemberRole(record.user._id, roleAssign);
         };
 
-        return record.role !== USER_ROLE.OWNER
+        return record.role !== UserRole.Owner
           ? (
             <Group position="center">
               {
-                role === USER_ROLE.OWNER
-                  ? (
-                    <ConfirmPopoverAssignRole role={record.role} onConfirm={onAssignRoleConfirm} />
-                  )
-                  : null
+                role === UserRole.Owner
+                  && (<ConfirmPopoverAssignRole role={record.role} onConfirm={onAssignRoleConfirm} />)
               }
               {
-                (role === USER_ROLE.OWNER || record.role === USER_ROLE.MEMBER)
-                  ? (
-                    <ConfirmPopoverKickOut onConfirm={() => handleKickOutMember(record.user._id)} />
-                  )
-                  : null
+                (role === UserRole.CoOwner || record.role === UserRole.Member)
+                  && (<ConfirmPopoverKickOut onConfirm={() => handleKickOutMember(record.user._id)} />)
               }
             </Group>
           )
@@ -130,7 +131,7 @@ export default function MemberList({ role, setRole }: PropsType) {
   return (
     <Box mt="xl">
       <DataTable
-        columns={role !== USER_ROLE.MEMBER ? [...COLUMNS, ...ACTION_COLUMNS] : COLUMNS}
+        columns={role !== UserRole.Member ? [...COLUMNS, ...ACTION_COLUMNS] : COLUMNS}
         records={dataSource}
         idAccessor="user._id"
         minHeight={dataSource.length > 0 ? 0 : 150}

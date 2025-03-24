@@ -1,24 +1,21 @@
 import {
-  createStyles,
-  Avatar,
-  Header,
-  Group,
-  Divider,
-  Box,
-  Burger,
-  Drawer,
-  Image,
-  ScrollArea, useMantineColorScheme,
+  createStyles, Avatar, Header, Group, Divider, Box, Burger, Drawer, Image,
+  ScrollArea, useMantineColorScheme, Menu, ActionIcon, Indicator,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-
+import { IconBellRinging } from '@tabler/icons';
+import Cookies from 'js-cookie';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
+import presentationApi, { ActivePresentationRoom } from '@/api/presentation';
 import BlackLogo from '@/assets/logo-low-res-black.png';
 import WhiteLogo from '@/assets/logo-low-res-white.png';
 
 import useUserInfo, { UserInfo } from '@/hooks/useUserInfo';
-import ThemeSwitcher from '@/pages/common/buttons/ThemeSwitcher';
+import ThemeSwitcher from '@/pages/common/buttons/themeSwitcher';
+
+import { AUTH_COOKIE } from '@/utils/constants';
 
 const useStyles = createStyles((theme) => ({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -48,7 +45,6 @@ const useStyles = createStyles((theme) => ({
   hiddenDesktop: { [theme.fn.largerThan('sm')]: { display: 'none' } },
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const UserAvatar = ({ userInfo }: { userInfo: UserInfo }) => (
   <Avatar src={`https://avatars.dicebear.com/api/identicon/${userInfo.email}.svg`} size="sm" />
 );
@@ -57,18 +53,73 @@ const NavLinks = () => {
   const { classes } = useStyles();
 
   return (
-    <Link to="/groups" className={classes.link}>
-      Groups
-    </Link>
+    <>
+      <Link to="/groups" className={classes.link}>
+        Groups
+      </Link>
+      <Link to="/presentations" className={classes.link}>
+        Presentations
+      </Link>
+    </>
   );
 };
 
 const RightButtons = () => {
   const { userInfo } = useUserInfo();
 
+  const intervalId = useRef<number>();
+
+  const [activeRooms, setActiveRooms] = useState<ActivePresentationRoom[]>([]);
+
+  const loadActiveGroupPresentation = useCallback(async () => {
+    if (!Cookies.get(AUTH_COOKIE)) {
+      return;
+    }
+
+    try {
+      const { data: response } = await presentationApi.getActiveGroupPresentation();
+
+      setActiveRooms(response.data);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log(error);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadActiveGroupPresentation();
+    intervalId.current = window.setInterval(() => {
+      loadActiveGroupPresentation();
+    }, 5000);
+
+    return () => window.clearInterval(intervalId.current);
+  }, [loadActiveGroupPresentation]);
+
   return (
-    <>
+    <Group spacing="xl">
       <ThemeSwitcher />
+      <Menu position="bottom-end" shadow="md">
+        <Menu.Target>
+          <Indicator label={activeRooms.length} showZero={false} inline dot={false} size={16}>
+            <ActionIcon>
+              <IconBellRinging size={28} />
+            </ActionIcon>
+          </Indicator>
+        </Menu.Target>
+        <Menu.Dropdown>
+          {
+            activeRooms.length > 0
+              ? (
+                activeRooms.map((i) => (
+                  <Menu.Item key={i.roomId} component={Link} to={`/presentation/join?roomId=${i.roomId}`}>
+                    {i.groupName}
+                  </Menu.Item>
+                ))
+              )
+              : <Menu.Item>No presentation now</Menu.Item>
+          }
+        </Menu.Dropdown>
+      </Menu>
       {
         userInfo
           ? (
@@ -78,7 +129,7 @@ const RightButtons = () => {
           )
           : null
       }
-    </>
+    </Group>
   );
 };
 

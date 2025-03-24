@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 
 import {
-  USER_ROLE, GROUP_FILTER_TYPE, USER_COOKIE,
+  GROUP_FILTER_TYPE, USER_COOKIE, UserRole,
 } from './constants';
 
 import { UsersInfoAndRole, Group } from '@/api/group';
@@ -15,9 +15,9 @@ export interface UserGetFromCookie {
 
 export function sortMemberListByRole(data: UsersInfoAndRole[]) {
   const sortingScheme = [
-    USER_ROLE.OWNER,
-    USER_ROLE.CO_OWNER,
-    USER_ROLE.MEMBER,
+    UserRole.Owner,
+    UserRole.CoOwner,
+    UserRole.Member,
   ];
 
   const compare = (a: UsersInfoAndRole, b: UsersInfoAndRole) => {
@@ -61,4 +61,28 @@ export function filterGroupByType(groups: Group[], type: string | null, userId: 
       return groups;
     }
   }
+}
+
+export function isValidUrl(value: string) {
+  return value.match(/https?:\/\/(www\.)?[\w#%+.:=@~-]{1,256}\.[\d()A-Za-z]{1,6}\b([\w#%&()+./:=?@~-]*)/);
+}
+
+export function getMessageFromObject(obj: any): string | undefined {
+  for (const key of Object.keys(obj)) {
+    if (key === 'message') {
+      return obj.message;
+    }
+  }
+
+  for (const key of Object.keys(obj)) {
+    if (typeof obj[key] === 'object') {
+      const message = getMessageFromObject(obj[key]);
+
+      if (message !== undefined) {
+        return message;
+      }
+    }
+  }
+
+  return undefined;
 }
