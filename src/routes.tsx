@@ -3,6 +3,7 @@ import type { RouteObject } from 'react-router-dom';
 import { createBrowserRouter, Outlet, useNavigate } from 'react-router-dom';
 
 import UnauthorizedLayout from './layout/UnauthorizedLayout';
+import ForgotPasswordPage from './pages/authentication/forgot-password';
 import LoginPage from './pages/authentication/login';
 import Logout from './pages/authentication/logout';
 import RegisterPage from './pages/authentication/register';
@@ -89,6 +90,11 @@ const UNAUTHORIZED_ROUTES: Props[] = [
     path: '/login',
     name: 'Login',
     element: <LoginPage />,
+  },
+  {
+    path: '/forgot-password',
+    name: 'Forgot Password',
+    element: <ForgotPasswordPage />,
   },
   {
     path: '/group/invite',

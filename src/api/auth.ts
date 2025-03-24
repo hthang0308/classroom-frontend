@@ -21,6 +21,10 @@ interface SignUpResponseType {
   message: string
 }
 
+interface ForgotPasswordResponseType {
+  message: string
+}
+
 const authApi = {
   signIn: (email: string, password: string) => (
     axiosClient.post<SignInResponseType>('/auth/sign-in', {
@@ -34,6 +38,9 @@ const authApi = {
       password,
       name,
     })
+  ),
+  forgotPassword: (email: string) => (
+    axiosClient.post<ForgotPasswordResponseType>('/auth/forgot-password', { email })
   ),
 };
 
